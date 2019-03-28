@@ -1,4 +1,4 @@
-package com.example.pdbproject;
+package si.uni_lj.fri.pbd2019;
 
 import org.junit.Test;
 

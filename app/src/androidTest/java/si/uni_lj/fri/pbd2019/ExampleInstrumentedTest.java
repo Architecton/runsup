@@ -1,4 +1,4 @@
-package com.example.pdbproject;
+package si.uni_lj.fri.pbd2019;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getTargetContext();
 
-        assertEquals("com.example.pdbproject", appContext.getPackageName());
+        assertEquals("si.uni_lj.fri.pbd2019", appContext.getPackageName());
     }
 }

@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/constraintlayout_stopwatch_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".runsup.StopwatchActivity">
+
+    <!-- Label for duration -->
+    <TextView
+        android:id="@+id/textview_stopwatch_labelduration"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Duration value -->
+    <TextView
+        android:id="@+id/textview_stopwatch_duration"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Label for distance -->
+    <TextView
+        android:id="@+id/textview_stopwatch_labeldistance"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Distance value -->
+    <TextView
+        android:id="@+id/textview_stopwatch_distance"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Unit of distance -->
+    <TextView
+        android:id="@+id/textview_stopwatch_distanceunit"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Label for pace -->
+    <TextView
+        android:id="@+id/textview_stopwatch_labelpace"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Pace value -->
+    <TextView
+        android:id="@+id/textview_stopwatch_pace"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Unit of pace -->
+    <TextView
+        android:id="@+id/textview_stopwatch_unitpace"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Label for Calories -->
+    <TextView
+        android:id="@+id/textview_stopwatch_labelcalories"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Calories Value -->
+    <TextView
+        android:id="@+id/textview_stopwatch_calories"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Unit of calories -->
+    <TextView
+        android:id="@+id/textview_stopwatch_unitcalories"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Sport activity selection -->
+    <Button
+        android:id="@+id/button_stopwatch_selectsport"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- Start button -->
+    <Button
+        android:id="@+id/button_stopwatch_start"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+
+    <!-- End workout button -->
+    <Button
+        android:id="@+id/button_stopwatch_endworkout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"/>
+
+
+</android.support.constraint.ConstraintLayout>
