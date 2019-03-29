@@ -15,10 +15,11 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".StopwatchActivity"
-                  android:label="Test"
-                  android:exported="true"/>
-
+        <activity android:name=".WorkoutDetailActivity"></activity>
+        <activity
+            android:name=".StopwatchActivity"
+            android:exported="true"
+            android:label="Test" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -27,15 +28,14 @@
              sign the APK for publishing.
              You can define the keys for the debug and release targets in src/debug/ and src/release/.
         -->
-
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
 
         <activity
             android:name=".MapsActivity"
-            android:label="@string/title_activity_maps"
-            android:exported="true"/>
+            android:exported="true"
+            android:label="@string/title_activity_maps" />
     </application>
 
 </manifest>
