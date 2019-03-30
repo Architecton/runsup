@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/constraintlayout_workoutdetail_content"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
@@ -119,11 +120,10 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
+        android:text="DURATION"
         app:layout_constraintEnd_toStartOf="@+id/textview_workoutdetail_labelcalories"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider4"
-        tools:text="DURATION" />
+        app:layout_constraintTop_toBottomOf="@+id/divider4"/>
 
     <TextView
         android:id="@+id/textview_workoutdetail_labelcalories"
@@ -131,11 +131,10 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="TextView"
+        android:text="CALORIES"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_workoutdetail_labelduration"
-        app:layout_constraintTop_toBottomOf="@+id/divider4"
-        tools:text="CALORIES" />
+        app:layout_constraintTop_toBottomOf="@+id/divider4" />
 
     <TextView
         android:id="@+id/textview_workoutdetail_valueduration"
