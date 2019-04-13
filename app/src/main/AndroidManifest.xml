@@ -38,6 +38,9 @@
             android:name=".MapsActivity"
             android:exported="true"
             android:label="@string/title_activity_maps" />
+
+        <service android:name=".TrackerService" android:enabled="true"/>
+
     </application>
 
 </manifest>

@@ -10,4 +10,9 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_workout_detail);
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
 }
