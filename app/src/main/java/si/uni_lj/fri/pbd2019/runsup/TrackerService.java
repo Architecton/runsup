@@ -60,6 +60,8 @@ public class TrackerService extends Service {
 
     private boolean firstMeasAfterPause;  // if true indicated that the next measurement will be the first after a pause.
 
+    private double pace;  // Current pace (property necessary for testing)
+
     private final IBinder mBinder = new LocalBinder();  // binder that provides an interface to this service.
 
 
@@ -157,7 +159,7 @@ public class TrackerService extends Service {
                 toSend.putExtra("distance", distanceAccumulator);
 
                 // Compute pace.
-                double pace = 0.0;
+                pace = 0.0;
                 // If list of positions is not empty and if last position update less than threshold ago, compute pace from speed.
                 if (!positionList.isEmpty() && SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1).getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
                     if (!speedList.isEmpty()) {
@@ -193,6 +195,7 @@ public class TrackerService extends Service {
     // onDestroy: method called when the service is destroyed.
     @Override
     public void onDestroy() {
+        Log.d(TAG, "onDestroy called");
         super.onDestroy();  // Call onDestroy method of superclass.
         unregisterReceiver(receiver);  // Unregister receiver.
         stopLocationUpdates();  // Disable location updates.
@@ -278,27 +281,24 @@ public class TrackerService extends Service {
 
 
 
-    // ### getters and binder provider for testing ###
-    // TODO
+    // ### getters used for testing ###
 
     public int getState() {
-        return -1;
+        return this.trackingState;
     }
 
     public long getDuration() {
-       return -1;
+       return this.durationAccumulator;
     }
 
     public double getDistance() {
-       return -1.0;
+       return this.distanceAccumulator;
     }
 
     public double getPace() {
-        return -1.0;
+        return this.pace;
     }
 
-
-
-    // ### /getters and binder provider for testing ###
+    // ### /getters provider for testing ###
 
 }
