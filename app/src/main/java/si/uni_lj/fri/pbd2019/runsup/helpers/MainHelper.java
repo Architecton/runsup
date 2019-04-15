@@ -1,9 +1,11 @@
-package si.uni_lj.fri.pbd2019.runsup;
+package si.uni_lj.fri.pbd2019.runsup.helpers;
 
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.TimeZone;
 
 import java.util.Date;
+
+import si.uni_lj.fri.pbd2019.runsup.Constant;
 
 public final class MainHelper {
 

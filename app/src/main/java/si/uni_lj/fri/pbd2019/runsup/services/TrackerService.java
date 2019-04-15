@@ -1,4 +1,4 @@
-package si.uni_lj.fri.pbd2019.runsup;
+package si.uni_lj.fri.pbd2019.runsup.services;
 
 import android.Manifest;
 import android.app.Service;
@@ -25,6 +25,9 @@ import com.google.android.gms.location.LocationServices;
 
 import java.util.ArrayList;
 import java.util.Date;
+
+import si.uni_lj.fri.pbd2019.runsup.Constant;
+import si.uni_lj.fri.pbd2019.runsup.helpers.SportActivities;
 
 public class TrackerService extends Service {
 
@@ -202,8 +205,8 @@ public class TrackerService extends Service {
     }
 
     // Create nested class that extends Binder and provides method to return service proxy.
-    class LocalBinder extends Binder {
-        TrackerService getService() {
+    public class LocalBinder extends Binder {
+        public TrackerService getService() {
             return TrackerService.this;
         }
     }

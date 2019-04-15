@@ -13,6 +13,8 @@ import android.widget.TextView;
 
 import java.util.Date;
 
+import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
+
 public class WorkoutDetailActivity extends AppCompatActivity {
 
     private EditText shareText;
