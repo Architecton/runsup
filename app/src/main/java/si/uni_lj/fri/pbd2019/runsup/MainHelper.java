@@ -36,7 +36,7 @@ public final class MainHelper {
      * round number to 2 decimal places and return as string
      */
     public static String formatPace(double n) {
-        return String.format("%.2f", n*1.0d-3);
+        return String.format("%.2f", n);
     }
 
     /**
@@ -68,5 +68,23 @@ public final class MainHelper {
      * */
     public static double minpkmToMinpmi(double n) {
         return n*MINpKM_TO_MINpMI;
+    }
+
+    /**
+     * Convert constant representing a sport activity to name of sport activity.
+     * @param sportActivity
+     * @return
+     */
+    public static String getSportActivityName(int sportActivity) {
+        switch (sportActivity) {
+            case Constant.RUNNING:
+                return "Running";
+            case Constant.CYCLING:
+                return  "Cycling";
+            case Constant.WALKING:
+                return "Walking";
+            default:
+                return "Unknown";
+        }
     }
 }

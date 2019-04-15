@@ -11,21 +11,6 @@
     android:layout_marginEnd="8dp"
     android:layout_marginBottom="8dp">
 
-    <Button
-        android:id="@+id/button_stopwatch_endworkout"
-        android:layout_width="312dp"
-        android:layout_height="97dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@android:color/holo_green_dark"
-        android:text="Stop"
-        android:visibility="gone"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_start" />
-
     <TextView
         android:id="@+id/textview_stopwatch_labelduration"
         android:layout_width="0dp"
@@ -41,8 +26,22 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
-        android:id="@+id/textview_stopwatch_duration"
+        android:id="@+id/textview_stopwatch_labeldistance"
         android:layout_width="0dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:text="Distance"
+        android:textAppearance="@android:style/TextAppearance.Holo.Large"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/divider2" />
+
+    <TextView
+        android:id="@+id/textview_stopwatch_duration"
+        android:layout_width="131dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
@@ -50,22 +49,9 @@
         android:text="12:34:56"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
+        app:layout_constraintHorizontal_bias="0.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labelduration" />
-
-    <TextView
-        android:id="@+id/textview_stopwatch_labeldistance"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
-        android:layout_marginEnd="8dp"
-        android:text="Distance"
-        android:textAppearance="@android:style/TextAppearance.Holo.Large"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider" />
 
     <TextView
         android:id="@+id/textview_stopwatch_distance"
@@ -77,7 +63,6 @@
         android:layout_marginBottom="17dp"
         android:text="1.24"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
-        app:layout_constraintBottom_toTopOf="@+id/textview_stopwatch_labelpace"
         app:layout_constraintEnd_toStartOf="@+id/textview_stopwatch_distanceunit"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labeldistance" />
@@ -95,23 +80,13 @@
         app:layout_constraintStart_toEndOf="@+id/textview_stopwatch_distance"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labeldistance" />
 
-    <View
-        android:id="@+id/divider"
-        android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="8dp"
-        android:background="@color/colorPrimary"
-        android:visibility="visible"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_duration" />
 
     <View
-        android:id="@+id/divider2"
+        android:id="@+id/divider3"
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginStart="8dp"
+        android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
         android:visibility="visible"
@@ -129,11 +104,10 @@
         android:layout_marginBottom="8dp"
         android:text="Pace"
         android:textAppearance="@android:style/TextAppearance.Holo.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/textview_stopwatch_pace"
         app:layout_constraintEnd_toStartOf="@+id/textview_stopwatch_labelcalories"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider2" />
+        app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
     <TextView
         android:id="@+id/textview_stopwatch_labelcalories"
@@ -145,10 +119,9 @@
         android:layout_marginBottom="8dp"
         android:text="Calories"
         android:textAppearance="@android:style/TextAppearance.Holo.Medium"
-        app:layout_constraintBottom_toTopOf="@+id/textview_stopwatch_calories"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_stopwatch_labelpace"
-        app:layout_constraintTop_toBottomOf="@+id/divider2" />
+        app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
     <TextView
         android:id="@+id/textview_stopwatch_pace"
@@ -202,18 +175,17 @@
         app:layout_constraintStart_toEndOf="@+id/textview_stopwatch_calories"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labelcalories" />
 
-    <Button
-        android:id="@+id/button_stopwatch_selectsport"
+    <View
+        android:id="@+id/divider5"
         android:layout_width="0dp"
-        android:layout_height="48dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_height="2dp"
+        android:layout_marginStart="3dp"
+        android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:background="@android:color/holo_blue_light"
-        android:text="Running"
+        android:background="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider6" />
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
+        app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_calories" />
 
     <View
         android:id="@+id/divider6"
@@ -228,21 +200,55 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_pace" />
 
+
+    <Button
+        android:id="@+id/button_stopwatch_endworkout"
+        android:layout_width="262dp"
+        android:layout_height="49dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="16dp"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="24dp"
+        android:background="@color/colorAccent"
+        android:text="Stop"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_start" />;
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_start" />
+
     <Button
         android:id="@+id/button_stopwatch_start"
         android:layout_width="312dp"
         android:layout_height="97dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="24dp"
+        android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
         android:text="Start"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.493"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_selectsport"
         android:onClick="startStopwatch"
-        />
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.507"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_selectsport" />
+
+    <Button
+        android:id="@+id/button_stopwatch_selectsport"
+        android:layout_width="0dp"
+        android:layout_height="48dp"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginEnd="8dp"
+        android:background="@android:color/holo_blue_light"
+        android:text="Running"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/divider6" />
 
     <android.support.constraint.Guideline
         android:id="@+id/guideline2"
@@ -252,15 +258,17 @@
         app:layout_constraintGuide_begin="197dp" />
 
     <View
-        android:id="@+id/divider5"
-        android:layout_width="0dp"
+        android:id="@+id/divider2"
+        android:layout_width="379dp"
         android:layout_height="2dp"
-        android:layout_marginStart="3dp"
+        android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="@+id/guideline2"
-        app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_calories" />
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_duration" />
+
 
 </android.support.constraint.ConstraintLayout>

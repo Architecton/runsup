@@ -75,7 +75,7 @@ public class TrackerService extends Service {
 
     private ArrayList<Location> positionList;  // List for storing locations.
     private ArrayList<Float> speedList;  // List for storing speeds.
-    private long distanceAccumulator;
+    private double distanceAccumulator;
     private long durationAccumulator;
     long prevTimeMeas;
 
@@ -90,6 +90,7 @@ public class TrackerService extends Service {
         /* Anonymous BroadcastReceiver instance that receives commands */
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "received broadcast!");
             String action = intent.getAction();  // Get broadcasted action.
             switch (action) {
                 case Constant.COMMAND_START:
@@ -102,6 +103,7 @@ public class TrackerService extends Service {
                     firstMeasAfterPause = false;
 
                     prevTimeMeas = SystemClock.elapsedRealtime();
+                    Log.d(TAG, "Starting location updates!");
                     startLocationUpdates();
 
                     // it starts to send a broadcast intent every second with action si.uni_lj.fri.pbd2019.runsup.TICK including following parameters:
@@ -145,23 +147,31 @@ public class TrackerService extends Service {
         // Instantiate mFusedLocationProviderClient.
         mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         durationAccumulator = 0;  // Initialize duration accumulator.
+        positionList = new ArrayList<Location>();
+        speedList = new ArrayList<Float>();
 
         IntentFilter filter = new IntentFilter();  // Instantiate IntentFilter.
-        filter.addAction("1");
+        filter.addAction(Constant.COMMAND_START);
+        filter.addAction(Constant.COMMAND_PAUSE);
+        filter.addAction(Constant.COMMAND_CONTINUE);
+        filter.addAction(Constant.COMMAND_STOP);
+
         registerReceiver(receiver, filter);  // Register receiver.
 
-        createLocationCallback();
         createLocationRequest();
+        createLocationCallback();
+
+        h = new Handler();
 
         r = new Runnable() {
             @Override
             public void run() {
-
                 // Initialize intent to broadcast.
                 Intent toSend = new Intent();
-                toSend.setAction("si.uni_lj.fri.pbd2019.runsup.TICK");
-                durationAccumulator += prevTimeMeas - SystemClock.elapsedRealtime();
-                toSend.putExtra("duration", 1.0e-3 * durationAccumulator);
+                toSend.setAction(Constant.TICK);
+                durationAccumulator += SystemClock.elapsedRealtime() - prevTimeMeas;
+                prevTimeMeas = SystemClock.elapsedRealtime();
+                toSend.putExtra("duration", Math.round(1.0e-3 * (double)durationAccumulator));
                 toSend.putExtra("distance", distanceAccumulator);
 
                 // Compute pace.
@@ -169,9 +179,12 @@ public class TrackerService extends Service {
                 // If list of positions is not empty and if last position update less than threshold ago, compute pace from speed.
                 if (!positionList.isEmpty() && SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1).getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
                     if (!speedList.isEmpty()) {
-                       pace = speedList.get(speedList.size() - 1)*(1000.0/60.0);
+                       Log.d(TAG, "speed == " + speedList.get(speedList.size() - 1));
+                       pace = 1.0/speedList.get(speedList.size() - 1)*(1000.0/60.0);
                     }
                 }
+
+                Log.d(TAG, "pace == " + pace);
 
                 toSend.putExtra("pace", pace);
 
@@ -200,6 +213,7 @@ public class TrackerService extends Service {
     public void onDestroy() {
         // onDestroy: method called when this service is destroyed.
         super.onDestroy();
+        Log.d(TAG, "onDestroy invoked");
         unregisterReceiver(receiver);  // Unregister receiver.
         stopLocationUpdates();  // Disable location updates.
     }
@@ -224,6 +238,7 @@ public class TrackerService extends Service {
             @Override
             public void onLocationResult(LocationResult locationResult) {
                 super.onLocationResult(locationResult);
+                Log.d(TAG, "Location received!");
                 Location nxtLocation = locationResult.getLastLocation();
 
                 // If distance from previous location point greater than 2 meters, add new
@@ -256,6 +271,7 @@ public class TrackerService extends Service {
         /* startLocationUpdates: start receiving location updates. */
 
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Log.d(TAG, "Permissions not granted!.");
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -263,9 +279,11 @@ public class TrackerService extends Service {
             //                                          int[] grantResults)
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
-            return;
+            Log.d(TAG, "starting to request location updates.");
+        } else {
+            Log.d(TAG, "Permissions granted!");
+            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
         }
-        mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
     }
 
 
