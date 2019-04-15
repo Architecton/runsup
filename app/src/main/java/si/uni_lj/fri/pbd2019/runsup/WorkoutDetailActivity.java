@@ -7,11 +7,12 @@ import android.widget.TextView;
 
 public class WorkoutDetailActivity extends AppCompatActivity {
 
+    // onCreate: method called when activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_workout_detail);
-        Intent intent = getIntent();
+        super.onCreate(savedInstanceState);  // Call onCreate method of superclass.
+        setContentView(R.layout.activity_workout_detail);  // Set content of activity.
+        Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
         setDuration(intent.getLongExtra("duration", 0));
         setSportActivity(intent.getIntExtra("sportActivity", -1));
         setCalories(intent.getDoubleExtra("calories", 0.0));
@@ -19,10 +20,15 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         setPace(intent.getDoubleExtra("pace", 0.0));
     }
 
+    // onPause: method called when this activity is paused.
     @Override
     public void onPause() {
         super.onPause();
     }
+
+
+
+    // ### METHODS FOR FORMATTING THE UI ###
 
     public void setSportActivity(int sportActivity) {
         TextView sportActivityText = findViewById(R.id.textview_workoutdetail_sportactivity);
@@ -49,4 +55,5 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         paceText.setText(MainHelper.formatPace(avgPace));
     }
 
+    // ### /METHODS FOR FORMATTING THE UI ###
 }

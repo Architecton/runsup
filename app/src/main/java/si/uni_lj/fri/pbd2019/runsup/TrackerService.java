@@ -14,47 +14,23 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
-import android.widget.Chronometer;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 
 import java.util.ArrayList;
 import java.util.Date;
 
 public class TrackerService extends Service {
 
-    // Service must use Google Play Location Services and FusedLocationProviderClient for
-    // location updates.
+    // ### PROPERTIES ###
 
-    // Min. time between updates should be 3 seconds.
-    // Min. distance change between updates should be 10 meters.
-
-    /*
-    Commands accepted by the service:
-
-    si.uni_lj.fri.pbd2019.runsup.COMMAND_START - starts a new workout activity.
-    si.uni_lj.fri.pbd2019.runsup.COMMAND_CONTINUE - continue paused workout.
-    si.uni_lj.fri.pbd2019.runsup.COMMAND_PAUSE - pause running workout.
-    si.uni_lj.fri.pbd2019.runsup.COMMAND_STOP - absolutely stop (end) workout.
-    */
-
-    /*
-    To save the battery of the device, location updates must be disabled, when the service is destroyed (not running).
-    */
-
-
-    // ## PROPERTIES ##
-
-    public static final String TAG = TrackerService.class.getName();
+    public static final String TAG = TrackerService.class.getName();  // Class' tag
 
     private final long BROADCAST_PERIOD = 1000;  // The broadcast period in milliseconds.
     private final long MIN_TIME_BETWEEN_UPDATES = 3000;  // Minimum delta time between updates.
@@ -75,102 +51,108 @@ public class TrackerService extends Service {
 
     private ArrayList<Location> positionList;  // List for storing locations.
     private ArrayList<Float> speedList;  // List for storing speeds.
-    private double distanceAccumulator;
-    private long durationAccumulator;
+    private double distanceAccumulator;  // distanceAccumulator that accumulates the distance
+    private long durationAccumulator;  // durationAccumulator that accumulates the duration
     long prevTimeMeas;
 
-    private int sportActivity;
-    private int trackingState;
+    private int sportActivity;  // sport activity indicator
+    private int trackingState;  // state of the service
 
-    private boolean firstMeasAfterPause;
+    private boolean firstMeasAfterPause;  // if true indicated that the next measurement will be the first after a pause.
 
-    private final IBinder mBinder = new LocalBinder();
+    private final IBinder mBinder = new LocalBinder();  // binder that provides an interface to this service.
 
+
+    /* Anonymous BroadcastReceiver instance that receives commands */
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        /* Anonymous BroadcastReceiver instance that receives commands */
+
+        // Method called when the receiver receives a broadcast.
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "received broadcast!");
-            String action = intent.getAction();  // Get broadcasted action.
+            String action = intent.getAction();  // Get broadcasted action and switch on it.
             switch (action) {
                 case Constant.COMMAND_START:
-                    Log.d(TAG, "COMMAND_START received");
 
                     durationAccumulator = 0;  // Initialize duration accumulator.
 
-                    sportActivity = Constant.RUNNING;
-                    trackingState = Constant.STATE_RUNNING;
-                    firstMeasAfterPause = false;
+                    sportActivity = Constant.RUNNING;  // Set workout activity (hardcoded for now)
+                    trackingState = Constant.STATE_RUNNING;  // Set service state.
+                    firstMeasAfterPause = false;  // initialize indicator.
 
-                    prevTimeMeas = SystemClock.elapsedRealtime();
-                    Log.d(TAG, "Starting location updates!");
-                    startLocationUpdates();
-
-                    // it starts to send a broadcast intent every second with action si.uni_lj.fri.pbd2019.runsup.TICK including following parameters:
-                    broadcasting = true;
+                    prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
+                    startLocationUpdates();  // Start location updates.
+                    broadcasting = true;  // Start broadcasting TICK actions.
                     h.postDelayed(r, BROADCAST_PERIOD);
                     break;
                 case Constant.COMMAND_CONTINUE:
-                    // it starts to send a broadcast intent every second with action si.uni_lj.fri.pbd2019.runsup.TICK including following parameters:
-                    Log.d(TAG, "COMMAND_CONTINUE received");
-
-                    prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to this moment.
-                    startLocationUpdates();
-                    firstMeasAfterPause = true;
-                    broadcasting = true;
+                    trackingState = Constant.STATE_CONTINUE;  // Set service state.
+                    prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
+                    startLocationUpdates();  // Start location updates.
+                    firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
+                    broadcasting = true;  // Start broadcasting.
                     h.postDelayed(r, BROADCAST_PERIOD);
                     break;
                 case Constant.COMMAND_PAUSE:
-                    Log.d(TAG, "COMMAND_PAUSE received");
-                    stopLocationUpdates();
+                    trackingState = Constant.STATE_PAUSED;  // Set service state.
+                    stopLocationUpdates();  // Stop location updates and broadcasting.
                     broadcasting = false;
                     break;
                 case Constant.COMMAND_STOP:
-                    Log.d(TAG, "COMMAND_STOP received");
-                    stopLocationUpdates();
+                    trackingState = Constant.STATE_STOPPED;  // Set service state.
+                    stopLocationUpdates();  // Stop location updates and broadcasting.
                     broadcasting = false;
                     break;
             }
         }
     };
 
-    // ## /PROPERTIES ##
+    // ### /PROPERTIES ###
 
 
 
+    // onCreate: method called when this service is created.
     @Override
     public void onCreate() {
-        /* onCreate: method called when this service is created. */
 
-        super.onCreate();
+        super.onCreate();  // Call onCreate method of superclass.
 
         // Instantiate mFusedLocationProviderClient.
-        mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
-        durationAccumulator = 0;  // Initialize duration accumulator.
-        positionList = new ArrayList<Location>();
-        speedList = new ArrayList<Float>();
+        this.mFusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
+        this.durationAccumulator = 0;  // Initialize duration accumulator.
+        this.positionList = new ArrayList<>();  // Initialize list of positions.
+        this.speedList = new ArrayList<>();  // Initialize list of speeds.
 
-        IntentFilter filter = new IntentFilter();  // Instantiate IntentFilter.
+        // Instantiate and initialize and intent filer.
+        IntentFilter filter = new IntentFilter();
         filter.addAction(Constant.COMMAND_START);
         filter.addAction(Constant.COMMAND_PAUSE);
         filter.addAction(Constant.COMMAND_CONTINUE);
         filter.addAction(Constant.COMMAND_STOP);
 
-        registerReceiver(receiver, filter);  // Register receiver.
+        // Register receiver.
+        registerReceiver(receiver, filter);
 
+        // Initialize location request and location callback function.
         createLocationRequest();
         createLocationCallback();
 
-        h = new Handler();
+        // Instantiate a Handler instance.
+        this.h = new Handler();
 
-        r = new Runnable() {
+        // Instantiate a class extending Runnable.
+        this.r = new Runnable() {
             @Override
             public void run() {
-                // Initialize intent to broadcast.
+
+                // Initialize contents to send.
                 Intent toSend = new Intent();
                 toSend.setAction(Constant.TICK);
+
+                // Update duration accumulator and set previous time measurement value.
                 durationAccumulator += SystemClock.elapsedRealtime() - prevTimeMeas;
                 prevTimeMeas = SystemClock.elapsedRealtime();
+
+                // Add duration and distance to intent broadcast.
                 toSend.putExtra("duration", Math.round(1.0e-3 * (double)durationAccumulator));
                 toSend.putExtra("distance", distanceAccumulator);
 
@@ -179,75 +161,82 @@ public class TrackerService extends Service {
                 // If list of positions is not empty and if last position update less than threshold ago, compute pace from speed.
                 if (!positionList.isEmpty() && SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1).getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
                     if (!speedList.isEmpty()) {
-                       Log.d(TAG, "speed == " + speedList.get(speedList.size() - 1));
                        pace = 1.0/speedList.get(speedList.size() - 1)*(1000.0/60.0);
                     }
                 }
 
-                Log.d(TAG, "pace == " + pace);
-
+                // Add pace to intent broadcast.
                 toSend.putExtra("pace", pace);
 
-                // Compute cumulative number of calories used until now.
+                // Compute cumulative number of calories used until now. NOTE: weight is hardcoded for now.
                 double caloriesNxt = 0.0;
                 if (speedList.size() >= 2) {
                     caloriesNxt = SportActivities.countCalories(sportActivity, 60, speedList, durationAccumulator*1.0e-3*Math.pow(60.0, -2.0));
                 }
 
+                // Add data about calories, service state, current sport activity and positions
+                // to intent broadcast.
                 toSend.putExtra("calories", caloriesNxt);
                 toSend.putExtra("state", trackingState);
                 toSend.putExtra("sportActivity", sportActivity);
                 toSend.putExtra("positionList", positionList);
                 sendBroadcast(toSend);
 
+                // If broadcasting, broadcast.
                 if (broadcasting) {
-                    Log.d(TAG, "Broadcasting intent...");
                     h.postDelayed(this, BROADCAST_PERIOD);
                 }
             }
         };
-
     }
 
+    // onDestroy: method called when the service is destroyed.
     @Override
     public void onDestroy() {
-        // onDestroy: method called when this service is destroyed.
-        super.onDestroy();
-        Log.d(TAG, "onDestroy invoked");
+        super.onDestroy();  // Call onDestroy method of superclass.
         unregisterReceiver(receiver);  // Unregister receiver.
         stopLocationUpdates();  // Disable location updates.
     }
 
-    public class LocalBinder extends Binder {
-        public TrackerService getService() {
+    // Create nested class that extends Binder and provides method to return service proxy.
+    class LocalBinder extends Binder {
+        TrackerService getService() {
             return TrackerService.this;
         }
     }
 
-    protected void createLocationRequest() {
-        // Instantiate and initialize new LocationRequest.
-        mLocationRequest = new LocationRequest();
-        mLocationRequest.setInterval(MIN_TIME_BETWEEN_UPDATES);
-        mLocationRequest.setFastestInterval(MIN_TIME_BETWEEN_UPDATES);
-        mLocationRequest.setSmallestDisplacement(MIN_DISTANCE_CHANGE_BETWEEN_UPDATES);
-        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    // onBind: method called when this service is bound.
+    // @androidx.annotation.Nullable
+    @Override
+    public IBinder onBind(Intent intent) {
+        return this.mBinder;
     }
 
+    // createLocationRequest: initialize location request.
+    protected void createLocationRequest() {
+        this.mLocationRequest = new LocationRequest();
+        this.mLocationRequest.setInterval(MIN_TIME_BETWEEN_UPDATES);
+        this.mLocationRequest.setFastestInterval(MIN_TIME_BETWEEN_UPDATES);
+        this.mLocationRequest.setSmallestDisplacement(MIN_DISTANCE_CHANGE_BETWEEN_UPDATES);
+        this.mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+    }
+
+    // createLocationCallback: initialize callback function called when location received.
     private void createLocationCallback() {
-        mLocationCallback = new LocationCallback() {
+        this.mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
-                super.onLocationResult(locationResult);
-                Log.d(TAG, "Location received!");
-                Location nxtLocation = locationResult.getLastLocation();
+                super.onLocationResult(locationResult);  // Call method of superclass.
+                Location nxtLocation = locationResult.getLastLocation();  // Get received location.
 
                 // If distance from previous location point greater than 2 meters, add new
                 // position to locations list.
                 if (mCurrentLocation != null && mCurrentLocation.distanceTo(nxtLocation) < MIN_DIST_CHANGE) {
-                    return;
+                    // ignore
                 } else {
                     // If previous location exists, compute speed in m/s.
                     if (mCurrentLocation != null) {
+                        // If first measurement after pause and location changed by more than 100 meters, discard.
                         if (firstMeasAfterPause && mCurrentLocation.distanceTo(nxtLocation) > 100) {
                             firstMeasAfterPause = false;
                         } else {
@@ -267,34 +256,30 @@ public class TrackerService extends Service {
         };
     }
 
+    // startLocationUpdates: method used to start requesting periodical location updates.
     protected void startLocationUpdates() {
-        /* startLocationUpdates: start receiving location updates. */
-
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            Log.d(TAG, "Permissions not granted!.");
-            // TODO: Consider calling
-            //    ActivityCompat#requestPermissions
-            // here to request the missing permissions, and then overriding
-            //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-            //                                          int[] grantResults)
-            // to handle the case where the user grants the permission. See the documentation
-            // for ActivityCompat#requestPermissions for more details.
-            Log.d(TAG, "starting to request location updates.");
+        // Check permissions.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            // Start requesting location updates.
+            this.mFusedLocationProviderClient.requestLocationUpdates(this.mLocationRequest, this.mLocationCallback, Looper.myLooper());
         } else {
-            Log.d(TAG, "Permissions granted!");
-            mFusedLocationProviderClient.requestLocationUpdates(mLocationRequest, mLocationCallback, Looper.myLooper());
+            // IGNORE
         }
     }
 
-
+    // stopLocationUpdates: method used to stop requesting periodical location updates.
     private void stopLocationUpdates() {
-        // stopLocationUpdates: stop receiving location updates.
         if (!mRequestingLocationUpdates) { return; }  // If not requesting updates, return.
-        mFusedLocationProviderClient.removeLocationUpdates(mLocationCallback);  // Stop location updates.
+        this.mFusedLocationProviderClient.removeLocationUpdates(this.mLocationCallback);  // Stop location updates.
     }
 
 
+
+
+
+
     // ### getters and binder provider for testing ###
+    // TODO
 
     public int getState() {
         return -1;
@@ -312,11 +297,6 @@ public class TrackerService extends Service {
         return -1.0;
     }
 
-    // @androidx.annotation.Nullable
-    @Override
-    public IBinder onBind(Intent intent) {
-        return mBinder;
-    }
 
 
     // ### /getters and binder provider for testing ###

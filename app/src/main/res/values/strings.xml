@@ -1,4 +1,41 @@
 <resources>
     <string name="app_name">FitnessTracker</string>
     <string name="title_activity_maps">Map</string>
+    <string name="default_duration">00:00:00</string>
+    <string name="default_distance">0.0</string>
+    <string name="default_pace">0.0</string>
+    <string name="default_calories">0</string>
+    <string name="workout_running_start_button_text">Pause Workout</string>
+    <string name="workout_paused_start_button_text">Continue Workout</string>
+    <string name="pace_unit">min/km</string>
+    <string name="distance_unit">km</string>
+    <string name="calories_unit">kcal</string>
+    <string name="button_stopwatch_endworkout_default">End</string>
+    <string name="button_stopwatch_start_default">Start</string>
+    <string name="button_stopwatch_selectsport_default">Running</string>
+    <string name="calories_label">Calories</string>
+    <string name="pace_label">Pace</string>
+    <string name="duration_label">Duration</string>
+    <string name="distance_label">Distance</string>
+
+    <!-- WorkoutDetailActivity -->
+    <string name="button_workoutdetail_showmap_default">Show Map</string>
+    <string name="textview_workoutdetail_workouttitle_default">MyWorkout</string>
+    <string name="textview_workoutdetail_labelsport_default">Sport</string>
+    <string name="textview_workoutdetail_sportactivity_default">Running</string>
+    <string name="textview_workoutdetail_activitydate_default">Apr 24, 2017 6:10:52 PM"</string>
+    <string name="textview_workoutdetail_labelsummary_default">Summary</string>
+    <string name="textview_workoutdetail_labelduration_default">DURATION</string>
+    <string name="textview_workoutdetail_labelcalories_default">CALORIES</string>
+    <string name="textview_workoutdetail_valueduration_default">12:34:65"</string>
+    <string name="textview_workoutdetail_valuecalories_default">0 kcal</string>
+    <string name="textview_workoutdetail_labeldistance_default">DISTANCE</string>
+    <string name="textview_workoutdetail_labelavgpace_default">AVG. PACE</string>
+    <string name="textview_workoutdetail_valueavgpace_default">0.0 min/k"</string>
+    <string name="textview_workoutdetail_valuedistance_default">0 km</string>
+    <string name="textview_workoutdetail_labelsocialshare_default">Social Share</string>
+    <string name="imageView1_description">share on Facebook</string>
+    <string name="imageView2_description">share through e-mail</string>
+    <string name="imageView3_description">share on Twitter</string>
+    <string name="imageView4_description">share on Google Plus</string>
 </resources>

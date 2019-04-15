@@ -28,7 +28,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="My Workout"
+        android:text="@string/textview_workoutdetail_workouttitle_default"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -52,7 +52,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="Sport"
+        android:text="@string/textview_workoutdetail_labelsport_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider3" />
@@ -64,7 +64,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="Running"
+        android:text="@string/textview_workoutdetail_sportactivity_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -77,7 +77,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="Apr 24, 2017 6:10:52 PM"
+        android:text="@string/textview_workoutdetail_activitydate_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_sportactivity" />
@@ -89,7 +89,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="Summary"
+        android:text="@string/textview_workoutdetail_labelsummary_default"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -120,7 +120,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="DURATION"
+        android:text="@string/textview_workoutdetail_labelduration_default"
         app:layout_constraintEnd_toStartOf="@+id/textview_workoutdetail_labelcalories"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider4"/>
@@ -131,7 +131,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="CALORIES"
+        android:text="@string/textview_workoutdetail_labelcalories_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_workoutdetail_labelduration"
         app:layout_constraintTop_toBottomOf="@+id/divider4" />
@@ -143,7 +143,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="1dp"
         android:layout_marginEnd="8dp"
-        android:text="12:34:65"
+        android:text="@string/textview_workoutdetail_valueduration_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toStartOf="@+id/textview_workoutdetail_valuecalories"
         app:layout_constraintStart_toStartOf="parent"
@@ -155,7 +155,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="1dp"
         android:layout_marginEnd="8dp"
-        android:text="0 kcal"
+        android:text="@string/textview_workoutdetail_valuecalories_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_workoutdetail_valueduration"
@@ -168,7 +168,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="DISTANCE"
+        android:text="@string/textview_workoutdetail_labeldistance_default"
         app:layout_constraintEnd_toStartOf="@+id/textview_workoutdetail_labelavgpace"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_valueduration" />
@@ -179,7 +179,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="AVG. PACE"
+        android:text="@string/textview_workoutdetail_labelavgpace_default"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_workoutdetail_labeldistance"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_valuecalories" />
@@ -191,7 +191,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="0 km"
+        android:text="@string/textview_workoutdetail_valuedistance_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toStartOf="@+id/textview_workoutdetail_valueavgpace"
         app:layout_constraintStart_toStartOf="parent"
@@ -203,7 +203,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
-        android:text="0.0 min/km"
+        android:text="@string/textview_workoutdetail_valueavgpace_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/textview_workoutdetail_valuedistance"
@@ -216,7 +216,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:text="Social Share"
+        android:text="@string/textview_workoutdetail_labelsocialshare_default"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -286,7 +286,7 @@
         app:layout_constraintTop_toBottomOf="@+id/divider7" />
 
     <ImageView
-        android:id="@+id/imageView2"
+        android:id="@+id/imageView1"
         android:layout_width="0dp"
         android:layout_height="86dp"
         app:layout_constraintBottom_toBottomOf="@+id/button_workoutdetail_fbsharebtn"
@@ -294,36 +294,40 @@
         app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/button_workoutdetail_fbsharebtn"
         app:layout_constraintTop_toTopOf="@+id/button_workoutdetail_fbsharebtn"
-        app:srcCompat="@mipmap/facebook" />
+        app:srcCompat="@mipmap/facebook"
+        android:contentDescription="@string/imageView1_description" />
 
     <ImageView
-        android:id="@+id/imageView5"
+        android:id="@+id/imageView2"
         android:layout_width="93dp"
         android:layout_height="104dp"
         app:layout_constraintBottom_toBottomOf="@+id/button_workoutdetail_emailshare"
         app:layout_constraintEnd_toEndOf="@+id/button_workoutdetail_emailshare"
         app:layout_constraintStart_toStartOf="@+id/button_workoutdetail_emailshare"
         app:layout_constraintTop_toTopOf="@+id/button_workoutdetail_emailshare"
-        app:srcCompat="@mipmap/email" />
+        app:srcCompat="@mipmap/email"
+        android:contentDescription="@string/imageView2_description" />
 
     <ImageView
-        android:id="@+id/imageView6"
+        android:id="@+id/imageView3"
         android:layout_width="80dp"
         android:layout_height="76dp"
         app:layout_constraintBottom_toBottomOf="@+id/button_workoutdetail_twittershare"
         app:layout_constraintEnd_toEndOf="@+id/button_workoutdetail_twittershare"
         app:layout_constraintStart_toStartOf="@+id/button_workoutdetail_twittershare"
         app:layout_constraintTop_toTopOf="@+id/button_workoutdetail_twittershare"
-        app:srcCompat="@mipmap/twitter" />
+        app:srcCompat="@mipmap/twitter"
+        android:contentDescription="@string/imageView3_description" />
 
     <ImageView
-        android:id="@+id/imageView8"
+        android:id="@+id/imageView4"
         android:layout_width="116dp"
         android:layout_height="85dp"
         app:layout_constraintBottom_toBottomOf="@+id/button_workoutdetail_gplusshare"
         app:layout_constraintEnd_toEndOf="@+id/button_workoutdetail_gplusshare"
         app:layout_constraintStart_toStartOf="@+id/button_workoutdetail_gplusshare"
         app:layout_constraintTop_toTopOf="@+id/button_workoutdetail_gplusshare"
-        app:srcCompat="@mipmap/iconfinder_google_plus_386644" />
+        app:srcCompat="@mipmap/iconfinder_google_plus_386644"
+        android:contentDescription="@string/imageView4_description" />
 
 </android.support.constraint.ConstraintLayout>

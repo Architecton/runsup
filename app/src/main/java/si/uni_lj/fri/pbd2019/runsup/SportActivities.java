@@ -1,5 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
+import android.util.Log;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -43,9 +45,9 @@ public final class SportActivities {
 
     // Map sports activities to multipliers to use when actual speed not in tables.
     public static Map<Integer, Double> MET_aux = new HashMap<Integer, Double>() {{
-        put(1, 1.535353535);
-        put(2, 1.14);
-        put(3, 0.744444444);
+        put(Constant.RUNNING, 1.535353535);
+        put(Constant.WALKING, 1.14);
+        put(Constant.CYCLING, 0.744444444);
     }};
 
 
@@ -56,7 +58,7 @@ public final class SportActivities {
     * @param speed - speed in m/s
     * @return
     */
-    public static double getMET(int activityType, Float speed) {
+    public static double getMET(int activityType, double speed) {
         switch (activityType) {
             case Constant.RUNNING:
                 if (speedToMET_running.containsKey((int)Math.ceil(speed))) {
@@ -97,10 +99,10 @@ public final class SportActivities {
         for (float f : speedList) {
             avgSpeed += f;
         }
-        avgSpeed /= speedList.size();
+        avgSpeed /= (double)speedList.size();
 
         // Compute calories used.
-        return getMET(sportActivity, avgSpeed)*weight*timeFillingSpeedListInHours;
+        return getMET(sportActivity, MainHelper.mpsToMiph(avgSpeed) * weight * timeFillingSpeedListInHours);
     }
 
 }
