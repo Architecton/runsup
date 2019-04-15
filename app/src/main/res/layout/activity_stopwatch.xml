@@ -225,7 +225,7 @@
         android:layout_marginTop="32dp"
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
-        android:text="@string/button_stopwatch_start_default"
+        android:text="@string/stopwatch_start"
         android:onClick="startStopwatch"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.507"
