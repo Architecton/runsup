@@ -106,6 +106,7 @@ public class StopwatchActivity extends AppCompatActivity {
     // oncCreate: method called when the activity is created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d(TAG, "OnCreate called");  // testing
 
         super.onCreate(savedInstanceState);  // Call onCreate of the superclass.
         setContentView(R.layout.activity_stopwatch);  // Set layout for UI.
