@@ -39,13 +39,14 @@ public class TrackerService extends Service {
     private final long MIN_TIME_BETWEEN_UPDATES = 3000;  // Minimum delta time between updates.
     private final long MIN_DISTANCE_CHANGE_BETWEEN_UPDATES = 10;  // Minimum delta distance between updates.
     private final long MIN_DIST_CHANGE = 2;  // Minimum distance between current and next location to store next location.
+    private final int PAUSE_DIST_CHANGE_THRESH = 100; // If during pause distance changed by more than this amount, discard.
 
     private FusedLocationProviderClient mFusedLocationProviderClient;  // Instance that allows interaction with the API.
     LocationRequest mLocationRequest;
     LocationCallback mLocationCallback;
     Location mCurrentLocation;
     String mLastUpdateTime;
-    boolean mRequestingLocationUpdates;
+    volatile boolean mRequestingLocationUpdates;
 
 
     private Handler h;  // handler
@@ -61,7 +62,7 @@ public class TrackerService extends Service {
     private int sportActivity;  // sport activity indicator
     private int trackingState;  // state of the service
 
-    private boolean firstMeasAfterPause;  // if true indicated that the next measurement will be the first after a pause.
+    private volatile boolean firstMeasAfterPause;  // if true indicated that the next measurement will be the first after a pause.
 
     private double pace;  // Current pace (property necessary for testing)
 
@@ -141,7 +142,14 @@ public class TrackerService extends Service {
         createLocationRequest();
         createLocationCallback();
 
-        // Instantiate a Handler instance.
+        // Instantiate a Handler instance. new IntentFilter();
+        filter.addAction(Constant.COMMAND_START);
+        filter.addAction(Constant.COMMAND_PAUSE);
+        filter.addAction(Constant.COMMAND_CONTINUE);
+        filter.addAction(Constant.COMMAND_STOP);
+
+        // Register receiver.
+        registerReceiver(receiver, filter);
         this.h = new Handler();
 
         // Instantiate a class extending Runnable.
@@ -243,7 +251,7 @@ public class TrackerService extends Service {
                     // If previous location exists, compute speed in m/s.
                     if (mCurrentLocation != null) {
                         // If first measurement after pause and location changed by more than 100 meters, discard.
-                        if (firstMeasAfterPause && mCurrentLocation.distanceTo(nxtLocation) > 100) {
+                        if (firstMeasAfterPause && mCurrentLocation.distanceTo(nxtLocation) > PAUSE_DIST_CHANGE_THRESH) {
                             firstMeasAfterPause = false;
                         } else {
                             firstMeasAfterPause = false;
@@ -252,7 +260,6 @@ public class TrackerService extends Service {
                             distanceAccumulator += mCurrentLocation.distanceTo(nxtLocation);  // Add distance to distance accumulator.
                         }
                     }
-
                     // Set current location to last retrieved location and set update time.
                     mCurrentLocation = nxtLocation;
                     mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
@@ -268,6 +275,7 @@ public class TrackerService extends Service {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Start requesting location updates.
             this.mFusedLocationProviderClient.requestLocationUpdates(this.mLocationRequest, this.mLocationCallback, Looper.myLooper());
+            this.mRequestingLocationUpdates = true;  // update receiving locations indicator.
         } else {
             // IGNORE
         }
@@ -277,11 +285,8 @@ public class TrackerService extends Service {
     private void stopLocationUpdates() {
         if (!mRequestingLocationUpdates) { return; }  // If not requesting updates, return.
         this.mFusedLocationProviderClient.removeLocationUpdates(this.mLocationCallback);  // Stop location updates.
+        this.mRequestingLocationUpdates = false;  // update receiving locations indicator.
     }
-
-
-
-
 
 
     // ### getters used for testing ###
