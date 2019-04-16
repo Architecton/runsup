@@ -2,8 +2,8 @@
     <string name="app_name">FitnessTracker</string>
     <string name="title_activity_maps">Map</string>
     <string name="default_duration">00:00:00</string>
-    <string name="default_distance">0.0</string>
-    <string name="default_pace">0.0</string>
+    <string name="default_distance">0.00</string>
+    <string name="default_pace">0.00</string>
     <string name="default_calories">0</string>
     <string name="stopwatch_stop">Pause Workout</string>
     <string name="stopwatch_continue">Continue Workout</string>
@@ -31,8 +31,8 @@
     <string name="textview_workoutdetail_valuecalories_default">0</string>
     <string name="textview_workoutdetail_labeldistance_default">DISTANCE</string>
     <string name="textview_workoutdetail_labelavgpace_default">AVG. PACE</string>
-    <string name="textview_workoutdetail_valueavgpace_default">0.0"</string>
-    <string name="textview_workoutdetail_valuedistance_default">0.0</string>
+    <string name="textview_workoutdetail_valueavgpace_default">0.00"</string>
+    <string name="textview_workoutdetail_valuedistance_default">0.00</string>
     <string name="textview_workoutdetail_labelsocialshare_default">Social Share</string>
     <string name="imageView1_description">share on Facebook</string>
     <string name="imageView2_description">share through e-mail</string>

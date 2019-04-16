@@ -45,6 +45,7 @@ public class StopwatchActivity extends AppCompatActivity {
     private long updateCounter;  // counter for number of data updates.
     private double calories;  // current calories used
     private ArrayList<List<Location>> positions;
+    private IntentFilter filter;
 
     private int state;
 
@@ -111,8 +112,8 @@ public class StopwatchActivity extends AppCompatActivity {
         this.state = Constant.STATE_STOPPED;
 
         // ## INTENT FILTER INITIALIZATION ##
-        IntentFilter filter = new IntentFilter();  // Instantiate IntentFilter.
-        filter.addAction(Constant.TICK);  // Register action.
+        filter = new IntentFilter();
+        this.filter.addAction(Constant.TICK);  // Register action.
         registerReceiver(receiver, filter);  // Register receiver.
         // ## INTENT FILTER INITIALIZATION ##
 
@@ -130,6 +131,7 @@ public class StopwatchActivity extends AppCompatActivity {
             // callback that is called when the service is disconnected.
             public void onServiceDisconnected(ComponentName name) {
                 bound = false; // Set bound indicator to false.
+                unregisterReceiver(receiver);
             }
         };
 
@@ -171,6 +173,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 unbindService(sConn);
                 this.bound = false;
                 stopService(new Intent(StopwatchActivity.this, TrackerService.class));
+                unregisterReceiver(receiver);
             }
         }
     }
@@ -198,6 +201,7 @@ public class StopwatchActivity extends AppCompatActivity {
         if (!this.bound) {
             // Bind service to activity.
             bindService(new Intent(this, TrackerService.class), sConn, BIND_AUTO_CREATE);
+            registerReceiver(receiver, filter);
         }
     }
 
@@ -209,6 +213,7 @@ public class StopwatchActivity extends AppCompatActivity {
             unbindService(sConn);
             this.bound = false;
             stopService(new Intent(StopwatchActivity.this, TrackerService.class));
+            unregisterReceiver(receiver);
         }
 
     }
