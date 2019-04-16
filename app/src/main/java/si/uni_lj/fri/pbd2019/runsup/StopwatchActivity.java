@@ -238,7 +238,7 @@ public class StopwatchActivity extends AppCompatActivity {
         new AlertDialog.Builder(this)
                 .setTitle("Stop Workout")
                 .setMessage("Are you sure you want to end this workout?")
-                .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
                         sendBroadcast(new Intent(Constant.COMMAND_STOP));  // Send command to stop workout.
                         if (bound) {  // If service still bounded, unbind.
@@ -260,7 +260,7 @@ public class StopwatchActivity extends AppCompatActivity {
                         StopwatchActivity.this.startActivity(workoutDetailsIntent);
                     }
                 })
-                .setNegativeButton(android.R.string.no, null)  // Do nothing if user selects cancel.
+                .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
                 .setIcon(android.R.drawable.ic_dialog_alert)
                 .show();
     }

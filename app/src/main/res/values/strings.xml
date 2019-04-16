@@ -10,7 +10,7 @@
     <string name="pace_unit">min/km</string>
     <string name="distance_unit">km</string>
     <string name="calories_unit">kcal</string>
-    <string name="button_stopwatch_endworkout_default">End</string>
+    <string name="stopwatch_endworkout">End</string>
     <string name="stopwatch_start">Start</string>
     <string name="button_stopwatch_selectsport_default">Running</string>
     <string name="calories_label">Calories</string>
@@ -41,5 +41,8 @@
 
     <string name="workout_share_description" formatted="false">I was out for %s. I did %s %s in %s.</string>
     <string name="confirm_share_button_description">confirm share</string>
+
+    <string name="no">cancel</string>
+    <string name="yes">confirm</string>
 
 </resources>
