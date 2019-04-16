@@ -6,7 +6,7 @@
     <string name="default_pace">0.0</string>
     <string name="default_calories">0</string>
     <string name="stopwatch_stop">Pause Workout</string>
-    <string name="workout_paused_start_button_text">Continue Workout</string>
+    <string name="stopwatch_continue">Continue Workout</string>
     <string name="pace_unit">min/km</string>
     <string name="distance_unit">km</string>
     <string name="calories_unit">kcal</string>

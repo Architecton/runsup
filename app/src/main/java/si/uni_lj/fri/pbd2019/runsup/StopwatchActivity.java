@@ -343,10 +343,10 @@ public class StopwatchActivity extends AppCompatActivity {
                 this.stopwatchStartButton.setText(R.string.stopwatch_stop);
                 break;
             case Constant.STATE_PAUSED:
-                this.stopwatchStartButton.setText(R.string.workout_paused_start_button_text);
+                this.stopwatchStartButton.setText(R.string.stopwatch_continue);
                 break;
             case Constant.STATE_STOPPED:
-                this.stopwatchStartButton.setText(R.string.workout_paused_start_button_text);
+                this.stopwatchStartButton.setText(R.string.stopwatch_continue);
                 break;
             case Constant.STATE_CONTINUE:
                 this.stopwatchStartButton.setText(R.string.stopwatch_stop);
