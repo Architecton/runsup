@@ -47,10 +47,13 @@ public class StopwatchActivity extends AppCompatActivity {
     private ArrayList<List<Location>> positions;
     private IntentFilter filter;
 
+
     private int state;
 
     Button stopwatchStartButton;
     Button endWorkoutButton;
+
+
 
     View.OnClickListener pauseListener = new View.OnClickListener() {
         public void onClick(View v) {  // callback method for when the button is pressed
@@ -69,6 +72,7 @@ public class StopwatchActivity extends AppCompatActivity {
             endWorkout();
         }
     };
+
 
     // ## BROADCAST RECEIVER ##
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
