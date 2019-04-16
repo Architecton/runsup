@@ -122,6 +122,7 @@ public class StopwatchActivity extends AppCompatActivity {
 
             // callback that is called when the service is connected.
             public void onServiceConnected(ComponentName name, IBinder binder) {
+                Log.d(TAG, "Service connected.");
                 service = ((TrackerService.LocalBinder)binder).getService();  // Call getService of passed binder.
                 bound = true;  // Set bound indicator to true.
             }
@@ -217,6 +218,7 @@ public class StopwatchActivity extends AppCompatActivity {
 
     // startStopwatch: method used to start the workout
     public void startStopwatch(final View view) {
+        Log.d(TAG, "Starting stopwatch");
 
 
         // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.COMMAND_START
