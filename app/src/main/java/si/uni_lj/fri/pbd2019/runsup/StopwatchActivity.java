@@ -106,11 +106,29 @@ public class StopwatchActivity extends AppCompatActivity {
     // oncCreate: method called when the activity is created
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d(TAG, "OnCreate called");  // testing
-
         super.onCreate(savedInstanceState);  // Call onCreate of the superclass.
         setContentView(R.layout.activity_stopwatch);  // Set layout for UI.
 
+        // Initialize buttons
+        this.stopwatchStartButton = findViewById(R.id.button_stopwatch_start);
+        this.endWorkoutButton = findViewById(R.id.button_stopwatch_endworkout);
+
+        // set listener on button to listen for workout start.
+        this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {  // callback method for when the button is pressed
+                startStopwatch(v);
+            }
+        });
+
+        // set listener on button to listen for workout end.
+        this.endWorkoutButton.setOnClickListener(endListener);
+
+        // Check for location access permissions.
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
+        }
+
+        // property initializations
         this.positions = new ArrayList<>();  // initialize list of positions lists.
         this.paceAccumulator = 0;  // Initialize pace accumulator;
         this.updateCounter = 0;  // Initialize counter of data updates.
@@ -144,29 +162,6 @@ public class StopwatchActivity extends AppCompatActivity {
         bindService(new Intent(this, TrackerService.class), sConn, BIND_AUTO_CREATE);
     }
 
-    // onStart: method that is called when the layout becomes visible to the user.
-    @Override
-    protected void onStart() {
-        super.onStart();
-        // Initialize button pointers.
-        this.stopwatchStartButton = findViewById(R.id.button_stopwatch_start);
-        this.endWorkoutButton = findViewById(R.id.button_stopwatch_endworkout);
-
-        // set listener on button to listen for workout start.
-        this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {  // callback method for when the button is pressed
-                startStopwatch(v);
-            }
-        });
-
-        // Check for location access permissions.
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
-        }
-
-        // set listener on button to listen for workout end.
-        this.endWorkoutButton.setOnClickListener(endListener);
-    }
 
     // onPause: method run when the activity is paused.
     @Override
@@ -228,8 +223,6 @@ public class StopwatchActivity extends AppCompatActivity {
 
     // startStopwatch: method used to start the workout
     public void startStopwatch(final View view) {
-        Log.d(TAG, "Starting stopwatch");
-
 
         // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.COMMAND_START
         this.sendBroadcast(new Intent(Constant.COMMAND_START));
