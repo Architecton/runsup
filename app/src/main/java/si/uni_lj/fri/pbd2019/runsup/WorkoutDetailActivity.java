@@ -1,6 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
 import android.content.Intent;
+import android.content.res.Resources;
 import android.icu.text.DateFormat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,11 +12,15 @@ import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
+import com.bumptech.glide.load.engine.Resource;
+
 import java.util.Date;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 
 public class WorkoutDetailActivity extends AppCompatActivity {
+
+    public static Resources resources;
 
     private EditText shareText;
     private ImageButton confirmShareButton;
@@ -38,6 +43,7 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);  // Call onCreate method of superclass.
         this.dateEnd = DateFormat.getTimeInstance().format(new Date());  // Set date when activity ended.
         setContentView(R.layout.activity_workout_detail);  // Set content of activity.
+        resources = getResources();  // Initialize resources.
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
         this.setDuration(intent.getLongExtra("duration", 0));
         this.setSportActivity(intent.getIntExtra("sportActivity", -1));
@@ -88,19 +94,19 @@ public class WorkoutDetailActivity extends AppCompatActivity {
 
     public void setCalories(double calories) {
         TextView caloriesText = findViewById(R.id.textview_workoutdetail_valuecalories);
-        caloriesText.setText(MainHelper.formatCalories(calories));
+        caloriesText.setText(MainHelper.formatCaloriesWithUnits(calories));
         this.calories = calories;
     }
 
     public void setDistance(double distance) {
         TextView distanceText = findViewById(R.id.textview_workoutdetail_valuedistance);
-        distanceText.setText(MainHelper.formatDistance(distance));
+        distanceText.setText(MainHelper.formatDistanceWithUnits(distance));
         this.distance = distance;
     }
 
     public void setPace(double avgPace) {
         TextView paceText = findViewById(R.id.textview_workoutdetail_valueavgpace);
-        paceText.setText(MainHelper.formatPace(avgPace));
+        paceText.setText(MainHelper.formatPaceWithUnits(avgPace));
         this.avgPace = avgPace;
     }
 

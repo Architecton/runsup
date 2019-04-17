@@ -28,11 +28,11 @@
     <string name="textview_workoutdetail_labelduration_default">DURATION</string>
     <string name="textview_workoutdetail_labelcalories_default">CALORIES</string>
     <string name="textview_workoutdetail_valueduration_default">00:00:00"</string>
-    <string name="textview_workoutdetail_valuecalories_default">0</string>
+    <string name="textview_workoutdetail_valuecalories_default">0 kcal</string>
     <string name="textview_workoutdetail_labeldistance_default">DISTANCE</string>
     <string name="textview_workoutdetail_labelavgpace_default">AVG. PACE</string>
-    <string name="textview_workoutdetail_valueavgpace_default">0.00"</string>
-    <string name="textview_workoutdetail_valuedistance_default">0.00</string>
+    <string name="textview_workoutdetail_valueavgpace_default">0.00 min/km"</string>
+    <string name="textview_workoutdetail_valuedistance_default">0.00 km</string>
     <string name="textview_workoutdetail_labelsocialshare_default">Social Share</string>
     <string name="imageView1_description">share on Facebook</string>
     <string name="imageView2_description">share through e-mail</string>

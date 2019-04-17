@@ -1,11 +1,14 @@
 package si.uni_lj.fri.pbd2019.runsup.helpers;
 
+import android.content.res.Resources;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.TimeZone;
 
 import java.util.Date;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
+import si.uni_lj.fri.pbd2019.runsup.R;
+import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 
 public final class MainHelper {
 
@@ -34,6 +37,14 @@ public final class MainHelper {
         return String.format("%.2f", n*1.0e-3);
     }
 
+
+    /**
+     * conver m to km and round to 2 decimal places and return as string with units
+     */
+    public static String formatDistanceWithUnits(double n) {
+        return formatDistance(n) + " " + WorkoutDetailActivity.resources.getString(R.string.distance_unit);
+    }
+
     /**
      * round number to 2 decimal places and return as string
      */
@@ -42,11 +53,25 @@ public final class MainHelper {
     }
 
     /**
+     * round number to 2 decimal places and return as string
+     */
+    public static String formatPaceWithUnits(double n) {
+        return formatPace(n) + " " + WorkoutDetailActivity.resources.getString(R.string.pace_unit);
+    }
+
+
+    /**
      * round number to integer
      */
     public static String formatCalories(double n) {
         return String.format("%d", (int)Math.round(n));
+    }
 
+    /**
+     * round number to integer
+     */
+    public static String formatCaloriesWithUnits(double n) {
+        return formatCalories(n) + " " + WorkoutDetailActivity.resources.getString(R.string.calories_unit);
     }
 
     /**
