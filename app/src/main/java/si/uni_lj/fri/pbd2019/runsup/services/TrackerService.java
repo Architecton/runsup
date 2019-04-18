@@ -212,6 +212,56 @@ public class TrackerService extends Service {
         stopLocationUpdates();  // Disable location updates.
     }
 
+
+
+    // ### COMMAND HANDLING ###
+
+    // onStartCommand: callback called every time the startService is called in the StopwatchActivity.
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.d(TAG, "onStartCalled");
+
+        String action = intent.getAction();  // Get intent action and switch on it.
+        switch (action) {
+            case Constant.COMMAND_START:
+
+                durationAccumulator = 0;  // Initialize duration accumulator.
+
+                sportActivity = Constant.RUNNING;  // Set workout activity (hardcoded for now)
+                trackingState = Constant.STATE_RUNNING;  // Set service state.
+                firstMeasAfterPause = false;  // initialize indicator.
+
+                prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
+                startLocationUpdates();  // Start location updates.
+                broadcasting = true;  // Start broadcasting TICK actions.
+                h.postDelayed(r, BROADCAST_PERIOD);
+                break;
+            case Constant.COMMAND_CONTINUE:
+                trackingState = Constant.STATE_CONTINUE;  // Set service state.
+                prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
+                startLocationUpdates();  // Start location updates.
+                firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
+                broadcasting = true;  // Start broadcasting.
+                h.postDelayed(r, BROADCAST_PERIOD);
+                break;
+            case Constant.COMMAND_PAUSE:
+                trackingState = Constant.STATE_PAUSED;  // Set service state.
+                stopLocationUpdates();  // Stop location updates and broadcasting.
+                broadcasting = false;
+                break;
+            case Constant.COMMAND_STOP:
+                trackingState = Constant.STATE_STOPPED;  // Set service state.
+                stopLocationUpdates();  // Stop location updates and broadcasting.
+                broadcasting = false;
+                break;
+        }
+        return super.onStartCommand(intent, flags, startId);
+    }
+
+    // ### /COMMAND HANDLING ###
+
+
+
     // Create nested class that extends Binder and provides method to return service proxy.
     public class LocalBinder extends Binder {
         public TrackerService getService() {

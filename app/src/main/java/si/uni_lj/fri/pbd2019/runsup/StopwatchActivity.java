@@ -49,6 +49,7 @@ public class StopwatchActivity extends AppCompatActivity {
 
 
     private int state;
+    Context context = this;
 
     Button stopwatchStartButton;
     Button endWorkoutButton;
@@ -218,14 +219,16 @@ public class StopwatchActivity extends AppCompatActivity {
 
     }
 
-
     // ### METHOD FOR CONTROLLING THE WORKOUT STATE ###
 
     // startStopwatch: method used to start the workout
     public void startStopwatch(final View view) {
 
         // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.COMMAND_START
-        this.sendBroadcast(new Intent(Constant.COMMAND_START));
+        // this.sendBroadcast(new Intent(Constant.COMMAND_START));
+        Intent startIntent = new Intent(this, TrackerService.class);
+        startIntent.setAction(Constant.COMMAND_START);
+        this.startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
         // set listener to button with id button_stopwatch_start - listen for pause.
@@ -243,7 +246,9 @@ public class StopwatchActivity extends AppCompatActivity {
                 .setMessage("Are you sure you want to end this workout?")
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
-                        sendBroadcast(new Intent(Constant.COMMAND_STOP));  // Send command to stop workout.
+                        Intent startIntent = new Intent(context, TrackerService.class);
+                        startIntent.setAction(Constant.COMMAND_STOP);
+                        startService(startIntent);
                         if (bound) {  // If service still bounded, unbind.
                             unbindService(sConn);
                             bound = false;
@@ -272,7 +277,12 @@ public class StopwatchActivity extends AppCompatActivity {
     public void pauseStopwatch(View view) {
 
         // Send broadcast to service.
-        this.sendBroadcast(new Intent(Constant.COMMAND_PAUSE));
+        // this.sendBroadcast(new Intent(Constant.COMMAND_PAUSE));
+
+        Intent startIntent = new Intent(this, TrackerService.class);
+        startIntent.setAction(Constant.COMMAND_PAUSE);
+        startService(startIntent);
+
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_PAUSED);
 
@@ -291,7 +301,12 @@ public class StopwatchActivity extends AppCompatActivity {
     public void continueStopwatch(View view) {
 
         // Send broadcast to service.
-        this.sendBroadcast(new Intent(Constant.COMMAND_CONTINUE));
+        // this.sendBroadcast(new Intent(Constant.COMMAND_CONTINUE));
+
+        Intent startIntent = new Intent(this, TrackerService.class);
+        startIntent.setAction(Constant.COMMAND_CONTINUE);
+        startService(startIntent);
+
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
