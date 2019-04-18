@@ -47,14 +47,16 @@ public class StopwatchActivity extends AppCompatActivity {
     private ArrayList<List<Location>> positions;
     private IntentFilter filter;
 
-
+    // State of the stopwatch (see Constant class for values)
     private int state;
-    Context context = this;
+    Context context = this;  // Context of instance
 
+    // buttons for starting/pausing the workout and for ending the workout
     Button stopwatchStartButton;
     Button endWorkoutButton;
 
 
+    // ## class level listeners ##
 
     View.OnClickListener pauseListener = new View.OnClickListener() {
         public void onClick(View v) {  // callback method for when the button is pressed
@@ -73,6 +75,8 @@ public class StopwatchActivity extends AppCompatActivity {
             endWorkout();
         }
     };
+
+    // ## /class level listeners ##
 
 
     // ## BROADCAST RECEIVER ##
@@ -108,6 +112,7 @@ public class StopwatchActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);  // Call onCreate of the superclass.
+
         setContentView(R.layout.activity_stopwatch);  // Set layout for UI.
 
         // Initialize buttons
@@ -161,6 +166,7 @@ public class StopwatchActivity extends AppCompatActivity {
 
         // Bind service to activity.
         bindService(new Intent(this, TrackerService.class), sConn, BIND_AUTO_CREATE);
+        this.bound = true;  // Set bound indicator.
     }
 
 
@@ -182,6 +188,7 @@ public class StopwatchActivity extends AppCompatActivity {
     // onResume: method run when the activity is resumed.
     @Override
     protected void onResume() {
+        super.onResume();  // Call onResume method of superclass.
 
         // rebind click listeners according to state.
         switch (this.state) {
@@ -197,7 +204,6 @@ public class StopwatchActivity extends AppCompatActivity {
                 this.stopwatchStartButton.setOnClickListener(pauseListener);
                 break;
         }
-        super.onResume();
         // If service not bound, bind it.
         if (!this.bound) {
             // Bind service to activity.
@@ -219,7 +225,7 @@ public class StopwatchActivity extends AppCompatActivity {
 
     }
 
-    // ### METHOD FOR CONTROLLING THE WORKOUT STATE ###
+    // ### METHODS FOR CONTROLLING THE WORKOUT STATE ###
 
     // startStopwatch: method used to start the workout
     public void startStopwatch(final View view) {
@@ -246,12 +252,14 @@ public class StopwatchActivity extends AppCompatActivity {
                 .setMessage("Are you sure you want to end this workout?")
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
+
+                        // Initialize intent for starting the service.
                         Intent startIntent = new Intent(context, TrackerService.class);
-                        startIntent.setAction(Constant.COMMAND_STOP);
+                        startIntent.setAction(Constant.COMMAND_STOP);  // Set action.
                         startService(startIntent);
                         if (bound) {  // If service still bounded, unbind.
                             unbindService(sConn);
-                            bound = false;
+                            bound = false;  // Update bound indicator.
                             stopService(new Intent(StopwatchActivity.this, TrackerService.class));
                         }
 
@@ -276,9 +284,7 @@ public class StopwatchActivity extends AppCompatActivity {
     // pauseStopWatch: method used to pause the stopwatch.
     public void pauseStopwatch(View view) {
 
-        // Send broadcast to service.
-        // this.sendBroadcast(new Intent(Constant.COMMAND_PAUSE));
-
+        // Initialize the intent for starting the service.
         Intent startIntent = new Intent(this, TrackerService.class);
         startIntent.setAction(Constant.COMMAND_PAUSE);
         startService(startIntent);
@@ -300,9 +306,7 @@ public class StopwatchActivity extends AppCompatActivity {
     // continueStopwatch: method used to resume the workout paused.
     public void continueStopwatch(View view) {
 
-        // Send broadcast to service.
-        // this.sendBroadcast(new Intent(Constant.COMMAND_CONTINUE));
-
+        // Initialize the intent for starting the service.
         Intent startIntent = new Intent(this, TrackerService.class);
         startIntent.setAction(Constant.COMMAND_CONTINUE);
         startService(startIntent);
@@ -315,11 +319,10 @@ public class StopwatchActivity extends AppCompatActivity {
 
         // Make button for ending workout invisible.
         this.endWorkoutButton.setVisibility(View.INVISIBLE);
-
         this.state = Constant.STATE_CONTINUE;  // Update state.
     }
 
-    // ### METHOD FOR CONTROLLING THE WORKOUT STATE ###
+    // ### /METHOD FOR CONTROLLING THE WORKOUT STATE ###
 
 
 
@@ -374,7 +377,5 @@ public class StopwatchActivity extends AppCompatActivity {
         }
 
     }
-
     // ### /METHODS FOR UPDATING THE UI ###
-
 }

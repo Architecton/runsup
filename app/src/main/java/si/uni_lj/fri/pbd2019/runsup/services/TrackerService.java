@@ -41,7 +41,9 @@ public class TrackerService extends Service {
     private final long MIN_DIST_CHANGE = 2;  // Minimum distance between current and next location to store next location.
     private final int PAUSE_DIST_CHANGE_THRESH = 100; // If during pause distance changed by more than this amount, discard.
 
-    private FusedLocationProviderClient mFusedLocationProviderClient;  // Instance that allows interaction with the API.
+    // Instance that allows interaction with the location API.
+    private FusedLocationProviderClient mFusedLocationProviderClient;
+    // request for location and callback called when location received.
     LocationRequest mLocationRequest;
     LocationCallback mLocationCallback;
     Location mCurrentLocation;
@@ -128,28 +130,10 @@ public class TrackerService extends Service {
         this.positionList = new ArrayList<>();  // Initialize list of positions.
         this.speedList = new ArrayList<>();  // Initialize list of speeds.
 
-        // Instantiate and initialize and intent filer.
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(Constant.COMMAND_START);
-        filter.addAction(Constant.COMMAND_PAUSE);
-        filter.addAction(Constant.COMMAND_CONTINUE);
-        filter.addAction(Constant.COMMAND_STOP);
-
-        // Register receiver.
-        registerReceiver(receiver, filter);
-
         // Initialize location request and location callback function.
         createLocationRequest();
         createLocationCallback();
 
-        // Instantiate a Handler instance. new IntentFilter();
-        filter.addAction(Constant.COMMAND_START);
-        filter.addAction(Constant.COMMAND_PAUSE);
-        filter.addAction(Constant.COMMAND_CONTINUE);
-        filter.addAction(Constant.COMMAND_STOP);
-
-        // Register receiver.
-        registerReceiver(receiver, filter);
         this.h = new Handler();
 
         // Instantiate a class extending Runnable.
@@ -206,7 +190,6 @@ public class TrackerService extends Service {
     // onDestroy: method called when the service is destroyed.
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy called");
         super.onDestroy();  // Call onDestroy method of superclass.
         unregisterReceiver(receiver);  // Unregister receiver.
         stopLocationUpdates();  // Disable location updates.
@@ -217,10 +200,9 @@ public class TrackerService extends Service {
     // ### COMMAND HANDLING ###
 
     // onStartCommand: callback called every time the startService is called in the StopwatchActivity.
+    // This callback is used to get commands from the bound activity.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG, "onStartCalled");
-
         String action = intent.getAction();  // Get intent action and switch on it.
         switch (action) {
             case Constant.COMMAND_START:
@@ -276,7 +258,7 @@ public class TrackerService extends Service {
         return this.mBinder;
     }
 
-    // createLocationRequest: initialize location request.
+    // createLocationRequest: initialize location request with specified constant values.
     protected void createLocationRequest() {
         this.mLocationRequest = new LocationRequest();
         this.mLocationRequest.setInterval(MIN_TIME_BETWEEN_UPDATES);
