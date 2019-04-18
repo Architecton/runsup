@@ -191,7 +191,6 @@ public class TrackerService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();  // Call onDestroy method of superclass.
-        unregisterReceiver(receiver);  // Unregister receiver.
         stopLocationUpdates();  // Disable location updates.
     }
 
