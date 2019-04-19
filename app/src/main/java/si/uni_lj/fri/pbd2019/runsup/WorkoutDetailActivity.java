@@ -5,6 +5,7 @@ import android.content.res.Resources;
 import android.icu.text.DateFormat;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -140,4 +141,16 @@ public class WorkoutDetailActivity extends AppCompatActivity {
     }
 
     // ### /METHODS FOR FORMATTING THE UI ###
+
+    // onKeyDown: override default action when user presses the back button
+    // Present stopwatch in initial state.
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event)  {
+        if (keyCode == KeyEvent.KEYCODE_BACK ) {
+            Intent stopwatchActivityIntent = new Intent(WorkoutDetailActivity.this, StopwatchActivity.class);
+            WorkoutDetailActivity.this.startActivity(stopwatchActivityIntent);
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+    }
 }

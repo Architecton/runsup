@@ -155,6 +155,7 @@ public class TrackerService extends Service {
     // onDestroy: method called when the service is destroyed.
     @Override
     public void onDestroy() {
+        Log.d(TAG, "Service destroyed.");
         super.onDestroy();  // Call onDestroy method of superclass.
         stopLocationUpdates();  // Disable location updates.
     }

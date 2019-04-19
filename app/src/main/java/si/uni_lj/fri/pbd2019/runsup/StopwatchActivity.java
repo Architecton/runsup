@@ -199,7 +199,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 unbindService(sConn);
                 this.bound = false;
                 stopService(new Intent(StopwatchActivity.this, TrackerService.class));
-                unregisterReceiver(receiver);
+                // unregisterReceiver(receiver); // TODO
             }
         }
     }
