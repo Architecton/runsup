@@ -215,6 +215,7 @@ public class TrackerService extends Service {
                 trackingState = Constant.STATE_STOPPED;  // Set service state.
                 stopLocationUpdates();  // Stop location updates and broadcasting.
                 broadcasting = false;
+                this.preferences.edit().clear();  // Clear all stored data about state in preferences.
                 break;
         }
         return super.onStartCommand(intent, flags, startId);
