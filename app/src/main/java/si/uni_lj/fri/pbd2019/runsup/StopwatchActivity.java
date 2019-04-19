@@ -12,17 +12,14 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
@@ -55,6 +52,7 @@ public class StopwatchActivity extends AppCompatActivity {
     // buttons for starting/pausing the workout and for ending the workout
     Button stopwatchStartButton;
     Button endWorkoutButton;
+    Button toggleSportActivityButton;
 
 
     // ## class level listeners ##
@@ -119,6 +117,7 @@ public class StopwatchActivity extends AppCompatActivity {
         // Initialize buttons
         this.stopwatchStartButton = findViewById(R.id.button_stopwatch_start);
         this.endWorkoutButton = findViewById(R.id.button_stopwatch_endworkout);
+        this.toggleSportActivityButton = findViewById(R.id.button_stopwatch_selectsport);
 
         // set listener on button to listen for workout start.
         this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
@@ -127,8 +126,27 @@ public class StopwatchActivity extends AppCompatActivity {
             }
         });
 
+        this.toggleSportActivityButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (state == Constant.STATE_STOPPED) {
+                    toggleSportActivity();
+                } else {
+                    new AlertDialog.Builder(context)
+                            .setTitle("Change Sport Activity")
+                            .setMessage("You cannot change the sport activity while a workout is in progress!")
+
+                            // A null listener allows the button to dismiss the dialog and take no further action.
+                            .setPositiveButton(android.R.string.yes, null)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
+            }
+        });
+
         // set listener on button to listen for workout end.
         this.endWorkoutButton.setOnClickListener(endListener);
+
 
         // Check for location access permissions.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -140,6 +158,7 @@ public class StopwatchActivity extends AppCompatActivity {
         this.paceAccumulator = 0;  // Initialize pace accumulator;
         this.updateCounter = 0;  // Initialize counter of data updates.
         this.state = Constant.STATE_STOPPED;
+        this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
 
         // ## INTENT FILTER INITIALIZATION ##
         filter = new IntentFilter();
@@ -234,6 +253,7 @@ public class StopwatchActivity extends AppCompatActivity {
         // this.sendBroadcast(new Intent(Constant.COMMAND_START));
         Intent startIntent = new Intent(this, TrackerService.class);
         startIntent.setAction(Constant.COMMAND_START);
+        startIntent.putExtra("sportActivity", this.sportActivity);
         this.startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
@@ -382,5 +402,18 @@ public class StopwatchActivity extends AppCompatActivity {
         }
 
     }
+
+    // updateSportActivity: update text on sport activity button.
+    private void updateSportActivityText(int sportActivity) {
+        this.toggleSportActivityButton.setText(MainHelper.getSportActivityName(sportActivity));
+    }
+
+    // toggleSportActivity: toggle the sport activity
+    private void toggleSportActivity() {
+        this.sportActivity += 1;
+        this.sportActivity %= 3;
+        updateSportActivityText(this.sportActivity);
+    }
+
     // ### /METHODS FOR UPDATING THE UI ###
 }

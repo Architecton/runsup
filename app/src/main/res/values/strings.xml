@@ -10,7 +10,7 @@
     <string name="pace_unit">min/km</string>
     <string name="distance_unit">km</string>
     <string name="calories_unit">kcal</string>
-    <string name="stopwatch_endworkout">End</string>
+    <string name="stopwatch_endworkout">End Workout</string>
     <string name="stopwatch_start">Start</string>
     <string name="button_stopwatch_selectsport_default">Running</string>
     <string name="calories_label">Calories</string>

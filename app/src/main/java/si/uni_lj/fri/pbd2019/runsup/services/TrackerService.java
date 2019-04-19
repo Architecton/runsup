@@ -75,48 +75,6 @@ public class TrackerService extends Service {
 
     SharedPreferences preferences;
 
-    /* Anonymous BroadcastReceiver instance that receives commands */
-    private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        // Method called when the receiver receives a broadcast.
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            String action = intent.getAction();  // Get broadcasted action and switch on it.
-            switch (action) {
-                case Constant.COMMAND_START:
-
-                    durationAccumulator = 0;  // Initialize duration accumulator.
-
-                    sportActivity = Constant.RUNNING;  // Set workout activity (hardcoded for now)
-                    trackingState = Constant.STATE_RUNNING;  // Set service state.
-                    firstMeasAfterPause = false;  // initialize indicator.
-
-                    prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
-                    startLocationUpdates();  // Start location updates.
-                    broadcasting = true;  // Start broadcasting TICK actions.
-                    h.postDelayed(r, BROADCAST_PERIOD);
-                    break;
-                case Constant.COMMAND_CONTINUE:
-                    trackingState = Constant.STATE_CONTINUE;  // Set service state.
-                    prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
-                    startLocationUpdates();  // Start location updates.
-                    firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
-                    broadcasting = true;  // Start broadcasting.
-                    h.postDelayed(r, BROADCAST_PERIOD);
-                    break;
-                case Constant.COMMAND_PAUSE:
-                    trackingState = Constant.STATE_PAUSED;  // Set service state.
-                    stopLocationUpdates();  // Stop location updates and broadcasting.
-                    broadcasting = false;
-                    break;
-                case Constant.COMMAND_STOP:
-                    trackingState = Constant.STATE_STOPPED;  // Set service state.
-                    stopLocationUpdates();  // Stop location updates and broadcasting.
-                    broadcasting = false;
-                    break;
-            }
-        }
-    };
-
     // ### /PROPERTIES ###
 
 
@@ -215,10 +173,11 @@ public class TrackerService extends Service {
 
                 durationAccumulator = 0;  // Initialize duration accumulator.
 
-                sportActivity = Constant.RUNNING;  // Set workout activity (hardcoded for now)
                 trackingState = Constant.STATE_RUNNING;  // Set service state.
                 firstMeasAfterPause = false;  // initialize indicator.
 
+                // Initialize sport activity from start command.
+                sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
                 prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
                 startLocationUpdates();  // Start location updates.
                 broadcasting = true;  // Start broadcasting TICK actions.

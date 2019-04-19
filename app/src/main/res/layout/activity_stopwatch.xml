@@ -203,7 +203,7 @@
 
     <Button
         android:id="@+id/button_stopwatch_endworkout"
-        android:layout_width="262dp"
+        android:layout_width="312dp"
         android:layout_height="49dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
