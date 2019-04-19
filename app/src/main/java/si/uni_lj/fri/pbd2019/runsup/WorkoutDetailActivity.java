@@ -25,7 +25,7 @@ public class WorkoutDetailActivity extends AppCompatActivity {
 
     // UI components
     private EditText shareText;
-    private ImageButton confirmShareButton;
+    private Button confirmShareButton;
     private Button facebookShareButton;
     private Button emailShareButton;
     private Button googlePlusShareButton;

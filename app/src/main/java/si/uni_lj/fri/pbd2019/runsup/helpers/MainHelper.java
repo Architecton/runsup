@@ -85,7 +85,7 @@ public final class MainHelper {
     /**
      * convert m/s to mi/h (multiply with a corresponding constant)
      * */
-    public static double mpsToMiph(double n) {
+    public static float mpsToMiph(float n) {
         return n*MpS_TO_MIpH;
 
     }

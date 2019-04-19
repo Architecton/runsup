@@ -60,7 +60,7 @@ public final class SportActivities {
     * @param speed - speed in m/s
     * @return
     */
-    public static double getMET(int activityType, double speed) {
+    public static double getMET(int activityType, float speed) {
         switch (activityType) {
             case Constant.RUNNING:
                 if (speedToMET_running.containsKey((int)Math.ceil(speed))) {
@@ -101,10 +101,10 @@ public final class SportActivities {
         for (float f : speedList) {
             avgSpeed += f;
         }
-        avgSpeed /= (double)speedList.size();
+        avgSpeed /= (float)speedList.size();
 
         // Compute calories used.
-        return getMET(sportActivity, MainHelper.mpsToMiph(avgSpeed) * weight * timeFillingSpeedListInHours);
+        return getMET(sportActivity, MainHelper.mpsToMiph(avgSpeed)) * weight * timeFillingSpeedListInHours;
     }
 
 }
