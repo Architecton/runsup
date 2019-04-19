@@ -5,7 +5,7 @@ import android.app.Service;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.icu.text.DateFormat;
 import android.location.Location;
@@ -22,6 +22,7 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.Gson;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -40,6 +41,8 @@ public class TrackerService extends Service {
     private final long MIN_DISTANCE_CHANGE_BETWEEN_UPDATES = 10;  // Minimum delta distance between updates.
     private final long MIN_DIST_CHANGE = 2;  // Minimum distance between current and next location to store next location.
     private final int PAUSE_DIST_CHANGE_THRESH = 100; // If during pause distance changed by more than this amount, discard.
+
+    public static final String STATE_PREF_NAME = "state";
 
     // Instance that allows interaction with the location API.
     private FusedLocationProviderClient mFusedLocationProviderClient;
@@ -70,10 +73,10 @@ public class TrackerService extends Service {
 
     private final IBinder mBinder = new LocalBinder();  // binder that provides an interface to this service.
 
+    SharedPreferences preferences;
 
     /* Anonymous BroadcastReceiver instance that receives commands */
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
-
         // Method called when the receiver receives a broadcast.
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -121,7 +124,6 @@ public class TrackerService extends Service {
     // onCreate: method called when this service is created.
     @Override
     public void onCreate() {
-
         super.onCreate();  // Call onCreate method of superclass.
 
         // Instantiate mFusedLocationProviderClient.
@@ -134,6 +136,10 @@ public class TrackerService extends Service {
         createLocationRequest();
         createLocationCallback();
 
+        // Initialize shared preferences pointer.
+        this.preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+
+        // Initialize handler.
         this.h = new Handler();
 
         // Instantiate a class extending Runnable.
@@ -164,6 +170,7 @@ public class TrackerService extends Service {
 
                 // Add pace to intent broadcast.
                 toSend.putExtra("pace", pace);
+                // preferences.edit().putLong("pace", Double.doubleToRawLongBits(pace));
 
                 // Compute cumulative number of calories used until now. NOTE: weight is hardcoded for now.
                 double caloriesNxt = 0.0;
@@ -222,6 +229,15 @@ public class TrackerService extends Service {
                 prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
                 startLocationUpdates();  // Start location updates.
                 firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
+
+                // RESTORE STATE from preferences.
+                this.durationAccumulator = preferences.getLong("duration", 0);  // Restore duration from shared preferences.
+                this.distanceAccumulator = Double.longBitsToDouble(preferences.getLong("distance", 0));  // Restore distance from preferences.
+                this.sportActivity = preferences.getInt("sportActivity", Constant.RUNNING);  // Restore sport activity from preferences.
+                this.positionList = intent.getParcelableArrayListExtra("positions");  // Restore positions list from StopwatchActivity.
+                this.speedList = positionsToSpeedList(this.positionList);  // Reconstruct speedList from positionList.
+
+
                 broadcasting = true;  // Start broadcasting.
                 h.postDelayed(r, BROADCAST_PERIOD);
                 break;
@@ -229,6 +245,11 @@ public class TrackerService extends Service {
                 trackingState = Constant.STATE_PAUSED;  // Set service state.
                 stopLocationUpdates();  // Stop location updates and broadcasting.
                 broadcasting = false;
+
+                // Store state in preferences to restore in case StopwatchActivity paused.
+                preferences.edit().putLong("duration", this.durationAccumulator).apply();
+                preferences.edit().putLong("distance", Double.doubleToRawLongBits(distanceAccumulator)).apply();
+                preferences.edit().putInt("sportActivity", sportActivity).apply();
                 break;
             case Constant.COMMAND_STOP:
                 trackingState = Constant.STATE_STOPPED;  // Set service state.
@@ -238,6 +259,7 @@ public class TrackerService extends Service {
         }
         return super.onStartCommand(intent, flags, startId);
     }
+
 
     // ### /COMMAND HANDLING ###
 
@@ -320,6 +342,17 @@ public class TrackerService extends Service {
     }
 
 
+    // positionsToSpeedList: convert list of positions to list of speeds.
+    private ArrayList<Float> positionsToSpeedList(ArrayList<Location> positionList) {
+        ArrayList<Float> constructedSpeedList = new ArrayList<>();  // Initialize resulting speed list.
+        for (int i = 1; i < positionList.size(); i++) {  // Compute speeds from distances.
+            constructedSpeedList.add((float)(positionList.get(i).distanceTo(positionList.get(i-1))/
+                    ((positionList.get(i).getElapsedRealtimeNanos() - positionList.get(i-1).getElapsedRealtimeNanos())*1.0e-9)));
+        }
+        return constructedSpeedList;
+    }
+
+
     // ### getters used for testing ###
 
     public int getState() {
@@ -339,5 +372,4 @@ public class TrackerService extends Service {
     }
 
     // ### /getters provider for testing ###
-
 }

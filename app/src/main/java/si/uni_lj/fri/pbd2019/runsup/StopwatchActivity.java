@@ -12,6 +12,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Parcelable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -44,7 +45,7 @@ public class StopwatchActivity extends AppCompatActivity {
     private double paceAccumulator; // average pace
     private long updateCounter;  // counter for number of data updates.
     private double calories;  // current calories used
-    private ArrayList<List<Location>> positions;
+    private ArrayList<ArrayList<Location>> positions;
     private IntentFilter filter;
 
     // State of the stopwatch (see Constant class for values)
@@ -152,7 +153,6 @@ public class StopwatchActivity extends AppCompatActivity {
 
             // callback that is called when the service is connected.
             public void onServiceConnected(ComponentName name, IBinder binder) {
-                Log.d(TAG, "Service connected.");
                 service = ((TrackerService.LocalBinder)binder).getService();  // Call getService of passed binder.
                 bound = true;  // Set bound indicator to true.
             }
@@ -175,7 +175,7 @@ public class StopwatchActivity extends AppCompatActivity {
     public void onPause() {
         super.onPause();
         // Check if workout running.
-        if (this.state == Constant.STATE_STOPPED) {
+        if (this.state == Constant.STATE_STOPPED || this.state == Constant.STATE_PAUSED) {
             if (this.bound) {
                 unbindService(sConn);
                 this.bound = false;
@@ -309,7 +309,12 @@ public class StopwatchActivity extends AppCompatActivity {
         // Initialize the intent for starting the service.
         Intent startIntent = new Intent(this, TrackerService.class);
         startIntent.setAction(Constant.COMMAND_CONTINUE);
-        startService(startIntent);
+        if (this.positions.size() >= 1) {
+            startIntent.putParcelableArrayListExtra("positions", this.positions.get(this.positions.size()-1));
+        } else {
+            startIntent.putParcelableArrayListExtra("positions", new ArrayList<Location>());
+        }
+        startService(startIntent);  // Start service with intent.
 
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_RUNNING);
