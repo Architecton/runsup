@@ -312,7 +312,6 @@ public class StopwatchActivity extends AppCompatActivity {
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_PAUSED);
 
-
         // set listener to button to listen for commands to continue workout.
         this.stopwatchStartButton.setOnClickListener(continueListener);
 
