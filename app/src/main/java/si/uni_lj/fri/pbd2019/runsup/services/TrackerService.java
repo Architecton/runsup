@@ -120,7 +120,9 @@ public class TrackerService extends Service {
                 // Compute pace.
                 pace = 0.0;
                 // If list of positions is not empty and if last position update less than threshold ago, compute pace from speed.
-                if (!positionList.isEmpty() && SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1).getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
+                if (positionList != null && !positionList.isEmpty() &&
+                        SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1)
+                                .getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
                     if (!speedList.isEmpty()) {
                        pace = 1.0/speedList.get(speedList.size() - 1)*(1000.0/60.0);
                     }
@@ -195,7 +197,11 @@ public class TrackerService extends Service {
                 this.distanceAccumulator = Double.longBitsToDouble(preferences.getLong("distance", 0));  // Restore distance from preferences.
                 this.sportActivity = preferences.getInt("sportActivity", Constant.RUNNING);  // Restore sport activity from preferences.
                 this.positionList = intent.getParcelableArrayListExtra("positions");  // Restore positions list from StopwatchActivity.
-                this.speedList = positionsToSpeedList(this.positionList);  // Reconstruct speedList from positionList.
+                if (this.positionList != null) {  // If position list is not null, reconstruct speedList.
+                    this.speedList = positionsToSpeedList();  // Reconstruct speedList from positionList.
+                } else {
+                    this.positionList = new ArrayList<>();
+                }
 
 
                 broadcasting = true;  // Start broadcasting.
@@ -215,7 +221,7 @@ public class TrackerService extends Service {
                 trackingState = Constant.STATE_STOPPED;  // Set service state.
                 stopLocationUpdates();  // Stop location updates and broadcasting.
                 broadcasting = false;
-                this.preferences.edit().clear();  // Clear all stored data about state in preferences.
+                this.preferences.edit().clear().apply();  // Clear all stored data about state in preferences.
                 break;
         }
         return super.onStartCommand(intent, flags, startId);
@@ -308,11 +314,11 @@ public class TrackerService extends Service {
 
 
     // positionsToSpeedList: convert list of positions to list of speeds.
-    private ArrayList<Float> positionsToSpeedList(ArrayList<Location> positionList) {
+    private ArrayList<Float> positionsToSpeedList() {
         ArrayList<Float> constructedSpeedList = new ArrayList<>();  // Initialize resulting speed list.
-        for (int i = 1; i < positionList.size(); i++) {  // Compute speeds from distances.
-            constructedSpeedList.add((float)(positionList.get(i).distanceTo(positionList.get(i-1))/
-                    ((positionList.get(i).getElapsedRealtimeNanos() - positionList.get(i-1).getElapsedRealtimeNanos())*1.0e-9)));
+        for (int i = 1; i < this.positionList.size(); i++) {  // Compute speeds from distances.
+            constructedSpeedList.add((float)(this.positionList.get(i).distanceTo(this.positionList.get(i-1))/
+                    ((this.positionList.get(i).getElapsedRealtimeNanos() - this.positionList.get(i-1).getElapsedRealtimeNanos())*1.0e-9)));
         }
         return constructedSpeedList;
     }
