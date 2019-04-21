@@ -287,7 +287,11 @@ public class TrackerService extends Service {
     protected void startLocationUpdates() {
         // Check permissions.
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED || ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            // Start requesting location updates.
+
+            // Check if looper initialized and start requesting location updates.
+            if (Looper.myLooper() == null) {
+                Looper.prepare();
+            }
             this.mFusedLocationProviderClient.requestLocationUpdates(this.mLocationRequest, this.mLocationCallback, Looper.myLooper());
             this.mRequestingLocationUpdates = true;  // update receiving locations indicator.
         } else {
