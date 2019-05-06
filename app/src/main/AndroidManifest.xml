@@ -15,14 +15,20 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <activity
+            android:name=".ActiveWorkoutMapActivity"
+            android:exported="true"/>
+
         <activity
             android:name=".WorkoutDetailActivity"
             android:configChanges="layoutDirection|locale"
-            android:exported="true"/>
+            android:exported="true" />
+
         <activity
             android:name=".StopwatchActivity"
             android:configChanges="layoutDirection|locale"
-            android:exported="true"/>
+            android:exported="true" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -41,9 +47,9 @@
             android:exported="true"
             android:label="@string/title_activity_maps" />
 
-        <service android:name=".services.TrackerService" android:enabled="true"/>
-        
-
+        <service
+            android:name=".services.TrackerService"
+            android:enabled="true" />
     </application>
 
 </manifest>

@@ -45,4 +45,6 @@
     <string name="no">cancel</string>
     <string name="yes">confirm</string>
 
+    <!-- ActiveWorkoutMapActivity -->
+    <string name="button_activeworkoutmap_back_text">Back</string>
 </resources>
