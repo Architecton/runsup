@@ -3,21 +3,28 @@ package si.uni_lj.fri.pbd2019.runsup;
 import android.content.Intent;
 import android.content.res.Resources;
 import android.icu.text.DateFormat;
+import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 
 public class WorkoutDetailActivity extends AppCompatActivity {
 
     // ### PROPERTIES ###
+
+    // Tag of class.
+    public static final String TAG = WorkoutDetailActivity.class.getSimpleName();
 
     // resource used by the activity
     public static Resources resources;
@@ -29,6 +36,7 @@ public class WorkoutDetailActivity extends AppCompatActivity {
     private Button emailShareButton;
     private Button googlePlusShareButton;
     private Button twitterShareButton;
+    private Button displayWorkoutMapButton;
 
     // workout parameters
     private int sportActivity;
@@ -36,6 +44,8 @@ public class WorkoutDetailActivity extends AppCompatActivity {
     private double calories;
     private double distance;
     private double avgPace;
+
+    private ArrayList<ArrayList<Location>> positions;
 
     // Date when the activity ended
     private String dateEnd;
@@ -55,6 +65,8 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         this.setCalories(intent.getDoubleExtra("calories", 0.0));
         this.setDistance(intent.getDoubleExtra("distance", 0.0));
         this.setPace(intent.getDoubleExtra("pace", 0.0));
+        this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
+        Log.d(TAG, String.format("Positions list size == %d", positions.size()));
     }
 
     // onStart: method called when the activity UI becomes visible to the user.
@@ -69,6 +81,17 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         this.googlePlusShareButton = findViewById(R.id.button_workoutdetail_gplusshare);
         this.twitterShareButton = findViewById(R.id.button_workoutdetail_twittershare);
         this.confirmShareButton = findViewById(R.id.confirm_share_button);
+        this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
+
+        displayWorkoutMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Start MapsActivity and pass locations to it.
+                Intent workoutMapIntent = new Intent(WorkoutDetailActivity.this, MapsActivity.class);
+                workoutMapIntent.putExtra("finalPositionsList", positions);
+                WorkoutDetailActivity.this.startActivity(workoutMapIntent);
+            }
+        });
 
         // Set moment as end of workout.
         this.setActivityDate(this.dateEnd);  // Set date of end of activity.

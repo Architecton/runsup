@@ -18,4 +18,6 @@ public class Constant {
     public static final int STATE_CONTINUE = 3;
 
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 3273;
+
+    public static final int PAUSE_DIST_CHANGE_THRESH = 100;
 }

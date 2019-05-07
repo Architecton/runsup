@@ -15,9 +15,12 @@ import android.os.IBinder;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
@@ -161,7 +164,7 @@ public class StopwatchActivity extends AppCompatActivity {
         this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
 
         // ## INTENT FILTER INITIALIZATION ##
-        filter = new IntentFilter();
+        this.filter = new IntentFilter();
         this.filter.addAction(Constant.TICK);  // Register action.
         registerReceiver(receiver, filter);  // Register receiver.
         // ## INTENT FILTER INITIALIZATION ##
@@ -261,6 +264,22 @@ public class StopwatchActivity extends AppCompatActivity {
         this.stopwatchStartButton.setOnClickListener(pauseListener);
 
         this.state = Constant.STATE_RUNNING;  // Update state.
+
+
+        // TODO
+
+        TextView cl = findViewById(R.id.textview_stopwatch_calories);
+        cl.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Log.d(TAG, "Click");
+                // Initialize intent to start new activity and put info to display in extras.
+                Intent activeWorkoutMapIntent = new Intent(StopwatchActivity.this, ActiveWorkoutMapActivity.class);
+                StopwatchActivity.this.startActivity(activeWorkoutMapIntent);
+            }
+        });
+
+
     }
 
     // endWorkout: method used to end current workout.
@@ -292,7 +311,7 @@ public class StopwatchActivity extends AppCompatActivity {
                         workoutDetailsIntent.putExtra("distance", distance);
                         workoutDetailsIntent.putExtra("pace", paceAccumulator/updateCounter);
                         workoutDetailsIntent.putExtra("calories", calories);
-                        workoutDetailsIntent.putExtra("finalPositionList", positions);
+                        workoutDetailsIntent.putExtra("finalPositionsList", positions);
                         StopwatchActivity.this.startActivity(workoutDetailsIntent);
                     }
                 })

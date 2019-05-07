@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Binder;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -40,7 +41,6 @@ public class TrackerService extends Service {
     private final long MIN_TIME_BETWEEN_UPDATES = 3000;  // Minimum delta time between updates.
     private final long MIN_DISTANCE_CHANGE_BETWEEN_UPDATES = 10;  // Minimum delta distance between updates.
     private final long MIN_DIST_CHANGE = 2;  // Minimum distance between current and next location to store next location.
-    private final int PAUSE_DIST_CHANGE_THRESH = 100; // If during pause distance changed by more than this amount, discard.
 
     public static final String STATE_PREF_NAME = "state";
 
@@ -271,10 +271,18 @@ public class TrackerService extends Service {
                     // If previous location exists, compute speed in m/s.
                     if (mCurrentLocation != null) {
                         // If first measurement after pause and location changed by more than 100 meters, discard.
-                        if (firstMeasAfterPause && mCurrentLocation.distanceTo(nxtLocation) > PAUSE_DIST_CHANGE_THRESH) {
+                        if (firstMeasAfterPause && mCurrentLocation.distanceTo(nxtLocation) > Constant.PAUSE_DIST_CHANGE_THRESH) {
                             firstMeasAfterPause = false;
                         } else {
-                            firstMeasAfterPause = false;
+
+                            // If first measurement after pause and distance changed by less than
+                            // PAUSE_DIST_CHANGE_THRESH, add pause flag to location.
+                            if (firstMeasAfterPause) {
+                                firstMeasAfterPause = false;
+                                Bundle flags = new Bundle();
+                                flags.putByte("pauseFlag", (byte)1);
+                                nxtLocation.setExtras(flags);
+                            }
                             double delta_time = 1.0e-9 * (nxtLocation.getElapsedRealtimeNanos() - mCurrentLocation.getElapsedRealtimeNanos());
                             speedList.add((float) (mCurrentLocation.distanceTo(nxtLocation) / delta_time));  // Compute speed in m/s.
                             distanceAccumulator += mCurrentLocation.distanceTo(nxtLocation);  // Add distance to distance accumulator.
