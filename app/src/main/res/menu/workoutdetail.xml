@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/workoutdetail_menuitem_settings"
+        android:orderInCategory="100"
+        android:title="@string/all_actionsettings" />
+
+    <item
+        android:id="@+id/workoutdetail_menuitem_delete"
+        android:orderInCategory="100"
+        android:title="@string/all_actiondelete"/>
+
+</menu>

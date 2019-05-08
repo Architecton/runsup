@@ -1,25 +1,41 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
+import com.google.android.gms.maps.CameraUpdate;
+import com.google.android.gms.maps.CameraUpdateFactory;
+import com.google.android.gms.maps.GoogleMap;
+import com.google.android.gms.maps.OnMapReadyCallback;
+import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
+import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 
-public class WorkoutDetailActivity extends AppCompatActivity {
+
+
+public class WorkoutDetailActivity extends AppCompatActivity implements OnMapReadyCallback{
 
     // ### PROPERTIES ###
 
@@ -37,6 +53,7 @@ public class WorkoutDetailActivity extends AppCompatActivity {
     private Button googlePlusShareButton;
     private Button twitterShareButton;
     private Button displayWorkoutMapButton;
+    private GoogleMap mMap;
 
     // workout parameters
     private int sportActivity;
@@ -52,6 +69,8 @@ public class WorkoutDetailActivity extends AppCompatActivity {
 
     // ### /PROPERTIES ###
 
+
+
     // onCreate: method called when activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,7 +85,11 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         this.setDistance(intent.getDoubleExtra("distance", 0.0));
         this.setPace(intent.getDoubleExtra("pace", 0.0));
         this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
-        Log.d(TAG, String.format("Positions list size == %d", positions.size()));
+
+        // Obtain the SupportMapFragment and get notified when the map is ready to be used.
+        SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_workoutdetail_map);
+        mapFragment.getMapAsync(this);
     }
 
     // onStart: method called when the activity UI becomes visible to the user.
@@ -81,8 +104,10 @@ public class WorkoutDetailActivity extends AppCompatActivity {
         this.googlePlusShareButton = findViewById(R.id.button_workoutdetail_gplusshare);
         this.twitterShareButton = findViewById(R.id.button_workoutdetail_twittershare);
         this.confirmShareButton = findViewById(R.id.confirm_share_button);
-        this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
 
+        // TODO
+        // this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
+        /*
         displayWorkoutMapButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -92,6 +117,7 @@ public class WorkoutDetailActivity extends AppCompatActivity {
                 WorkoutDetailActivity.this.startActivity(workoutMapIntent);
             }
         });
+        */
 
         // Set moment as end of workout.
         this.setActivityDate(this.dateEnd);  // Set date of end of activity.
@@ -164,15 +190,116 @@ public class WorkoutDetailActivity extends AppCompatActivity {
 
     // ### /METHODS FOR FORMATTING THE UI ###
 
+    // called when map is ready.
+    @Override
+    public void onMapReady(GoogleMap map) {
+
+        // Initialize map instance.
+        this.mMap = map;
+        this.mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+
+                // Start MapsActivity and pass locations to it.
+                Intent workoutMapIntent = new Intent(WorkoutDetailActivity.this, MapsActivity.class);
+                workoutMapIntent.putExtra("finalPositionsList", positions);
+                WorkoutDetailActivity.this.startActivity(workoutMapIntent);
+            }
+        });
+
+        // Get last list of locations.
+        ArrayList<Location> positionsLast = positions.get(positions.size()-1);
+
+        // Get starting and end positions.
+        Location startPos = positionsLast.get(positionsLast.size()-1);
+        Location endPos = positionsLast.get(0);
+
+        // Mark starting and end position.
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(startPos.getLatitude(), startPos.getLongitude()))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start_small)));
+
+        mMap.addMarker(new MarkerOptions()
+                .position(new LatLng(endPos.getLatitude(), endPos.getLongitude()))
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag_small)));
+
+
+        // Create route trail.
+        for (int i = 1; i < positionsLast.size(); i++) {
+            mMap.addPolyline(new PolylineOptions()
+                    .add(
+                            new LatLng(positionsLast.get(i-1).getLatitude(),
+                                    positionsLast.get(i-1).getLongitude()),
+                            new LatLng(positionsLast.get(i).getLatitude(),
+                                    positionsLast.get(i).getLongitude()))
+                    .width(5.0f)
+                    .color(Color.RED));
+        }
+
+        // Zoom enough to see start and end of route.
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder.include(new LatLng(startPos.getLatitude(), startPos.getLongitude()));
+        builder.include(new LatLng(endPos.getLatitude(), endPos.getLongitude()));
+        LatLngBounds bounds = builder.build();
+        int width = getResources().getDisplayMetrics().widthPixels;
+        int height = getResources().getDisplayMetrics().heightPixels / 5;
+        int padding = (int) (width * 0.1);
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+        mMap.animateCamera(cu);
+    }
+
+
     // onKeyDown: override default action when user presses the back button
     // Present stopwatch in initial state.
     @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event)  {
-        if (keyCode == KeyEvent.KEYCODE_BACK ) {
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent stopwatchActivityIntent = new Intent(WorkoutDetailActivity.this, StopwatchActivity.class);
             WorkoutDetailActivity.this.startActivity(stopwatchActivityIntent);
             return true;
         }
         return super.onKeyDown(keyCode, event);
     }
+
+    // onCreateOptionsMenu: called when options menu is created
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.workoutdetail, menu);
+        return true;
+    }
+
+
+    // onOptionsItemSelected: Handle action bar item selection
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+
+        // Get id of selected item.
+        int id = item.getItemId();
+
+        // Handle selection.
+        if (id == R.id.workoutdetail_menuitem_settings) {
+            // Start settings activity
+
+            // TODO
+            // Intent settingsIntent = new Intent(WorkoutDetailActivity.this, SettingsActivity.class);
+            // WorkoutDetailActivity.this.startActivity(settingsIntent);
+        } else if (id == R.id.workoutdetail_menuitem_delete) {
+
+            // Prompt user to confirm intention to delete activity.
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete Workout")
+                    .setMessage("Are you sure you want to delete this workout? You cannot undo this action.")
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            // TODO delete workout and destroy activity.
+                        }
+                    })
+                    .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+        }
+        return super.onOptionsItemSelected(item);
+    }
 }
+

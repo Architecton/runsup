@@ -21,34 +21,28 @@ import android.widget.TextView;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
-public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+import org.jetbrains.annotations.NotNull;
 
-    // Default shown fragment after the app starts must be StopwatchFragment
+
+public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+
+    // ### PROPERTIES ###
     public static final String TAG = MainActivity.class.getSimpleName();
     private ImageView userImage;
     private TextView userName;
     private Uri userImageUri;
     private String userFullName;
+    // ### /PROPERTIES ###
 
 
     // onCreate: method called when the activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);  // Call method of superclass.
+        super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_main);  // Set layout content.
         Toolbar toolbar = findViewById(R.id.toolbar);  // Get toolbar.
         setSupportActionBar(toolbar);  // Get support action for toolbar.
-        FloatingActionButton fab = findViewById(R.id.fab);  // Get floating action button.
-
-        // TODO
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
 
         // Initialization of drawer.
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
@@ -63,12 +57,15 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+
+    // onStart: method called when activity becomes visible to user.
     @Override
     protected void onStart() {
         super.onStart();
+
+        // Check if user signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
-            Log.d(TAG, "Last signed in account found");
 
             // Get user's photo url and user's full name.
             this.userImageUri = account.getPhotoUrl();
@@ -79,6 +76,8 @@ public class MainActivity extends AppCompatActivity
     // onBackPressed: method called when back button pressed.
     @Override
     public void onBackPressed() {
+
+        // If drawer is open, close drawer.
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
@@ -87,9 +86,11 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
+
     // onCreateOptionsMenu: method called when options menu created.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.main, menu);
 
@@ -126,27 +127,28 @@ public class MainActivity extends AppCompatActivity
     }
 
 
-    // onOptionsItemSelected: Handle action bar item
+    // onOptionsItemSelected: Handle action bar item selection
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+
+        // Get id of clicked item.
         int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
+        // If user clicked on settings...
         if (id == R.id.action_settings) {
             return true;
         }
 
-        return super.onOptionsItemSelected(item);  // Call method of superclass.
+        return super.onOptionsItemSelected(item);
     }
 
 
     // onNavigationItemSelected: handle navigation view item clicks
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NotNull MenuItem item) {
+
+        // Get id of selected item.
         int id = item.getItemId();
 
         // Switch on selected item's id.
@@ -170,6 +172,7 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    // onPause: method called when activity paused.
     @Override
     public void onPause() {
         super.onPause();  // Call method of superclass.

@@ -11,9 +11,12 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.v7.app.AppCompatActivity;
-import android.util.Log;
+import android.view.Gravity;
+import android.view.View;
 import android.view.animation.Interpolator;
 import android.view.animation.LinearInterpolator;
+import android.widget.Button;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -36,59 +39,74 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
     private GoogleMap mMap;
     private IntentFilter filter;
     private Marker currentMarker;
+    private LatLng currentLocation;
+    private boolean lockPosition;
+
+    private final int REDRAW_INTERVAL = 15;
 
 
     // ## BROADCAST RECEIVER ##
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
 
-        // TODO do not redraw path every time.
+        int receiveCounter = 0;
 
         /* Anonymous BroadcastReceiver instance that receives commands */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Update from service received.");
+
+            // Increment counter of received broadcasts.
+            receiveCounter += 1;
 
             // Save received ArrayList of locations.
-            ArrayList<Location> positions = intent.<Location>getParcelableArrayListExtra("positionList");
+            ArrayList<Location> positions = intent.getParcelableArrayListExtra("positionList");
 
-            // Draw trail.
-            for (int i = 1; i < positions.size(); i++) {
-                mMap.addPolyline(new PolylineOptions()
-                        .add(new LatLng(positions.get(i-1).getLatitude(), positions.get(i-1).getLongitude()),
-                                new LatLng(positions.get(i).getLatitude(), positions.get(i).getLongitude()))
-                        .width(5.0f)
-                        .color(Color.RED));
+            // Draw trail
+            if (receiveCounter % REDRAW_INTERVAL == 0) {
+                for (int i = 1; i < positions.size(); i++) {
+                    mMap.addPolyline(new PolylineOptions()
+                            .add(
+                                    new LatLng(positions.get(i-1).getLatitude(),
+                                            positions.get(i-1).getLongitude()),
+                                    new LatLng(positions.get(i).getLatitude(),
+                                            positions.get(i).getLongitude()))
+                            .width(5.0f)
+                            .color(Color.RED));
+                }
             }
 
             // Get current location and set marker
-            LatLng currentLocation = new LatLng(positions.get(positions.size()-1).getLatitude(), positions.get(positions.size()-1).getLongitude());
+            currentLocation = new LatLng(positions.get(positions.size()-1).getLatitude(), positions.get(positions.size()-1).getLongitude());
 
-            // Add marker at user's current location.
+            // Add marker at user's current location (remove previous one if it exists).
             if (currentMarker != null) {
-                currentMarker.remove();
-                currentMarker = null;
+                animateMarker(currentMarker, currentLocation, false);
+            } else {
+                currentMarker = mMap.addMarker(new MarkerOptions()
+                        .position(currentLocation)
+                        .title("Your Current Location"));
             }
-            currentMarker = mMap.addMarker(new MarkerOptions()
-                    .position(currentLocation)
-                    .title("Your Current Location"));
 
+            if (lockPosition) {
 
-            // Move camera to current location of user. TODO zoom only for first received broadcast.
-            CameraUpdate center=
-                    CameraUpdateFactory.newLatLng(currentLocation);
-            CameraUpdate zoom=CameraUpdateFactory.zoomTo(15f);
+                // Move camera to current location of user.
+                CameraUpdate center = CameraUpdateFactory.newLatLng(currentLocation);
+                CameraUpdate zoom = CameraUpdateFactory.zoomTo(15f);
 
-            mMap.moveCamera(center);
-            mMap.animateCamera(zoom);
+                mMap.moveCamera(center);
+                mMap.animateCamera(zoom);
 
+            }
         }
     };
+
+    private boolean receiverRegistered;
+
     // ## /BROADCAST RECEIVER ##
 
 
     // ### /PROPERTIES ###
 
-    // called when activity created.
+    // onCreate: called when activity created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -102,22 +120,97 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         // ## INTENT FILTER INITIALIZATION ##
         this.filter = new IntentFilter();
         this.filter.addAction(Constant.TICK);  // Register action.
-        registerReceiver(receiver, filter);  // Register receiver.
+        registerReceiver(this.receiver, this.filter);  // Register receiver.
+        this.receiverRegistered = true;
         // ## INTENT FILTER INITIALIZATION ##
+
+        // Lock camera position onto current location marker.
+        this.lockPosition = true;
+
+        // Display toast with short instructions on position lock.
+        Toast toast = Toast.makeText(this, getString(R.string.workoutmap_toast_instructions), Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+    }
+
+    // onStart: called when activity becomes visible to user.
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+        // Set on-click listener to back button.
+        Button backButton = findViewById(R.id.button_activeworkoutmap_back);
+        backButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
     }
 
 
-    // called when map is ready.
+    // onBackPressed: called when the back button is pressed.
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+
+        // If broadcast receiver registered, unregister it.
+        if (this.receiverRegistered) {
+            unregisterReceiver(this.receiver);
+            this.receiverRegistered = false;
+        }
+    }
+
+    // onPause: called when the activity is paused.
+    @Override
+    protected void onPause() {
+        super.onPause();
+
+        // If broadcast receiver registered, unregister it.
+        if (this.receiverRegistered) {
+            unregisterReceiver(this.receiver);
+            this.receiverRegistered = false;
+        }
+    }
+
+    // onResume: called when the activity is resumed.
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        // If broadcast receiver not registered, register it.
+        if (!this.receiverRegistered) {
+            registerReceiver(this.receiver, this.filter);
+            this.receiverRegistered = true;
+        }
+    }
+
+
+    // onRestart: called when activity restarted.
+    @Override
+    protected void onRestart() {
+        super.onRestart();
+
+        // If broadcast receiver not registered, register it.
+        if (!this.receiverRegistered) {
+            registerReceiver(this.receiver, this.filter);
+            this.receiverRegistered = true;
+        }
+    }
+
+    // onMapReady: called when map is ready.
     @Override
     public void onMapReady(GoogleMap map) {
+        // Initialize map instance.
+        this.mMap = map;
 
-        this.mMap = map;  // initialize map instance.
-        Log.d(TAG, "onMapReady called");
-        Marker testMarker = map.addMarker(new MarkerOptions()
-                .position(new LatLng(0, 0))
-                .title("Marker"));
-        LatLng testLatLng = new LatLng(39.0392, 125.7625);
-        animateMarker(testMarker, testLatLng, false);
+        // set on-click listener - when user clicks on map, toggle location lock.
+        this.mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
+            @Override
+            public void onMapClick(LatLng latLng) {
+                lockPosition = !lockPosition;
+            }
+        });
     }
 
 

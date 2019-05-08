@@ -12,22 +12,23 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
 
 import java.util.ArrayList;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
 
-public class StopwatchActivity extends AppCompatActivity {
+public class StopwatchActivity extends Fragment {
 
 
 
@@ -50,25 +51,24 @@ public class StopwatchActivity extends AppCompatActivity {
 
     // State of the stopwatch (see Constant class for values)
     private int state;
-    Context context = this;  // Context of instance
 
     // buttons for starting/pausing the workout and for ending the workout
-    Button stopwatchStartButton;
-    Button endWorkoutButton;
-    Button toggleSportActivityButton;
+    private Button stopwatchStartButton;
+    private Button endWorkoutButton;
+    private Button toggleSportActivityButton;
 
 
     // ## class level listeners ##
 
     View.OnClickListener pauseListener = new View.OnClickListener() {
         public void onClick(View v) {  // callback method for when the button is pressed
-            pauseStopwatch(v);
+            pauseStopwatch();
         }
     };
 
     View.OnClickListener continueListener = new View.OnClickListener() {
         public void onClick(View v) {
-            continueStopwatch(v);
+            continueStopwatch();
         }
     };
 
@@ -101,31 +101,33 @@ public class StopwatchActivity extends AppCompatActivity {
             sportActivity = intent.getIntExtra("sportActivity", -1);
         }
     };
+
+    private boolean receiverRegistered; // TODO
+
     // ## /BROADCAST RECEIVER ##
 
 
     // ### /PROPERTIES ###
 
 
-
-
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        return inflater.inflate(R.layout.activity_stopwatch, parent, false);
+    }
 
     // oncCreate: method called when the activity is created
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);  // Call onCreate of the superclass.
-
-        setContentView(R.layout.activity_stopwatch);  // Set layout for UI.
-
+    public void onViewCreated(View view, Bundle savedInstanceState) {
         // Initialize buttons
-        this.stopwatchStartButton = findViewById(R.id.button_stopwatch_start);
-        this.endWorkoutButton = findViewById(R.id.button_stopwatch_endworkout);
-        this.toggleSportActivityButton = findViewById(R.id.button_stopwatch_selectsport);
+        this.stopwatchStartButton = view.findViewById(R.id.button_stopwatch_start);
+        this.endWorkoutButton = view.findViewById(R.id.button_stopwatch_endworkout);
+        this.toggleSportActivityButton = view.findViewById(R.id.button_stopwatch_selectsport);
 
         // set listener on button to listen for workout start.
         this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {  // callback method for when the button is pressed
-                startStopwatch(v);
+                startStopwatch();
             }
         });
 
@@ -135,7 +137,7 @@ public class StopwatchActivity extends AppCompatActivity {
                 if (state == Constant.STATE_STOPPED) {
                     toggleSportActivity();
                 } else {
-                    new AlertDialog.Builder(context)
+                    new AlertDialog.Builder(getContext())
                             .setTitle("Change Sport Activity")
                             .setMessage("You cannot change the sport activity while a workout is in progress!")
 
@@ -152,22 +154,23 @@ public class StopwatchActivity extends AppCompatActivity {
 
 
         // Check for location access permissions.
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
         }
 
         // property initializations
-        this.positions = new ArrayList<>();  // initialize list of positions lists.
-        this.paceAccumulator = 0;  // Initialize pace accumulator;
-        this.updateCounter = 0;  // Initialize counter of data updates.
+        this.positions = new ArrayList<>();     // initialize list of positions lists.
+        this.paceAccumulator = 0;               // Initialize pace accumulator;
+        this.updateCounter = 0;                 // Initialize counter of data updates.
         this.state = Constant.STATE_STOPPED;
         this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
 
-        // ## INTENT FILTER INITIALIZATION ##
+        // ## INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
         this.filter = new IntentFilter();
-        this.filter.addAction(Constant.TICK);  // Register action.
-        registerReceiver(receiver, filter);  // Register receiver.
-        // ## INTENT FILTER INITIALIZATION ##
+        this.filter.addAction(Constant.TICK);              // Register action.
+        getActivity().registerReceiver(receiver, filter);  // Register receiver.
+        this.receiverRegistered = true;
+        // ## /INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
 
 
         // Create a new service connection.
@@ -182,12 +185,12 @@ public class StopwatchActivity extends AppCompatActivity {
             // callback that is called when the service is disconnected.
             public void onServiceDisconnected(ComponentName name) {
                 bound = false; // Set bound indicator to false.
-                unregisterReceiver(receiver);
+                getActivity().unregisterReceiver(receiver);
             }
         };
 
         // Bind service to activity.
-        bindService(new Intent(this, TrackerService.class), sConn, BIND_AUTO_CREATE);
+        getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
         this.bound = true;  // Set bound indicator.
     }
 
@@ -195,21 +198,27 @@ public class StopwatchActivity extends AppCompatActivity {
     // onPause: method run when the activity is paused.
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause called.");
         super.onPause();
         // Check if workout running.
         if (this.state == Constant.STATE_STOPPED || this.state == Constant.STATE_PAUSED) {
             if (this.bound) {
-                unbindService(sConn);
+                getActivity().unbindService(sConn);
                 this.bound = false;
-                stopService(new Intent(StopwatchActivity.this, TrackerService.class));
-                // unregisterReceiver(receiver); // TODO
+                getActivity().stopService(new Intent(getContext(), TrackerService.class));
+            }
+            // If receiver registered, unregister.
+            if (this.receiverRegistered) {
+                getActivity().unregisterReceiver(this.receiver);
+                this.receiverRegistered = false;
             }
         }
     }
 
     // onResume: method run when the activity is resumed.
     @Override
-    protected void onResume() {
+    public void onResume() {
+        Log.d(TAG, "onResume called.");
         super.onResume();  // Call onResume method of superclass.
 
         // rebind click listeners according to state.
@@ -229,20 +238,32 @@ public class StopwatchActivity extends AppCompatActivity {
         // If service not bound, bind it.
         if (!this.bound) {
             // Bind service to activity.
-            bindService(new Intent(this, TrackerService.class), sConn, BIND_AUTO_CREATE);
-            registerReceiver(receiver, filter);
+            getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
+            getActivity().registerReceiver(receiver, filter);
+        }
+
+        // If receiver not registered, register.
+        if (!this.receiverRegistered) {
+            getContext().registerReceiver(this.receiver, this.filter);
+            this.receiverRegistered = true;
         }
     }
 
     // onDestroy: method called when the activity is destoryed.
     @Override
-    protected void onDestroy() {
+    public void onDestroy() {
+        Log.d(TAG, "onDestroy called.");
         super.onDestroy();
         if (this.bound) {  // If service still bounded, unbind.
-            unbindService(sConn);
+            getActivity().unbindService(sConn);
             this.bound = false;
-            stopService(new Intent(StopwatchActivity.this, TrackerService.class));
-            unregisterReceiver(receiver);
+            getActivity().stopService(new Intent(getContext(), TrackerService.class));
+            getActivity().unregisterReceiver(receiver);
+        }
+
+        // If receiver not registered, register.
+        if (this.receiverRegistered) {
+            getActivity().registerReceiver(this.receiver, this.filter);
         }
 
     }
@@ -250,62 +271,45 @@ public class StopwatchActivity extends AppCompatActivity {
     // ### METHODS FOR CONTROLLING THE WORKOUT STATE ###
 
     // startStopwatch: method used to start the workout
-    public void startStopwatch(final View view) {
+    public void startStopwatch() {
 
         // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.COMMAND_START
-        // this.sendBroadcast(new Intent(Constant.COMMAND_START));
-        Intent startIntent = new Intent(this, TrackerService.class);
+        Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_START);
         startIntent.putExtra("sportActivity", this.sportActivity);
-        this.startService(startIntent);
+        getActivity().startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
         // set listener to button with id button_stopwatch_start - listen for pause.
         this.stopwatchStartButton.setOnClickListener(pauseListener);
 
         this.state = Constant.STATE_RUNNING;  // Update state.
-
-
-        // TODO
-
-        TextView cl = findViewById(R.id.textview_stopwatch_calories);
-        cl.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "Click");
-                // Initialize intent to start new activity and put info to display in extras.
-                Intent activeWorkoutMapIntent = new Intent(StopwatchActivity.this, ActiveWorkoutMapActivity.class);
-                StopwatchActivity.this.startActivity(activeWorkoutMapIntent);
-            }
-        });
-
-
     }
 
     // endWorkout: method used to end current workout.
     public void endWorkout() {
 
         // Prompt user to confirm decision to end workout.
-        new AlertDialog.Builder(this)
+        new AlertDialog.Builder(getContext())
                 .setTitle("Stop Workout")
                 .setMessage("Are you sure you want to end this workout?")
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
                         // Initialize intent for starting the service.
-                        Intent startIntent = new Intent(context, TrackerService.class);
+                        Intent startIntent = new Intent(getContext(), TrackerService.class);
                         startIntent.setAction(Constant.COMMAND_STOP);  // Set action.
-                        startService(startIntent);
+                        getContext().startService(startIntent);
                         if (bound) {  // If service still bounded, unbind.
-                            unbindService(sConn);
+                            getContext().unbindService(sConn);
                             bound = false;  // Update bound indicator.
-                            stopService(new Intent(StopwatchActivity.this, TrackerService.class));
+                            getContext().stopService(new Intent(getContext(), TrackerService.class));
                         }
 
                         state = Constant.STATE_STOPPED;  // Update state.
 
                         // Initialize intent to start new activity and put info to display in extras.
-                        Intent workoutDetailsIntent = new Intent(StopwatchActivity.this, WorkoutDetailActivity.class);
+                        Intent workoutDetailsIntent = new Intent(getContext(), WorkoutDetailActivity.class);
                         workoutDetailsIntent.putExtra("sportActivity", sportActivity); //Optional parameters
                         workoutDetailsIntent.putExtra("duration", duration);
                         workoutDetailsIntent.putExtra("distance", distance);
@@ -321,12 +325,12 @@ public class StopwatchActivity extends AppCompatActivity {
     }
 
     // pauseStopWatch: method used to pause the stopwatch.
-    public void pauseStopwatch(View view) {
+    public void pauseStopwatch() {
 
         // Initialize the intent for starting the service.
-        Intent startIntent = new Intent(this, TrackerService.class);
+        Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_PAUSE);
-        startService(startIntent);
+        getActivity().startService(startIntent);
 
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_PAUSED);
@@ -342,17 +346,17 @@ public class StopwatchActivity extends AppCompatActivity {
     }
 
     // continueStopwatch: method used to resume the workout paused.
-    public void continueStopwatch(View view) {
+    public void continueStopwatch() {
 
         // Initialize the intent for starting the service.
-        Intent startIntent = new Intent(this, TrackerService.class);
+        Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_CONTINUE);
         if (this.positions.size() >= 1) {
             startIntent.putParcelableArrayListExtra("positions", this.positions.get(this.positions.size()-1));
         } else {
             startIntent.putParcelableArrayListExtra("positions", new ArrayList<Location>());
         }
-        startService(startIntent);  // Start service with intent.
+        getActivity().startService(startIntent);  // Start service with intent.
 
         // Set text on start button.
         this.updateStartButtonText(Constant.STATE_RUNNING);
@@ -375,28 +379,28 @@ public class StopwatchActivity extends AppCompatActivity {
     // updateDuration: update the workout duration display.
     private void updateDuration(long duration) {
         this.duration = duration;
-        TextView durationText = findViewById(R.id.textview_stopwatch_duration);
+        TextView durationText = getActivity().findViewById(R.id.textview_stopwatch_duration);
         durationText.setText(MainHelper.formatDuration(duration));
     }
 
     // updateDistance: update the workout distance display.
     private void updateDistance(double dist) {
        this.distance = dist;
-       TextView distanceText = findViewById(R.id.textview_stopwatch_distance);
+       TextView distanceText = getActivity().findViewById(R.id.textview_stopwatch_distance);
        distanceText.setText(MainHelper.formatDistance(dist));
     }
 
     // updatePace: update the workout pace display.
     private void updatePace(double pace) {
         this.paceAccumulator += pace;
-        TextView paceText = findViewById(R.id.textview_stopwatch_pace);
+        TextView paceText = getActivity().findViewById(R.id.textview_stopwatch_pace);
         paceText.setText(MainHelper.formatPace(pace));
     }
 
     // updateCalories: update the workout calories display.
     private void updateCalories(double calories) {
         this.calories = calories;
-        TextView caloriesText = findViewById(R.id.textview_stopwatch_calories);
+        TextView caloriesText = getActivity().findViewById(R.id.textview_stopwatch_calories);
         caloriesText.setText(MainHelper.formatCalories(calories));
     }
 

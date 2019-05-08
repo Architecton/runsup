@@ -11,6 +11,7 @@ import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
+import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -20,31 +21,46 @@ import java.util.ArrayList;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
-    // Get list of locations from stopwatch activity and use them to draw routes.
+    // ### PROPERTIES ###
 
     public static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
     private ArrayList<ArrayList<Location>> positions;
 
+    // ### /PROPERTIES ###
+
+
+    // onCreate: called when activity created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        // Set content of activity.
         setContentView(R.layout.activity_maps);
+
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_maps_map);
         mapFragment.getMapAsync(this);
 
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
+
+        // Get list of lists of positions from intent.
         this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
     }
 
 
-
+    // create_trail: create line that connects all locations.
     private void create_trail(ArrayList<Location> positionsLast) {
+
+        // initialize counter of pauses and breaks (used to enumerate markers)
         int pauseCounter = 1;
         int breakCounter = 1;
+
+        // Go over locations in final list of locations.
         for (int i = 1; i < positionsLast.size(); i++) {
+
+            // If change in position less than 100 meters, add trail segment to current session.
             if (positionsLast.get(i-1).distanceTo(positionsLast.get(i)) < Constant.PAUSE_DIST_CHANGE_THRESH) {
                 mMap.addPolyline(new PolylineOptions()
                         .add(new LatLng(positionsLast.get(i-1).getLatitude(), positionsLast.get(i-1).getLongitude()),
@@ -62,8 +78,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             .title(String.format("Break %d", breakCounter)));
                     breakCounter += 1;  // Increment breaks counter.
                 }
-
             } else {
+                // If change in positions more than 100 meters, mark new session.
 
                 // Add marker to end of previous session (before pausing).
                 mMap.addMarker(new MarkerOptions()
@@ -74,10 +90,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(positionsLast.get(i).getLatitude(), positionsLast.get(i).getLongitude()))
                         .title(String.format("Continue %d", pauseCounter)));
-                pauseCounter += 1;
+
+                pauseCounter += 1;  // Increment pause counter.
             }
         }
+
+        // Get start and end position of route.
+        LatLng startPos = new LatLng(positionsLast.get(positionsLast.size()-1).getLatitude(),
+                positionsLast.get(positionsLast.size()-1).getLongitude());
+
+        LatLng endPos = new LatLng(positionsLast.get(0).getLatitude(),
+                positionsLast.get(0).getLongitude());
+
+
+        // Mark start and finish of workout.
+        mMap.addMarker(new MarkerOptions()
+                .position(startPos)
+                .title("Start of Workout")
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start)));
+
+        mMap.addMarker(new MarkerOptions()
+                .position(endPos)
+                .title("End of Workout")
+                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag)));
+
     }
+
 
     // onMapReady: callback executed when the map is ready.
     @Override

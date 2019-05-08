@@ -20,11 +20,11 @@ public class LoginActivity extends AppCompatActivity {
     // ### PROPERTIES ###
 
     public static final String TAG  = LoginActivity.class.getSimpleName();
-    private SharedPreferences preferences;
-    public static final String STATE_PREF_NAME = "state";
-    private long userId;  // user's id
-    private GoogleSignInClient mGoogleSignInClient;  // Google sign in client
-    static final int RC_SIGN_IN = 1;  // request code
+    private SharedPreferences preferences;                                  // shared preferences
+    public static final String STATE_PREF_NAME = "state";                   // name of preferences state
+    private long userId;                                                    // user's id
+    private GoogleSignInClient mGoogleSignInClient;                         // Google sign in client
+    static final int RC_SIGN_IN = 1;                                        // request code for intent
 
     // ### /PROPERTIES ###
 
@@ -33,6 +33,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_login);  // Set content view.
         this.preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);  // Get shared preferences.
 
@@ -46,6 +47,7 @@ public class LoginActivity extends AppCompatActivity {
             // Render layout of logged in user.
 
         } else {
+
             // User is not logged in.
             GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                     .requestEmail()
@@ -70,12 +72,9 @@ public class LoginActivity extends AppCompatActivity {
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);  // Call method of superclass.
 
-        Log.d(TAG, "onActivityResultCalled");
-
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
 
-            Log.d(TAG, "onActivityResult with requestCode == RC_SIGN_IN called");
             // The Task returned from this call is always completed, no need to attach a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
@@ -86,7 +85,6 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);  // Get account from results.
-            Log.d(TAG, "handleSignInResult called");
             // Signed in successfully, show authenticated UI.
             updateUI(account);
         } catch (ApiException e) {
@@ -97,6 +95,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    // onStart: method called when the activity is started.
     @Override
     protected void onStart() {
         super.onStart();
@@ -107,6 +107,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+
+    // updateUI: update user interface depending on whether user is signed in
     private void updateUI(GoogleSignInAccount account) {
         // TODO
     }
