@@ -18,6 +18,9 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -25,6 +28,7 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import si.uni_lj.fri.pbd2019.runsup.ActiveWorkoutMapActivity;
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
@@ -58,7 +62,8 @@ public class StopwatchFragment extends Fragment {
     // buttons for starting/pausing the workout and for ending the workout
     private Button stopwatchStartButton;
     private Button endWorkoutButton;
-    private Button toggleSportActivityButton;
+    private Button showMapButton;
+    private Button sportActivityButton;
 
 
     // ## class level listeners ##
@@ -105,7 +110,8 @@ public class StopwatchFragment extends Fragment {
         }
     };
 
-    private boolean receiverRegistered; // TODO
+    // Flag that indicates whether receiver is registered.
+    private boolean receiverRegistered;
 
     // ## /BROADCAST RECEIVER ##
 
@@ -116,7 +122,25 @@ public class StopwatchFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        setHasOptionsMenu(true);
         return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
+    }
+
+
+    // confirmSportActivitySelection: prompt user to confirm sport activity selection and apply selection
+    // if user confirmed.
+    private void confirmSportActivitySelection(final int sportActivityCode) {
+        new AlertDialog.Builder(getContext())
+                .setTitle("Change Sport Activity")
+                .setMessage(String.format("Are you sure you want to change the sport activity to %s?", MainHelper.getSportActivityName(sportActivityCode)))
+                .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                    public void onClick(DialogInterface dialog, int which) {
+                        setSportActivity(sportActivityCode);  // Apply selection.
+                    }
+                })
+                .setNegativeButton(R.string.cancel, null)  // Do nothing if user selects cancel.
+                .setIcon(android.R.drawable.ic_dialog_alert)
+                .show();
     }
 
     // oncCreate: method called when the activity is created
@@ -125,54 +149,52 @@ public class StopwatchFragment extends Fragment {
         // Initialize buttons
         this.stopwatchStartButton = view.findViewById(R.id.button_stopwatch_start);
         this.endWorkoutButton = view.findViewById(R.id.button_stopwatch_endworkout);
-        this.toggleSportActivityButton = view.findViewById(R.id.button_stopwatch_selectsport);
+        this.showMapButton = view.findViewById(R.id.button_stopwatch_activeworkout);
+        this.sportActivityButton = view.findViewById(R.id.button_stopwatch_selectsport);
 
-        // set listener on button to listen for workout start.
+        // Set listener on button to listen for workout start.
         this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {  // callback method for when the button is pressed
                 startStopwatch();
             }
         });
 
-        this.toggleSportActivityButton.setOnClickListener(new View.OnClickListener() {
+        // Set listener on button that is used to change the current sport activity.
+        this.sportActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (state == Constant.STATE_STOPPED) {
-                    // setup the alert builder
-                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-                            .setTitle("Select Activity")
-                            .setItems(Constant.activities, new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    switch (which) {
-                                        case 0:
-                                            Log.d(TAG, String.format("Selected %s", Constant.activities[0]));
-                                            setSportActivity(0);
-                                            break;
-                                        case 1:
-                                            Log.d(TAG, String.format("Selected %s", Constant.activities[1]));
-                                            setSportActivity(1);
-                                            break;
-                                        case 2:
-                                            Log.d(TAG, String.format("Selected %s", Constant.activities[2]));
-                                            setSportActivity(2);
-                                            break;
-                                    }
-
+                // setup the alert builder
+                AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                        .setTitle("Select Activity")
+                        .setItems(Constant.activities, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                switch (which) {
+                                    case 0:
+                                        confirmSportActivitySelection(0);
+                                        break;
+                                    case 1:
+                                        confirmSportActivitySelection(1);
+                                        break;
+                                    case 2:
+                                        confirmSportActivitySelection(2);
+                                        break;
                                 }
-                            });
-                    AlertDialog dialog = builder.create();
-                    dialog.show();
-                } else {
-                    new AlertDialog.Builder(getContext())
-                            .setTitle("Change Sport Activity")
-                            .setMessage("You cannot change the sport activity while a workout is in progress!")
+                            }
+                        });
+                AlertDialog dialog = builder.create();
+                dialog.show();
+            }
+        });
 
-                            // A null listener allows the button to dismiss the dialog and take no further action.
-                            .setPositiveButton(android.R.string.yes, null)
-                            .setIcon(android.R.drawable.ic_dialog_alert)
-                            .show();
-                }
+        // Set listener on button to listen for requests to go to start ActiveWorkoutMapActivity.
+        this.showMapButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+                // Start ActiveWorkoutMapActivity.
+                Intent activeMapIntent = new Intent(getContext(), ActiveWorkoutMapActivity.class);
+                StopwatchFragment.this.startActivity(activeMapIntent);
             }
         });
 
@@ -225,7 +247,6 @@ public class StopwatchFragment extends Fragment {
     // onPause: method run when the activity is paused.
     @Override
     public void onPause() {
-        Log.d(TAG, "onPause called.");
         super.onPause();
         // Check if workout running.
         if (this.state == Constant.STATE_STOPPED || this.state == Constant.STATE_PAUSED) {
@@ -245,7 +266,6 @@ public class StopwatchFragment extends Fragment {
     // onResume: method run when the activity is resumed.
     @Override
     public void onResume() {
-        Log.d(TAG, "onResume called.");
         super.onResume();  // Call onResume method of superclass.
 
         // rebind click listeners according to state.
@@ -279,7 +299,6 @@ public class StopwatchFragment extends Fragment {
     // onDestroy: method called when the activity is destoryed.
     @Override
     public void onDestroy() {
-        Log.d(TAG, "onDestroy called.");
         super.onDestroy();
         if (this.bound) {  // If service still bounded, unbind.
             getActivity().unbindService(sConn);
@@ -335,7 +354,7 @@ public class StopwatchFragment extends Fragment {
 
                         state = Constant.STATE_STOPPED;  // Update state.
 
-                        // Initialize intent to start new activity and put info to display in extras.
+                        // Initialize intent to start new activity and put additional data in extras.
                         Intent workoutDetailsIntent = new Intent(getContext(), WorkoutDetailActivity.class);
                         workoutDetailsIntent.putExtra("sportActivity", sportActivity); //Optional parameters
                         workoutDetailsIntent.putExtra("duration", duration);
@@ -343,6 +362,7 @@ public class StopwatchFragment extends Fragment {
                         workoutDetailsIntent.putExtra("pace", paceAccumulator/updateCounter);
                         workoutDetailsIntent.putExtra("calories", calories);
                         workoutDetailsIntent.putExtra("finalPositionsList", positions);
+                        workoutDetailsIntent.putExtra("workoutId", 129123);  // TODO
                         StopwatchFragment.this.startActivity(workoutDetailsIntent);
                     }
                 })
@@ -365,7 +385,8 @@ public class StopwatchFragment extends Fragment {
         // set listener to button to listen for commands to continue workout.
         this.stopwatchStartButton.setOnClickListener(continueListener);
 
-        // Make button for ending workout visible.
+        // Make button for showing map invisible and button for ending workout visible.
+        this.showMapButton.setVisibility(View.INVISIBLE);
         this.endWorkoutButton.setVisibility(View.VISIBLE);
 
         this.state = Constant.STATE_PAUSED;  // Update state.
@@ -391,8 +412,9 @@ public class StopwatchFragment extends Fragment {
         // set listener to button to listen for commands to pause the workout.
         this.stopwatchStartButton.setOnClickListener(pauseListener);
 
-        // Make button for ending workout invisible.
+        // Make button for ending workout invisible and button for showing map visible.
         this.endWorkoutButton.setVisibility(View.INVISIBLE);
+        this.showMapButton.setVisibility(View.VISIBLE);
         this.state = Constant.STATE_CONTINUE;  // Update state.
     }
 
@@ -452,15 +474,31 @@ public class StopwatchFragment extends Fragment {
 
     }
 
-    // updateSportActivity: update text on sport activity button.
-    private void updateSportActivityText(int sportActivity) {
-        // TODO
-    }
-
-    // toggleSportActivity: toggle the sport activity
-    private void setSportActivity() {
-        // TODO
+    // updateSportActivityText: update text on sport activity button.
+    private void updateSportActivityText(int sportActivityCode) {
+        this.sportActivityButton.setText(MainHelper.getSportActivityName(sportActivityCode));
     }
 
     // ### /METHODS FOR UPDATING THE UI ###
+
+    // setSportActivity: handle requests to change the sports activity
+    private void setSportActivity(int activityCode) {
+
+        // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.UPDATE_SPORT_ACTIVITY
+        Intent startIntent = new Intent(getContext(), TrackerService.class);
+        startIntent.setAction(Constant.UPDATE_SPORT_ACTIVITY);
+        startIntent.putExtra("sportActivity", activityCode);
+        getActivity().startService(startIntent);
+        this.sportActivity = activityCode;
+
+        // Update text on button.
+        this.updateSportActivityText(activityCode);
+    }
+
+    // onCreateOptionsMenu: called when options menu created.
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.stopwatch, menu);
+    }
+
 }

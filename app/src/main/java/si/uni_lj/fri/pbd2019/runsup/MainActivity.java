@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -29,12 +30,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // ### PROPERTIES ###
     public static final String TAG = MainActivity.class.getSimpleName();
+
+    private static final int FRAGMENT_STOPWATCH = 0;
+
     private ImageView userImage;
     private TextView userName;
     private Uri userImageUri;
     private String userFullName;
 
     private FragmentManager fragmentManager;
+    private int currentFragment;
     // ### /PROPERTIES ###
 
 
@@ -58,6 +63,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         NavigationView navigationView = findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
 
+        // Initialize fragmentManager instance.
+        this.fragmentManager = getSupportFragmentManager();
+
+        // Set default fragment (StopwatchFragment).
+        StopwatchFragment fragment = new StopwatchFragment();
+        this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
+        this.currentFragment = FRAGMENT_STOPWATCH;
+
     }
 
 
@@ -74,15 +87,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.userImageUri = account.getPhotoUrl();
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
         }
-
-        // Initialize fragmentManager instance.
-        this.fragmentManager = getSupportFragmentManager();
-
-        // Set default fragment (StopwatchFragment).
-        StopwatchFragment fragment = new StopwatchFragment();
-        this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
-
-
     }
 
     // onBackPressed: method called when back button pressed.
@@ -146,9 +150,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Get id of clicked item.
         int id = item.getItemId();
 
-        // If user clicked on settings...
-        if (id == R.id.action_settings) {
-            return true;
+        if (id == R.id.stopwatchfragment_menuitem_settings) {
+           // TODO start settings activity.
+        } else if (id == R.id.stopwatchfragment_menuitem_sync) {
+            // TODO
         }
 
         return super.onOptionsItemSelected(item);
@@ -165,8 +170,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Switch on selected item's id.
         if (id == R.id.nav_workout) {
-            Log.d(TAG, "workout menu item selected.");
-            // load StopwatchFragment
+
+            // If current fragment not StopwatchFragment, set StopwatchFragment.
+            if (currentFragment != FRAGMENT_STOPWATCH) {
+                // load StopwatchFragment
+                StopwatchFragment fragment = new StopwatchFragment();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+            }
+
         } else if (id == R.id.nav_history) {
             Log.d(TAG, "history menu item selected.");
             // load HistoryFragment

@@ -223,6 +223,11 @@ public class TrackerService extends Service {
                 broadcasting = false;
                 this.preferences.edit().clear().apply();  // Clear all stored data about state in preferences.
                 break;
+            case Constant.UPDATE_SPORT_ACTIVITY:
+
+                // Set sent sport activity.
+                this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
+                break;
         }
         return super.onStartCommand(intent, flags, startId);
     }

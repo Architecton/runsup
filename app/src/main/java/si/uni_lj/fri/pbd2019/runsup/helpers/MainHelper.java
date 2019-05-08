@@ -91,6 +91,13 @@ public final class MainHelper {
     }
 
     /**
+     * convert m/s to mi/h (multiply with a corresponding constant)
+     * */
+    public static double kmphToMiph(Double n) {
+        return n*KM_TO_MI;
+    }
+
+    /**
      *  convert min/km to min/mi (multiply with a corresponding constant)
      * */
     public static double minpkmToMinpmi(double n) {

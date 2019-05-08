@@ -9,6 +9,7 @@ import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.text.InputType;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,6 +44,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     // Tag of class.
     public static final String TAG = WorkoutDetailActivity.class.getSimpleName();
 
+    // ID of this workout.
+    private int workoutId;
+
     // resource used by the activity
     public static Resources resources;
 
@@ -54,6 +58,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     private Button googlePlusShareButton;
     private Button twitterShareButton;
     private Button displayWorkoutMapButton;
+    private TextView workoutTitleTextView;
     private GoogleMap mMap;
 
     // workout parameters
@@ -62,6 +67,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     private double calories;
     private double distance;
     private double avgPace;
+    private String workoutTitle;
 
     private ArrayList<ArrayList<Location>> positions;
 
@@ -85,7 +91,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.setCalories(intent.getDoubleExtra("calories", 0.0));
         this.setDistance(intent.getDoubleExtra("distance", 0.0));
         this.setPace(intent.getDoubleExtra("pace", 0.0));
+        this.workoutId = intent.getIntExtra("workoutId", -1);
         this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
+        this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -105,6 +113,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.googlePlusShareButton = findViewById(R.id.button_workoutdetail_gplusshare);
         this.twitterShareButton = findViewById(R.id.button_workoutdetail_twittershare);
         this.confirmShareButton = findViewById(R.id.confirm_share_button);
+        this.workoutTitleTextView = findViewById(R.id.textview_workoutdetail_workouttitle);
 
         // TODO
         // this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
@@ -122,6 +131,35 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
         // Set moment as end of workout.
         this.setActivityDate(this.dateEnd);  // Set date of end of activity.
+
+        // Set on-click listener to listen for requests to change workout title.
+        this.workoutTitleTextView.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AlertDialog.Builder builder = new AlertDialog.Builder(WorkoutDetailActivity.this);
+                builder.setTitle("Set Workout Title");
+                final EditText input = new EditText(WorkoutDetailActivity.this);
+                input.setInputType(InputType.TYPE_CLASS_TEXT);
+                builder.setView(input);
+                builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+
+                        // Set new workout title.
+                        String workoutTitleNew = input.getText().toString();
+                        workoutTitleTextView.setText(workoutTitleNew);
+                        workoutTitle = workoutTitleNew;
+                    }
+                });
+                builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        dialog.cancel();
+                    }
+                });
+                builder.show();
+            }
+        });
     }
 
     // onPause: method called when this activity is paused.
@@ -197,6 +235,10 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
         // Initialize map instance.
         this.mMap = map;
+
+        // Disable gestures.
+        mMap.getUiSettings().setAllGesturesEnabled(false);
+
         this.mMap.setOnMapClickListener(new GoogleMap.OnMapClickListener() {
             @Override
             public void onMapClick(LatLng latLng) {

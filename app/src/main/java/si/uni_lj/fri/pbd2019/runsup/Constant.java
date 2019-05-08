@@ -7,6 +7,7 @@ public class Constant {
     public static final String COMMAND_CONTINUE = "si.uni_lj.fri.pbd2019.runsup.COMMAND_CONTINUE";
     public static final String COMMAND_PAUSE = "si.uni_lj.fri.pbd2019.runsup.COMMAND_PAUSE";
     public static final String COMMAND_STOP = "si.uni_lj.fri.pbd2019.runsup.COMMAND_STOP";
+    public static final String UPDATE_SPORT_ACTIVITY = "si.uni_lj.fri.pbd2019.runsup.UPDATE_SPORT_ACTIVITY";
 
     // list of activities
     public static final String[] activities = {"Running", "Walking", "Cycling"};
