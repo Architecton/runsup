@@ -8,6 +8,9 @@ public class Constant {
     public static final String COMMAND_PAUSE = "si.uni_lj.fri.pbd2019.runsup.COMMAND_PAUSE";
     public static final String COMMAND_STOP = "si.uni_lj.fri.pbd2019.runsup.COMMAND_STOP";
 
+    // list of activities
+    public static final String[] activities = {"Running", "Walking", "Cycling"};
+
     // Tick intent
     public static final String TICK = "si.uni_lj.fri.pbd2019.runsup.TICK";
 
@@ -27,4 +30,5 @@ public class Constant {
 
     // Threshold to consider workout after pause a new session
     public static final int PAUSE_DIST_CHANGE_THRESH = 100;
+
 }

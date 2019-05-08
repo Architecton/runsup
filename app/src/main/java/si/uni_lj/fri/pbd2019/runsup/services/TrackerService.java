@@ -166,7 +166,7 @@ public class TrackerService extends Service {
 
     // ### COMMAND HANDLING ###
 
-    // onStartCommand: callback called every time the startService is called in the StopwatchActivity.
+    // onStartCommand: callback called every time the startService is called in the StopwatchFragment.
     // This callback is used to get commands from the bound activity.
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -196,7 +196,7 @@ public class TrackerService extends Service {
                 this.durationAccumulator = preferences.getLong("duration", 0);  // Restore duration from shared preferences.
                 this.distanceAccumulator = Double.longBitsToDouble(preferences.getLong("distance", 0));  // Restore distance from preferences.
                 this.sportActivity = preferences.getInt("sportActivity", Constant.RUNNING);  // Restore sport activity from preferences.
-                this.positionList = intent.getParcelableArrayListExtra("positions");  // Restore positions list from StopwatchActivity.
+                this.positionList = intent.getParcelableArrayListExtra("positions");  // Restore positions list from StopwatchFragment.
                 if (this.positionList != null) {  // If position list is not null, reconstruct speedList.
                     this.speedList = positionsToSpeedList();  // Reconstruct speedList from positionList.
                 } else {
@@ -212,7 +212,7 @@ public class TrackerService extends Service {
                 stopLocationUpdates();  // Stop location updates and broadcasting.
                 broadcasting = false;
 
-                // Store state in preferences to restore in case StopwatchActivity paused.
+                // Store state in preferences to restore in case StopwatchFragment paused.
                 preferences.edit().putLong("duration", this.durationAccumulator).apply();
                 preferences.edit().putLong("distance", Double.doubleToRawLongBits(distanceAccumulator)).apply();
                 preferences.edit().putInt("sportActivity", sportActivity).apply();

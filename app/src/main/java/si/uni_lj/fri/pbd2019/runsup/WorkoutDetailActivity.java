@@ -31,6 +31,7 @@ import com.google.android.gms.maps.model.PolylineOptions;
 import java.util.ArrayList;
 import java.util.Date;
 
+import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 
 
@@ -254,7 +255,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            Intent stopwatchActivityIntent = new Intent(WorkoutDetailActivity.this, StopwatchActivity.class);
+            Intent stopwatchActivityIntent = new Intent(WorkoutDetailActivity.this, StopwatchFragment.class);
             WorkoutDetailActivity.this.startActivity(stopwatchActivityIntent);
             return true;
         }

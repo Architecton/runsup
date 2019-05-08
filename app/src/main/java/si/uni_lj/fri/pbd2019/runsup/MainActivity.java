@@ -3,18 +3,17 @@ package si.uni_lj.fri.pbd2019.runsup;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
-import android.util.Log;
-import android.view.View;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -22,6 +21,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import org.jetbrains.annotations.NotNull;
+
+import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -32,6 +33,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private TextView userName;
     private Uri userImageUri;
     private String userFullName;
+
+    private FragmentManager fragmentManager;
     // ### /PROPERTIES ###
 
 
@@ -71,6 +74,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.userImageUri = account.getPhotoUrl();
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
         }
+
+        // Initialize fragmentManager instance.
+        this.fragmentManager = getSupportFragmentManager();
+
+        // Set default fragment (StopwatchFragment).
+        StopwatchFragment fragment = new StopwatchFragment();
+        this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
+
+
     }
 
     // onBackPressed: method called when back button pressed.

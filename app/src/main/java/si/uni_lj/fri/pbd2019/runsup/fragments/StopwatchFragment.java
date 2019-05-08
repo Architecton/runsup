@@ -1,4 +1,4 @@
-package si.uni_lj.fri.pbd2019.runsup;
+package si.uni_lj.fri.pbd2019.runsup.fragments;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
@@ -25,16 +25,19 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import si.uni_lj.fri.pbd2019.runsup.Constant;
+import si.uni_lj.fri.pbd2019.runsup.R;
+import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
 
-public class StopwatchActivity extends Fragment {
+public class StopwatchFragment extends Fragment {
 
 
 
     // ### PROPERTIES ###
 
-    public static final String TAG = StopwatchActivity.class.getName();  // class tag
+    public static final String TAG = StopwatchFragment.class.getName();  // class tag
 
     private boolean bound;  // indicator that indicates whether the service is bound
     private ServiceConnection sConn;  // connection to service
@@ -113,7 +116,7 @@ public class StopwatchActivity extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        return inflater.inflate(R.layout.activity_stopwatch, parent, false);
+        return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
     }
 
     // oncCreate: method called when the activity is created
@@ -135,7 +138,31 @@ public class StopwatchActivity extends Fragment {
             @Override
             public void onClick(View v) {
                 if (state == Constant.STATE_STOPPED) {
-                    toggleSportActivity();
+                    // setup the alert builder
+                    AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
+                            .setTitle("Select Activity")
+                            .setItems(Constant.activities, new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    switch (which) {
+                                        case 0:
+                                            Log.d(TAG, String.format("Selected %s", Constant.activities[0]));
+                                            setSportActivity(0);
+                                            break;
+                                        case 1:
+                                            Log.d(TAG, String.format("Selected %s", Constant.activities[1]));
+                                            setSportActivity(1);
+                                            break;
+                                        case 2:
+                                            Log.d(TAG, String.format("Selected %s", Constant.activities[2]));
+                                            setSportActivity(2);
+                                            break;
+                                    }
+
+                                }
+                            });
+                    AlertDialog dialog = builder.create();
+                    dialog.show();
                 } else {
                     new AlertDialog.Builder(getContext())
                             .setTitle("Change Sport Activity")
@@ -316,7 +343,7 @@ public class StopwatchActivity extends Fragment {
                         workoutDetailsIntent.putExtra("pace", paceAccumulator/updateCounter);
                         workoutDetailsIntent.putExtra("calories", calories);
                         workoutDetailsIntent.putExtra("finalPositionsList", positions);
-                        StopwatchActivity.this.startActivity(workoutDetailsIntent);
+                        StopwatchFragment.this.startActivity(workoutDetailsIntent);
                     }
                 })
                 .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
@@ -427,14 +454,12 @@ public class StopwatchActivity extends Fragment {
 
     // updateSportActivity: update text on sport activity button.
     private void updateSportActivityText(int sportActivity) {
-        this.toggleSportActivityButton.setText(MainHelper.getSportActivityName(sportActivity));
+        // TODO
     }
 
     // toggleSportActivity: toggle the sport activity
-    private void toggleSportActivity() {
-        this.sportActivity += 1;
-        this.sportActivity %= 3;
-        updateSportActivityText(this.sportActivity);
+    private void setSportActivity() {
+        // TODO
     }
 
     // ### /METHODS FOR UPDATING THE UI ###

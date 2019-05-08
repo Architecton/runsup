@@ -39,7 +39,7 @@
             android:configChanges="layoutDirection|locale"
             android:exported="true" />
         <activity
-            android:name=".StopwatchActivity"
+            android:name=".fragments.StopwatchFragment"
             android:configChanges="layoutDirection|locale"
             android:exported="true" />
         <!--
