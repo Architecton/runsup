@@ -23,6 +23,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 
 import org.jetbrains.annotations.NotNull;
 
+import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 
 
@@ -32,6 +33,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int FRAGMENT_STOPWATCH = 0;
+    private static final int FRAGMENT_ABOUT = 3;
 
     private ImageView userImage;
     private TextView userName;
@@ -176,6 +178,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 // load StopwatchFragment
                 StopwatchFragment fragment = new StopwatchFragment();
                 this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                this.currentFragment = FRAGMENT_STOPWATCH;
             }
 
         } else if (id == R.id.nav_history) {
@@ -186,7 +189,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // open SettingsActivity
         } else if (id == R.id.nav_about) {
             Log.d(TAG, "about menu item selected.");
-            // load AboutFragment
+            // If current fragment not AboutFragment, set AboutFragment.
+            if (currentFragment != FRAGMENT_ABOUT) {
+
+                // load AboutFragment
+                AboutFragment fragment = new AboutFragment();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                currentFragment = FRAGMENT_ABOUT;
+            }
         }
 
         // Close drawer.

@@ -114,10 +114,9 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:text="@string/pace_label"
         android:textAppearance="@android:style/TextAppearance.Holo.Medium"
-        app:layout_constraintEnd_toStartOf="@+id/textview_stopwatch_labelcalories"
+        app:layout_constraintEnd_toStartOf="@+id/guideline2"
         app:layout_constraintHorizontal_chainStyle="spread_inside"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider3" />
@@ -126,14 +125,13 @@
         android:id="@+id/textview_stopwatch_labelcalories"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="2dp"
         android:layout_marginTop="16dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="8dp"
         android:text="@string/calories_label"
         android:textAppearance="@android:style/TextAppearance.Holo.Medium"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/textview_stopwatch_labelpace"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/divider3" />
 
     <TextView
@@ -166,13 +164,13 @@
         android:id="@+id/textview_stopwatch_calories"
         android:layout_width="30dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="2dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="2dp"
         android:text="@string/default_calories"
         android:textAppearance="@android:style/TextAppearance.Material.Medium"
         app:layout_constraintEnd_toStartOf="@+id/textview_stopwatch_unitcalories"
-        app:layout_constraintStart_toEndOf="@+id/textview_stopwatch_unitpace"
+        app:layout_constraintStart_toStartOf="@+id/guideline2"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labelcalories" />
 
     <TextView
@@ -209,17 +207,16 @@
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
         app:layout_constraintEnd_toStartOf="@+id/guideline2"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_pace" />
 
 
     <Button
         android:id="@+id/button_stopwatch_endworkout"
-        android:layout_width="312dp"
-        android:layout_height="49dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="24dp"
         android:background="@color/colorAccent"
@@ -232,10 +229,10 @@
 
     <Button
         android:id="@+id/button_stopwatch_start"
-        android:layout_width="312dp"
-        android:layout_height="97dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="32dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
         android:background="@color/colorPrimary"
         android:text="@string/stopwatch_start"
@@ -260,15 +257,13 @@
 
     <Button
         android:id="@+id/button_stopwatch_activeworkout"
-        android:layout_width="312dp"
-        android:layout_height="49dp"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
-        android:layout_marginBottom="24dp"
         android:background="@color/colorAccent"
         android:text="@string/stopwatch_activeworkoutmap_button"
-        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/button_stopwatch_start" />
@@ -278,8 +273,15 @@
         android:id="@+id/guideline2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="197dp"
+        android:layout_marginEnd="197dp"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="197dp" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintGuide_percent="0.5"
+        app:layout_constraintHorizontal_bias="0.49"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
 
 </android.support.constraint.ConstraintLayout>

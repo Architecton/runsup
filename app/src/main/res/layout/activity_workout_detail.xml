@@ -15,6 +15,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:textSize="30sp"
         android:text="@string/workoutdetail_workoutname"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
@@ -81,6 +82,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:textSize="30sp"
         android:text="@string/textview_workoutdetail_labelsummary_default"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
@@ -106,7 +108,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        app:layout_constraintGuide_begin="202dp" />
+        app:layout_constraintGuide_percent="0.5" />
 
     <TextView
         android:id="@+id/textview_workoutdetail_labelduration"
@@ -151,13 +153,12 @@
         android:id="@+id/textview_workoutdetail_valuecalories"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="2dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:text="@string/textview_workoutdetail_valuecalories_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_labelcalories" />
 
@@ -202,13 +203,13 @@
         android:id="@+id/textview_workoutdetail_valueavgpace"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
+        android:layout_marginStart="2dp"
         android:layout_marginTop="2dp"
         android:layout_marginEnd="8dp"
         android:text="@string/textview_workoutdetail_valueavgpace_default"
         android:textAppearance="@android:style/TextAppearance.Holo"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintHorizontal_bias="0.49"
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_labelavgpace" />
 
@@ -219,6 +220,7 @@
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
         android:layout_marginEnd="8dp"
+        android:textSize="30sp"
         android:text="@string/textview_workoutdetail_labelsocialshare_default"
         android:textAppearance="@android:style/TextAppearance.Material.Display1"
         app:layout_constraintEnd_toEndOf="parent"
@@ -241,62 +243,59 @@
 
     <Button
         android:id="@+id/button_workoutdetail_fbsharebtn"
-        android:layout_width="89dp"
-        android:layout_height="93dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:layout_weight="1"
         android:background="@mipmap/facebook"
         android:onClick="displayShareText"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_workoutdetail_gplusshare"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/divider7" />
 
     <Button
         android:id="@+id/button_workoutdetail_gplusshare"
-        android:layout_width="89dp"
-        android:layout_height="93dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="4dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:layout_weight="1"
         android:background="@mipmap/iconfinder_google_plus_386644"
         android:onClick="displayShareText"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_workoutdetail_twittershare"
         app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_fbsharebtn"
         app:layout_constraintTop_toBottomOf="@+id/divider7"
         app:layout_constraintVertical_bias="0.51" />
 
     <Button
         android:id="@+id/button_workoutdetail_twittershare"
-        android:layout_width="89dp"
-        android:layout_height="93dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:layout_weight="1"
         android:background="@mipmap/twitter"
         android:onClick="displayShareText"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toStartOf="@+id/button_workoutdetail_emailshare"
         app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_gplusshare"
-        app:layout_constraintTop_toBottomOf="@+id/divider7" />
+        app:layout_constraintTop_toBottomOf="@+id/divider7"
+        app:layout_constraintVertical_bias="0.571" />
 
     <Button
         android:id="@+id/button_workoutdetail_emailshare"
-        android:layout_width="89dp"
-        android:layout_height="93dp"
-        android:layout_marginStart="4dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="65dp"
+        android:layout_height="63dp"
+        android:layout_marginStart="10dp"
+        android:layout_marginTop="2dp"
         android:layout_marginBottom="8dp"
         android:layout_weight="1"
         android:background="@mipmap/email"
         android:onClick="displayShareText"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_twittershare"
         app:layout_constraintTop_toBottomOf="@+id/divider7" />
 

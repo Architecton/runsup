@@ -65,4 +65,7 @@
     <string name="all_actiondelete">Delete Workout</string>
     <string name="stopwatch_activeworkoutmap_button">Show Map</string>
 
+    <!-- AboutFragment -->
+    <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean tempor, ligula vitae sollicitudin dignissim, dui massa bibendum lectus, sit amet posuere magna dui sed mauris. Nunc cursus facilisis justo nec venenatis. Nullam sodales, sapien molestie maximus molestie, justo neque consectetur neque, vitae accumsan nisi eros at sapien. Vestibulum at velit massa. Praesent eleifend condimentum mauris. Praesent risus ipsum, euismod vitae tempus ut, rutrum ac lacus.</string>
+
 </resources>
