@@ -22,7 +22,6 @@
     <string name="historysettings_actionsync">Synchronize with Cloud</string>
 
     <!-- WorkoutDetailActivity -->
-    <string name="button_workoutdetail_showmap_default">Show Map</string>
     <string name="workoutdetail_workoutname">My Workout (tap to edit)</string>
     <string name="workoutdetail_workoutname_default">My Workout</string>
     <string name="textview_workoutdetail_labelsport_default">Sport</string>
@@ -51,7 +50,6 @@
     <string name="navigation_drawer_open">Open navigation drawer</string>
     <string name="navigation_drawer_close">Close navigation drawer</string>
     <string name="nav_header_desc">Navigation header</string>
-    <string name="action_settings">TODO</string>
     <string name="menu_workout">Workout</string>
     <string name="menu_history">History</string>
     <string name="menu_settings">Settings</string>
@@ -67,5 +65,38 @@
 
     <!-- AboutFragment -->
     <string name="lorem_ipsum">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Aenean tempor, ligula vitae sollicitudin dignissim, dui massa bibendum lectus, sit amet posuere magna dui sed mauris. Nunc cursus facilisis justo nec venenatis. Nullam sodales, sapien molestie maximus molestie, justo neque consectetur neque, vitae accumsan nisi eros at sapien. Vestibulum at velit massa. Praesent eleifend condimentum mauris. Praesent risus ipsum, euismod vitae tempus ut, rutrum ac lacus.</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+
+    <string-array name="pref_list_dist_units">
+        <item>Kilometers (km)</item>
+        <item>Miles (mi)</item>
+    </string-array>
+    <string-array name="pref_list_dist_units_values">
+        <item>0</item>
+        <item>1</item>
+    </string-array>
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
+
+    <string name="pref_ringtone_silent">Silent</string>
+
+    <string name="pref_header_location">Location</string>
+    <string name="pref_header_units">Units</string>
+    <string name="pref_description_location_access">Allow this application to access your location. You will not be asked to allow location access every time you start a workout.</string>
+    <string name="pref_title_location_access">Location Access</string>
+    <string name="pref_title_set_dist_units">Distance Units</string>
+
+    <!-- Strings related to Settings -->
+
+    <!-- Example General settings -->
+
+    <!-- Example settings for Data & Sync -->
+
+    <!-- Example settings for Notifications -->
 
 </resources>

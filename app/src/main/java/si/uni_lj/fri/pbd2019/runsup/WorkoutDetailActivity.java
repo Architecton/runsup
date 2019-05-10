@@ -297,7 +297,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
 
     // onKeyDown: override default action when user presses the back button
-    // Present stopwatch in initial state.
+    // Present stopwatch_shared in initial state.
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {

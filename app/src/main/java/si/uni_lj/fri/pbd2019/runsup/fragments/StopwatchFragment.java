@@ -16,11 +16,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -56,7 +54,7 @@ public class StopwatchFragment extends Fragment {
     private ArrayList<ArrayList<Location>> positions;
     private IntentFilter filter;
 
-    // State of the stopwatch (see Constant class for values)
+    // State of the stopwatch_shared (see Constant class for values)
     private int state;
 
     // buttons for starting/pausing the workout and for ending the workout
@@ -371,7 +369,7 @@ public class StopwatchFragment extends Fragment {
                 .show();
     }
 
-    // pauseStopWatch: method used to pause the stopwatch.
+    // pauseStopWatch: method used to pause the stopwatch_shared.
     public void pauseStopwatch() {
 
         // Initialize the intent for starting the service.
@@ -498,7 +496,7 @@ public class StopwatchFragment extends Fragment {
     // onCreateOptionsMenu: called when options menu created.
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.stopwatch, menu);
+        inflater.inflate(R.menu.stopwatch_shared, menu);
     }
 
 }

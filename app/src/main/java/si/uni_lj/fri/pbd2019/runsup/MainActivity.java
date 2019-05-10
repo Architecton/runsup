@@ -25,6 +25,7 @@ import org.jetbrains.annotations.NotNull;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
+import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -153,7 +154,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         int id = item.getItemId();
 
         if (id == R.id.stopwatchfragment_menuitem_settings) {
-           // TODO start settings activity.
+            // Start SettingsActivity
+            Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
             // TODO
         }
@@ -186,7 +189,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // load HistoryFragment
         } else if (id == R.id.nav_settings) {
             Log.d(TAG, "settings menu item selected.");
-            // open SettingsActivity
+            // Start SettingsActivity.
+            Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
+            MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.nav_about) {
             Log.d(TAG, "about menu item selected.");
             // If current fragment not AboutFragment, set AboutFragment.
