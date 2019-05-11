@@ -75,8 +75,8 @@
         <item>Miles (mi)</item>
     </string-array>
     <string-array name="pref_list_dist_units_values">
-        <item>0</item>
-        <item>1</item>
+        <item>km</item>
+        <item>mi</item>
     </string-array>
 
     <!-- Example settings for Data & Sync -->
@@ -90,6 +90,8 @@
     <string name="pref_description_location_access">Allow this application to access your location. You will not be asked to allow location access every time you start a workout.</string>
     <string name="pref_title_location_access">Location Access</string>
     <string name="pref_title_set_dist_units">Distance Units</string>
+    <string name="historysettings_actiondelete_history">Delete history</string>
+    <string name="history_nohistorydata">No history to show</string>
 
     <!-- Strings related to Settings -->
 

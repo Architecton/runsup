@@ -1,0 +1,171 @@
+#
+# generated on 2019/05/11 10:39:05
+#
+# --table-start--
+dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint
+tableName=gpsPoints
+# --table-fields-start--
+# --field-start--
+fieldName=id
+id=true
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=workout
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=sessionNumber
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=latitude
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=longitude
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=duration
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=speed
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=pace
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=totalCalories
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=created
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=lastUpdate
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=si.uni_lj.fri.pbd2019.runsup.model.Workout
+tableName=workouts
+# --table-fields-start--
+# --field-start--
+fieldName=id
+id=true
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=user
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=title
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=created
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=status
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=distance
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=duration
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=totalCalories
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=paceAvg
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=sportActivity
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=lastUpdate
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=si.uni_lj.fri.pbd2019.runsup.model.User
+tableName=users
+# --table-fields-start--
+# --field-start--
+fieldName=id
+id=true
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=accId
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=authToken
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=si.uni_lj.fri.pbd2019.runsup.model.UserProfile
+tableName=userProfiles
+# --table-fields-start--
+# --field-start--
+fieldName=id
+id=true
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=user
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=weight
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################

@@ -98,14 +98,13 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);  // Get account from results.
-            Log.d(TAG, "SIGN IN SUCCESSFUL!");
             // Signed in successfully, show authenticated UI.
-            updateUI(account);
+            updateUiLoggedIn(account);
         } catch (ApiException e) {
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
-            updateUI(null);
+            updateUiLoggedIn(null);
         }
     }
 
@@ -149,7 +148,7 @@ public class LoginActivity extends AppCompatActivity {
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
             Log.d(TAG, "Last signed in account found");
-            updateUI(account);
+            updateUiLoggedIn(account);
         } else {
             Log.d(TAG, "Not found");
         }
@@ -176,21 +175,19 @@ public class LoginActivity extends AppCompatActivity {
         npWeight.setMaxValue(500);
         npWeight.setWrapSelectorWheel(false);
         npWeight.setDisplayedValues(weights);
-        npWeight.setValue(60);
-        this.weightSetting = 60;  // TODO add to Constants.
+        npWeight.setValue(preferences.getInt("age", Constant.DEFAULT_AGE));
 
         npAge.setMinValue(1);
         npAge.setMaxValue(200);
         npAge.setWrapSelectorWheel(false);
         npAge.setDisplayedValues(ages);
-        npAge.setValue(30);
-        this.ageSetting = 30;
+        npAge.setValue(preferences.getInt("weight", Constant.DEFAULT_WEIGHT));
 
         npWeight.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 // Set selected value.
-                weightSetting = newVal;
+                preferences.edit().putInt("weight", newVal).apply();
             }
         });
 
@@ -198,7 +195,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
                 // set selected value.
-                ageSetting = newVal;
+                preferences.edit().putInt("age", newVal).apply();
             }
         });
 
@@ -217,7 +214,7 @@ public class LoginActivity extends AppCompatActivity {
 
 
     // updateUI: update user interface depending on whether user is signed in
-    private void updateUI(GoogleSignInAccount account) {
-        // TODO
+    private void updateUiLoggedIn(GoogleSignInAccount account) {
+        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
     }
 }

@@ -2,8 +2,6 @@ package si.uni_lj.fri.pbd2019.runsup.services;
 
 import android.Manifest;
 import android.app.Service;
-import android.content.BroadcastReceiver;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -23,13 +21,16 @@ import com.google.android.gms.location.LocationCallback;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
-import com.google.gson.Gson;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.helpers.SportActivities;
+import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
+import si.uni_lj.fri.pbd2019.runsup.model.Workout;
+import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 
 public class TrackerService extends Service {
 
@@ -56,6 +57,8 @@ public class TrackerService extends Service {
 
     private Handler h;  // handler
     private Runnable r;  // runnable
+    Handler locationsTimeoutHandler;
+    Runnable locationTimeoutRunnable;
     private volatile boolean broadcasting; // volatile boolean specifying whether the service is broadcasting.
 
     private ArrayList<Location> positionList;  // List for storing locations.
@@ -69,12 +72,19 @@ public class TrackerService extends Service {
 
     private volatile boolean firstMeasAfterPause;  // if true indicated that the next measurement will be the first after a pause.
 
-    private double pace;  // Current pace (property necessary for testing)
+    private double pace;  // Current pace
+    private double caloriesAcc; // Current calories
 
     private final IBinder mBinder = new LocalBinder();  // binder that provides an interface to this service.
 
     SharedPreferences preferences;
+    SharedPreferences.OnSharedPreferenceChangeListener prefListener;
 
+    private DatabaseHelper databaseHelper;
+
+    private Workout currentWorkout;
+
+    private int sessionNumber;
     // ### /PROPERTIES ###
 
 
@@ -96,6 +106,17 @@ public class TrackerService extends Service {
 
         // Initialize shared preferences pointer.
         this.preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+
+        this.databaseHelper = new DatabaseHelper(this);
+
+        this.locationTimeoutRunnable = new Runnable() {
+            public void run() {
+                Log.i("LOLEK", "Locations timeout!");
+            }
+        };
+
+        this.locationsTimeoutHandler = new android.os.Handler();
+
 
         // Initialize handler.
         this.h = new Handler();
@@ -138,6 +159,8 @@ public class TrackerService extends Service {
                     caloriesNxt = SportActivities.countCalories(sportActivity, 60, speedList, durationAccumulator*1.0e-3*Math.pow(60.0, -2.0));
                 }
 
+                caloriesAcc = caloriesNxt;
+
                 // Add data about calories, service state, current sport activity and positions
                 // to intent broadcast.
                 toSend.putExtra("calories", caloriesNxt);
@@ -145,6 +168,8 @@ public class TrackerService extends Service {
                 toSend.putExtra("sportActivity", sportActivity);
                 toSend.putExtra("positionList", positionList);
                 sendBroadcast(toSend);
+
+                // If last location same than in previous broadcast, update noLocationCounter.
 
                 // If broadcasting, broadcast.
                 if (broadcasting) {
@@ -185,6 +210,12 @@ public class TrackerService extends Service {
                 startLocationUpdates();  // Start location updates.
                 broadcasting = true;  // Start broadcasting TICK actions.
                 h.postDelayed(r, BROADCAST_PERIOD);
+
+                // TODO
+                // Initialize current workout
+                this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
+                this.sessionNumber = 0;
+
                 break;
             case Constant.COMMAND_CONTINUE:
                 trackingState = Constant.STATE_CONTINUE;  // Set service state.
@@ -206,6 +237,8 @@ public class TrackerService extends Service {
 
                 broadcasting = true;  // Start broadcasting.
                 h.postDelayed(r, BROADCAST_PERIOD);
+                this.sessionNumber += 1;
+
                 break;
             case Constant.COMMAND_PAUSE:
                 trackingState = Constant.STATE_PAUSED;  // Set service state.
@@ -265,6 +298,10 @@ public class TrackerService extends Service {
         this.mLocationCallback = new LocationCallback() {
             @Override
             public void onLocationResult(LocationResult locationResult) {
+
+                locationsTimeoutHandler.removeCallbacks(locationTimeoutRunnable);
+                locationsTimeoutHandler.postDelayed(locationTimeoutRunnable, Constant.LOCATION_UPDATES_TIMEOUT_TO_SAVE);
+
                 super.onLocationResult(locationResult);  // Call method of superclass.
                 Location nxtLocation = locationResult.getLastLocation();  // Get received location.
 
@@ -297,6 +334,12 @@ public class TrackerService extends Service {
                     mCurrentLocation = nxtLocation;
                     mLastUpdateTime = DateFormat.getTimeInstance().format(new Date());
                     positionList.add(mCurrentLocation);  // Add location to list of locations.
+                    try {
+                        int sessionNumber = 0;
+                        databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.get(speedList.size()-1), pace, caloriesAcc));
+                    } catch (SQLException e) {
+                        // TODO
+                    }
                 }
             }
         };

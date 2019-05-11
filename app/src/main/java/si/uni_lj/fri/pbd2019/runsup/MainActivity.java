@@ -1,10 +1,12 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -18,13 +20,21 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.j256.ormlite.dao.Dao;
 
 import org.jetbrains.annotations.NotNull;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
+import si.uni_lj.fri.pbd2019.runsup.fragments.HistoryFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
+import si.uni_lj.fri.pbd2019.runsup.model.User;
+import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
 
@@ -34,22 +44,27 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final String TAG = MainActivity.class.getSimpleName();
 
     private static final int FRAGMENT_STOPWATCH = 0;
-    private static final int FRAGMENT_ABOUT = 3;
+    private static final int FRAGMENT_HISTORY = 1;
+    private static final int FRAGMENT_ABOUT = 2;
 
-    private ImageView userImage;
-    private TextView userName;
     private Uri userImageUri;
     private String userFullName;
 
     private FragmentManager fragmentManager;
     private int currentFragment;
-    // ### /PROPERTIES ###
 
+    public static final String STATE_PREF_NAME = "state";
+
+    public static MainActivity mainActivity;
+
+    // ### /PROPERTIES ###
 
     // onCreate: method called when the activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        mainActivity = this;
 
         setContentView(R.layout.activity_main);  // Set layout content.
         Toolbar toolbar = findViewById(R.id.toolbar);  // Get toolbar.
@@ -74,6 +89,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
+        SharedPreferences preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+
+        // Check if necessary preferences values exist. If not, set defaults.
+        if (!preferences.contains("pref_units_value")) {
+            preferences.edit().putString("pref_units_value", "km").apply();
+        }
+        if(!preferences.contains("pref_location_access_value")) {
+            preferences.edit().putString("pref_location_access_value", "false").apply();
+        }
     }
 
 
@@ -114,20 +138,25 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.main, menu);
 
         // user's profile image and full name.
-        this.userImage = findViewById(R.id.menu_loggedInUserImage);
-        this.userName = findViewById(R.id.menu_loggedInUserFullName);
+        ImageView userImage = findViewById(R.id.menu_loggedInUserImage);
+        TextView userName = findViewById(R.id.menu_loggedInUserFullName);
 
         // If user logged in, set profile image and full name.
         if (this.userImageUri != null && this.userFullName != null)  {
-            this.userImage.setImageURI(this.userImageUri);
-            this.userName.setText(this.userFullName);
+            Glide
+                    .with(MainActivity.this)
+                    .load(userImageUri)
+                    .centerCrop()
+                    .override(150,150)
+                    .into(userImage);
+            userImage.setImageURI(this.userImageUri);
+            userName.setText(this.userFullName);
         }
 
         // Set on click listeners.
         userImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "Profile image clicked.");
                 // Start LoginActivity.
                 Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
                 MainActivity.this.startActivity(loginIntent);
@@ -136,7 +165,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         userName.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Log.d(TAG, "User's name clicked.");
                 // Start LoginActivity.
                 Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
                 MainActivity.this.startActivity(loginIntent);
@@ -153,14 +181,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Get id of clicked item.
         int id = item.getItemId();
 
-        if (id == R.id.stopwatchfragment_menuitem_settings) {
+        if (id == R.id.stopwatchfragment_menuitem_settings || id == R.id.historyfragment_menuitem_settings) {
             // Start SettingsActivity
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
             // TODO
+        } else if (id == R.id.historyfragment_menuitem_delete_history) {
+            // TODO
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -187,6 +216,13 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.nav_history) {
             Log.d(TAG, "history menu item selected.");
             // load HistoryFragment
+            if (currentFragment != FRAGMENT_HISTORY) {
+
+                // load AboutFragment
+                HistoryFragment fragment = new HistoryFragment();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                currentFragment = FRAGMENT_HISTORY;
+            }
         } else if (id == R.id.nav_settings) {
             Log.d(TAG, "settings menu item selected.");
             // Start SettingsActivity.

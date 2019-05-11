@@ -8,6 +8,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
@@ -32,6 +33,8 @@ import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
+
+import static android.content.Context.MODE_PRIVATE;
 
 public class StopwatchFragment extends Fragment {
 
@@ -62,6 +65,14 @@ public class StopwatchFragment extends Fragment {
     private Button endWorkoutButton;
     private Button showMapButton;
     private Button sportActivityButton;
+
+
+    public static final String STATE_PREF_NAME = "state";
+    private SharedPreferences preferences;
+    SharedPreferences.OnSharedPreferenceChangeListener prefListener;
+    private int distUnits;
+
+    private boolean firstRun = true;
 
 
     // ## class level listeners ##
@@ -96,8 +107,8 @@ public class StopwatchFragment extends Fragment {
 
             // Update TextView fields in UI using received values.
             updateDuration(intent.getLongExtra("duration", 0));
-            updateDistance(intent.getDoubleExtra("distance", 0.0));
-            updatePace(intent.getDoubleExtra("pace", 0.0));
+            updateDistance(intent.getDoubleExtra("distance", 0.0), distUnits);
+            updatePace(intent.getDoubleExtra("pace", 0.0), distUnits);
             updateCalories(intent.getDoubleExtra("calories", 0.0));
 
             // Add locations list to list of location lists.
@@ -121,7 +132,43 @@ public class StopwatchFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
         setHasOptionsMenu(true);
+
+        // Initialize shared preferences pointer.
+        this.preferences = getActivity().getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+
+        prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
+            public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
+
+                // Handle preference changes
+                if (key.equals("pref_units_value")) {
+                    distUnits = preferences.getString(key, "km").equals("km")
+                            ? Constant.UNITS_KM : Constant.UNITS_MI;
+                    preferences.edit().putBoolean("unitsChanged", true).apply();
+                }
+                if (key.equals("pref_location_access_value")) {
+                    // pass
+                }
+            }
+        };
+        preferences.registerOnSharedPreferenceChangeListener(prefListener);
+
+        this.distUnits = this.preferences.getString("pref_units_value", "km").equals("km")
+                ? Constant.UNITS_KM : Constant.UNITS_MI;
+
         return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
+    }
+
+    private void updateUnitsUI(int distUnits) {
+        // Update unit abbreviations on UI.
+        TextView distUnitsTextView = getActivity().findViewById(R.id.textview_stopwatch_distanceunit);
+        TextView paceUnitsTextView = getActivity().findViewById(R.id.textview_stopwatch_unitpace);
+        if (distUnits == Constant.UNITS_KM) {
+            distUnitsTextView.setText(Constant.UNITS_KM_ABBR);
+            paceUnitsTextView.setText(Constant.UNITS_MINPKM_ABBR);
+        } else {
+            distUnitsTextView.setText(Constant.UNITS_MI_ABBR);
+            paceUnitsTextView.setText(Constant.UNITS_MINPMI_ABBR);
+        }
     }
 
 
@@ -156,6 +203,13 @@ public class StopwatchFragment extends Fragment {
                 startStopwatch();
             }
         });
+
+        // TODO write to shared preferences if units changed and only update UI in that case.
+        if (firstRun || preferences.getBoolean("unitsChanged", true)) {
+            updateUnitsUI(distUnits);
+            preferences.edit().putBoolean("unitsChanged", false).apply();
+            firstRun = false;
+        }
 
         // Set listener on button that is used to change the current sport activity.
         this.sportActivityButton.setOnClickListener(new View.OnClickListener() {
@@ -431,17 +485,25 @@ public class StopwatchFragment extends Fragment {
     }
 
     // updateDistance: update the workout distance display.
-    private void updateDistance(double dist) {
+    private void updateDistance(double dist, int distUnits) {
        this.distance = dist;
-       TextView distanceText = getActivity().findViewById(R.id.textview_stopwatch_distance);
-       distanceText.setText(MainHelper.formatDistance(dist));
+        TextView distanceText = getActivity().findViewById(R.id.textview_stopwatch_distance);
+       if (distUnits == Constant.UNITS_MI) {
+           distanceText.setText(MainHelper.formatDistance(MainHelper.kmToMi(dist)));
+       } else {
+           distanceText.setText(MainHelper.formatDistance(dist));
+       }
     }
 
     // updatePace: update the workout pace display.
-    private void updatePace(double pace) {
+    private void updatePace(double pace, int distUnits) {
         this.paceAccumulator += pace;
         TextView paceText = getActivity().findViewById(R.id.textview_stopwatch_pace);
-        paceText.setText(MainHelper.formatPace(pace));
+        if (distUnits == Constant.UNITS_MI) {
+            paceText.setText(MainHelper.formatPace(MainHelper.minpkmToMinpmi(pace)));
+        } else {
+            paceText.setText(MainHelper.formatPace(pace));
+        }
     }
 
     // updateCalories: update the workout calories display.

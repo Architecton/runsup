@@ -32,4 +32,18 @@ public class Constant {
     // Threshold to consider workout after pause a new session
     public static final int PAUSE_DIST_CHANGE_THRESH = 100;
 
+
+    public static final int UNITS_KM = 0;
+    public static final int UNITS_MI = 1;
+
+    public static final String UNITS_KM_ABBR = "km";
+    public static final String UNITS_MI_ABBR = "mi";
+    public static final String UNITS_MINPKM_ABBR = "min/km";
+    public static final String UNITS_MINPMI_ABBR = "min/mi";
+
+
+    public static final int DEFAULT_WEIGHT = 65;
+    public static final int DEFAULT_AGE = 30;
+    public static final String DEFAULT_WORKOUT_TITLE_FORMAT_STRING = "Workout %d";
+    public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 }
