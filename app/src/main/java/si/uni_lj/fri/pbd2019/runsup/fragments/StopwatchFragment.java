@@ -21,6 +21,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
@@ -141,8 +142,8 @@ public class StopwatchFragment extends Fragment {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 
                 // Handle preference changes
-                if (key.equals("pref_units_value")) {
-                    distUnits = preferences.getString(key, "km").equals("km")
+                if (key.equals("unit")) {
+                    distUnits = preferences.getInt(key, Constant.UNITS_KM) == Constant.UNITS_KM
                             ? Constant.UNITS_KM : Constant.UNITS_MI;
                     preferences.edit().putBoolean("unitsChanged", true).apply();
                 }
@@ -153,7 +154,7 @@ public class StopwatchFragment extends Fragment {
         };
         preferences.registerOnSharedPreferenceChangeListener(prefListener);
 
-        this.distUnits = this.preferences.getString("pref_units_value", "km").equals("km")
+        this.distUnits = this.preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM
                 ? Constant.UNITS_KM : Constant.UNITS_MI;
 
         return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
@@ -255,6 +256,7 @@ public class StopwatchFragment extends Fragment {
         this.endWorkoutButton.setOnClickListener(endListener);
 
 
+        // TODO: show alert and move this to settings
         // Check for location access permissions.
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
@@ -561,6 +563,10 @@ public class StopwatchFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.stopwatch_shared, menu);
+        if (!preferences.getBoolean("userSignedIn", false)) {
+            MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
+            menuItem.setVisible(false);
+        }
     }
 
 }

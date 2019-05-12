@@ -111,8 +111,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-                if (preference.getKey().equals("pref_units_value")) {
-                    preferences.edit().putString("pref_units_value", stringValue).apply();
+                if (preference.getKey().equals("unit")) {
+                    preferences.edit().putInt("unit", stringValue.equals(Constant.UNITS_KM_ABBR) ? Constant.UNITS_KM : Constant.UNITS_MI).apply();
                 }
             } else {
                 // For all other preferences, set the summary to the value's
@@ -257,7 +257,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("pref_units_value"));
+            bindPreferenceSummaryToValue(findPreference("unit"));
         }
 
         @Override

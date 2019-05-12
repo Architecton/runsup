@@ -49,14 +49,7 @@ public class LoginActivity extends AppCompatActivity {
 
         // Check if user logged in.
         if (preferences.getBoolean("userSignedIn", false)) {
-            // User is logged in.
-            Log.d(TAG, "Signed in");
-
-            // Get id of logged in user.
-            this.userId = preferences.getLong("userId", -1);
-
-            // Render layout of logged in user.
-
+            // Do nothing.
         } else {
 
             // User is not logged in.
@@ -82,12 +75,8 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);  // Call method of superclass.
-        Log.d(TAG, "CALLED!");
-
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
-            Log.d(TAG, "RC_SIGN_IN");
-
             // The Task returned from this call is always completed, no need to attach a listener.
             Task<GoogleSignInAccount> task = GoogleSignIn.getSignedInAccountFromIntent(data);
             handleSignInResult(task);
@@ -98,9 +87,13 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);  // Get account from results.
+            this.preferences.edit().putBoolean("userSignedIn", true).apply();
+            this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
+
             // Signed in successfully, show authenticated UI.
             updateUiLoggedIn(account);
         } catch (ApiException e) {
+
             // The ApiException status code indicates the detailed failure reason.
             // Please refer to the GoogleSignInStatusCodes class reference for more information.
             Log.w(TAG, "signInResult:failed code=" + e.getStatusCode());
@@ -147,10 +140,10 @@ public class LoginActivity extends AppCompatActivity {
         // this.setWeightButton = findViewById(R.id.set_weight_button);
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
-            Log.d(TAG, "Last signed in account found");
             updateUiLoggedIn(account);
         } else {
-            Log.d(TAG, "Not found");
+            this.preferences.edit().putBoolean("userSignedIn", false).apply();
+            this.preferences.edit().remove("userId").apply();
         }
 
         NumberPicker npWeight = findViewById(R.id.numberPicker_set_weight);
@@ -215,6 +208,8 @@ public class LoginActivity extends AppCompatActivity {
 
     // updateUI: update user interface depending on whether user is signed in
     private void updateUiLoggedIn(GoogleSignInAccount account) {
-        findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+        if (account != null) {
+            findViewById(R.id.sign_in_button).setVisibility(View.GONE);
+        }
     }
 }

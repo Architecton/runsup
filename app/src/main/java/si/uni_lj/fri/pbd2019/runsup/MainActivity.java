@@ -53,6 +53,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private FragmentManager fragmentManager;
     private int currentFragment;
 
+    private SharedPreferences preferences;
+
     public static final String STATE_PREF_NAME = "state";
 
     public static MainActivity mainActivity;
@@ -89,7 +91,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
-        SharedPreferences preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
 
         // Check if necessary preferences values exist. If not, set defaults.
         if (!preferences.contains("pref_units_value")) {
@@ -109,10 +111,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Check if user signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
-
             // Get user's photo url and user's full name.
             this.userImageUri = account.getPhotoUrl();
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
+            this.preferences.edit().putBoolean("userSignedIn", true).apply();
+            this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
+
+        } else {
+            this.preferences.edit().putBoolean("userSignedIn", false).apply();
+            this.preferences.edit().remove("userId").apply();
         }
     }
 
@@ -170,6 +177,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MainActivity.this.startActivity(loginIntent);
             }
         });
+
+
+
         return true;
     }
 

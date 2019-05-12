@@ -94,6 +94,8 @@
     <string name="all_labeldistanceunitmiles">mi</string>
     <string name="all_labelpaceunitkilometers">min/km</string>
     <string name="all_labelpaceunitmiles">min/mi</string>
+    <string name="all_min">min</string>
+    <string name="all_labelcaloriesunit">kcal</string>
 
     <!-- Strings related to Settings -->
 
