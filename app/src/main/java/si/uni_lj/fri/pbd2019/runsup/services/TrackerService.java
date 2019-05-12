@@ -78,7 +78,6 @@ public class TrackerService extends Service {
     private final IBinder mBinder = new LocalBinder();  // binder that provides an interface to this service.
 
     SharedPreferences preferences;
-    SharedPreferences.OnSharedPreferenceChangeListener prefListener;
 
     private DatabaseHelper databaseHelper;
 
@@ -111,7 +110,18 @@ public class TrackerService extends Service {
 
         this.locationTimeoutRunnable = new Runnable() {
             public void run() {
-                Log.i("LOLEK", "Locations timeout!");
+                try {
+                    currentWorkout.setDistance(distanceAccumulator);
+                    currentWorkout.setDuration(durationAccumulator);
+                    currentWorkout.setTotalCalories(caloriesAcc);
+                    currentWorkout.setPaceAvg(pace);
+                    currentWorkout.setLastUpdate(new Date());
+                    currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber));
+                    databaseHelper.workoutDao().update(currentWorkout);
+                    Log.i(TAG, "Workout updated due to location updates timeout.");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         };
 
@@ -144,7 +154,9 @@ public class TrackerService extends Service {
                 if (positionList != null && !positionList.isEmpty() &&
                         SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1)
                                 .getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
+                    Log.d("LOLEK1", "HERE");
                     if (!speedList.isEmpty()) {
+                        Log.d("LOLEK", "HERE");
                        pace = 1.0/speedList.get(speedList.size() - 1)*(1000.0/60.0);
                     }
                 }
@@ -166,7 +178,7 @@ public class TrackerService extends Service {
                 toSend.putExtra("calories", caloriesNxt);
                 toSend.putExtra("state", trackingState);
                 toSend.putExtra("sportActivity", sportActivity);
-                toSend.putExtra("positionList", positionList);
+                toSend.putExtra("position", mCurrentLocation);
                 sendBroadcast(toSend);
 
                 // If last location same than in previous broadcast, update noLocationCounter.
@@ -196,70 +208,130 @@ public class TrackerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         String action = intent.getAction();  // Get intent action and switch on it.
+        assert action != null;
         switch (action) {
             case Constant.COMMAND_START:
 
-                durationAccumulator = 0;  // Initialize duration accumulator.
+                this.durationAccumulator = 0;  // Initialize duration accumulator.
 
-                trackingState = Constant.STATE_RUNNING;  // Set service state.
-                firstMeasAfterPause = false;  // initialize indicator.
+                this.trackingState = Constant.STATE_RUNNING;  // Set service state.
+                this.firstMeasAfterPause = false;  // initialize indicator.
 
                 // Initialize sport activity from start command.
-                sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
-                prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
-                startLocationUpdates();  // Start location updates.
-                broadcasting = true;  // Start broadcasting TICK actions.
-                h.postDelayed(r, BROADCAST_PERIOD);
+                this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
+                this.prevTimeMeas = SystemClock.elapsedRealtime();  // Set previous measurement time to now.
+                this.startLocationUpdates();  // Start location updates.
+                this.broadcasting = true;  // Start broadcasting TICK actions.
+                this.h.postDelayed(this.r, this.BROADCAST_PERIOD);
+                this.sessionNumber = 0;
 
                 // TODO
                 // Initialize current workout
                 this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
-                this.sessionNumber = 0;
+                this.currentWorkout.setDistance(this.distanceAccumulator);
+                this.currentWorkout.setDuration(this.durationAccumulator);
+                this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                this.currentWorkout.setPaceAvg(this.pace);
+                this.currentWorkout.setLastUpdate(new Date());
+                try {
+                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
                 break;
             case Constant.COMMAND_CONTINUE:
-                trackingState = Constant.STATE_CONTINUE;  // Set service state.
-                prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
-                startLocationUpdates();  // Start location updates.
-                firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
+                this.trackingState = Constant.STATE_CONTINUE;  // Set service state.
+                this.prevTimeMeas = SystemClock.elapsedRealtime();  // Set time measurement to now.
+                this.startLocationUpdates();  // Start location updates.
+                this.firstMeasAfterPause = true;  // Next measurement will be the first after a pause.
 
                 // RESTORE STATE from preferences.
-                this.durationAccumulator = preferences.getLong("duration", 0);  // Restore duration from shared preferences.
-                this.distanceAccumulator = Double.longBitsToDouble(preferences.getLong("distance", 0));  // Restore distance from preferences.
-                this.sportActivity = preferences.getInt("sportActivity", Constant.RUNNING);  // Restore sport activity from preferences.
+                this.durationAccumulator = this.preferences.getLong("duration", 0);  // Restore duration from shared preferences.
+                this.distanceAccumulator = Double.longBitsToDouble(this.preferences.getLong("distance", 0));  // Restore distance from preferences.
+                this.sportActivity = this.preferences.getInt("sportActivity", Constant.RUNNING);  // Restore sport activity from preferences.
                 this.positionList = intent.getParcelableArrayListExtra("positions");  // Restore positions list from StopwatchFragment.
                 if (this.positionList != null) {  // If position list is not null, reconstruct speedList.
-                    this.speedList = positionsToSpeedList();  // Reconstruct speedList from positionList.
+                    this.speedList = this.positionsToSpeedList();  // Reconstruct speedList from positionList.
                 } else {
                     this.positionList = new ArrayList<>();
                 }
 
 
-                broadcasting = true;  // Start broadcasting.
-                h.postDelayed(r, BROADCAST_PERIOD);
+                this.broadcasting = true;  // Start broadcasting.
+                this.h.postDelayed(r, BROADCAST_PERIOD);
                 this.sessionNumber += 1;
+
+                this.currentWorkout.setDistance(this.distanceAccumulator);
+                this.currentWorkout.setDuration(this.durationAccumulator);
+                this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                this.currentWorkout.setPaceAvg(this.pace);
+                this.currentWorkout.setLastUpdate(new Date());
+                this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber));
+                try {
+                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
 
                 break;
             case Constant.COMMAND_PAUSE:
-                trackingState = Constant.STATE_PAUSED;  // Set service state.
-                stopLocationUpdates();  // Stop location updates and broadcasting.
-                broadcasting = false;
+                this.trackingState = Constant.STATE_PAUSED;  // Set service state.
+                this.stopLocationUpdates();  // Stop location updates and broadcasting.
+                this.broadcasting = false;
 
                 // Store state in preferences to restore in case StopwatchFragment paused.
-                preferences.edit().putLong("duration", this.durationAccumulator).apply();
-                preferences.edit().putLong("distance", Double.doubleToRawLongBits(distanceAccumulator)).apply();
-                preferences.edit().putInt("sportActivity", sportActivity).apply();
+                this.preferences.edit().putLong("duration", this.durationAccumulator).apply();
+                this.preferences.edit().putLong("distance", Double.doubleToRawLongBits(this.distanceAccumulator)).apply();
+                this.preferences.edit().putInt("sportActivity", this.sportActivity).apply();
+
+                this.currentWorkout.setDistance(this.distanceAccumulator);
+                this.currentWorkout.setDuration(this.durationAccumulator);
+                this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                this.currentWorkout.setPaceAvg(this.pace);
+                this.currentWorkout.setLastUpdate(new Date());
+                try {
+                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case Constant.COMMAND_STOP:
-                trackingState = Constant.STATE_STOPPED;  // Set service state.
-                stopLocationUpdates();  // Stop location updates and broadcasting.
-                broadcasting = false;
+                this.trackingState = Constant.STATE_STOPPED;  // Set service state.
+                this.stopLocationUpdates();  // Stop location updates and broadcasting.
+                this.broadcasting = false;
                 this.preferences.edit().clear().apply();  // Clear all stored data about state in preferences.
+
+                this.currentWorkout.setDistance(this.distanceAccumulator);
+                this.currentWorkout.setDuration(this.durationAccumulator);
+                this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                this.currentWorkout.setPaceAvg(this.pace);
+                this.currentWorkout.setLastUpdate(new Date());
+                try {
+                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 break;
             case Constant.UPDATE_SPORT_ACTIVITY:
 
                 // Set sent sport activity.
                 this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
+
+                this.currentWorkout.setDistance(this.distanceAccumulator);
+                this.currentWorkout.setDuration(this.durationAccumulator);
+                this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                this.currentWorkout.setPaceAvg(this.pace);
+                this.currentWorkout.setLastUpdate(new Date());
+                this.currentWorkout.setSportActivity(this.sportActivity);
+                try {
+                    databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+
                 break;
         }
         return super.onStartCommand(intent, flags, startId);
@@ -336,7 +408,14 @@ public class TrackerService extends Service {
                     positionList.add(mCurrentLocation);  // Add location to list of locations.
                     try {
                         int sessionNumber = 0;
-                        databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.get(speedList.size()-1), pace, caloriesAcc));
+                        currentWorkout.setDistance(distanceAccumulator);
+                        currentWorkout.setDuration(durationAccumulator);
+                        currentWorkout.setTotalCalories(caloriesAcc);
+                        currentWorkout.setPaceAvg(pace);
+                        currentWorkout.setLastUpdate(new Date());
+                        currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber));
+                        databaseHelper.workoutDao().update(currentWorkout);
+                        databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.size() > 0 ? speedList.get(speedList.size()-1) : 0, pace, caloriesAcc));
                     } catch (SQLException e) {
                         // TODO
                     }

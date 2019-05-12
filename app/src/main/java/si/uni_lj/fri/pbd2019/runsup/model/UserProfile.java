@@ -3,13 +3,13 @@ package si.uni_lj.fri.pbd2019.runsup.model;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "userProfiles")
+@DatabaseTable(tableName = "UserProfile")
 public class UserProfile {
 
-    @DatabaseField(id = true, useGetSet = true)
+    @DatabaseField(generatedId = true, useGetSet = true)
     private long id;
-    @DatabaseField(canBeNull = false, useGetSet = true)
-    private int user;
+    @DatabaseField(foreign=true, foreignAutoRefresh=true)
+    private User user;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private int weight;
 
@@ -24,11 +24,11 @@ public class UserProfile {
         this.id = id;
     }
 
-    public int getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(int user) {
+    public void setUser(User user) {
         this.user = user;
     }
 

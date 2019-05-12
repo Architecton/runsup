@@ -8,13 +8,13 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.util.Date;
 
 
-@DatabaseTable(tableName = "gpsPoints")
+@DatabaseTable(tableName = "GpsPoint")
 public class GpsPoint {
 
 
-    @DatabaseField(id = true, useGetSet = true)
+    @DatabaseField(generatedId = true, useGetSet = true)
     private long id;
-    @DatabaseField(canBeNull = false, useGetSet = true)
+    @DatabaseField(foreign=true, foreignAutoRefresh=true)
     private Workout workout;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private Long sessionNumber;

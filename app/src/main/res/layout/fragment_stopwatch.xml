@@ -2,7 +2,6 @@
 <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/constraintlayout_stopwatch_content"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context="si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment"
@@ -187,7 +186,6 @@
         app:layout_constraintTop_toBottomOf="@+id/textview_stopwatch_labelcalories" />
 
     <View
-        android:id="@+id/divider5"
         android:layout_width="0dp"
         android:layout_height="2dp"
         android:layout_marginStart="3dp"

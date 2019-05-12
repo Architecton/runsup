@@ -17,6 +17,7 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -54,7 +55,7 @@ public class StopwatchFragment extends Fragment {
     private double paceAccumulator; // average pace
     private long updateCounter;  // counter for number of data updates.
     private double calories;  // current calories used
-    private ArrayList<ArrayList<Location>> positions;
+    private ArrayList<Location> positions;
     private IntentFilter filter;
 
     // State of the stopwatch_shared (see Constant class for values)
@@ -112,7 +113,7 @@ public class StopwatchFragment extends Fragment {
             updateCalories(intent.getDoubleExtra("calories", 0.0));
 
             // Add locations list to list of location lists.
-            positions.add(intent.<Location>getParcelableArrayListExtra("positionList"));
+            positions.add(intent.<Location>getParcelableExtra("position"));
 
             // Set property indicating current sport activity.
             sportActivity = intent.getIntExtra("sportActivity", -1);
@@ -413,7 +414,7 @@ public class StopwatchFragment extends Fragment {
                         workoutDetailsIntent.putExtra("distance", distance);
                         workoutDetailsIntent.putExtra("pace", paceAccumulator/updateCounter);
                         workoutDetailsIntent.putExtra("calories", calories);
-                        workoutDetailsIntent.putExtra("finalPositionsList", positions);
+                        workoutDetailsIntent.putExtra("positions", positions);
                         workoutDetailsIntent.putExtra("workoutId", 129123);  // TODO
                         StopwatchFragment.this.startActivity(workoutDetailsIntent);
                     }
@@ -452,7 +453,8 @@ public class StopwatchFragment extends Fragment {
         Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_CONTINUE);
         if (this.positions.size() >= 1) {
-            startIntent.putParcelableArrayListExtra("positions", this.positions.get(this.positions.size()-1));
+            Log.d("LOLEK", this.positions.toString());
+            startIntent.putParcelableArrayListExtra("positions", this.positions);
         } else {
             startIntent.putParcelableArrayListExtra("positions", new ArrayList<Location>());
         }

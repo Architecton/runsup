@@ -5,14 +5,14 @@ import com.j256.ormlite.table.DatabaseTable;
 
 import java.util.Date;
 
-@DatabaseTable(tableName = "workouts")
+@DatabaseTable(tableName = "Workout")
 public class Workout {
 
 
-    @DatabaseField(id = true, useGetSet = true)
+    @DatabaseField(generatedId = true, useGetSet = true)
     private int id;
-    @DatabaseField(canBeNull = false, useGetSet = true)
-    private int user;
+    @DatabaseField(foreign=true, foreignAutoRefresh=true)
+    private User user;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private String title;
     @DatabaseField(canBeNull = false, useGetSet = true)
@@ -20,11 +20,11 @@ public class Workout {
     @DatabaseField(canBeNull = false, useGetSet = true)
     private int status;
     @DatabaseField(canBeNull = false, useGetSet = true)
-    private int distance;
+    private double distance;
     @DatabaseField(canBeNull = false, useGetSet = true)
-    private int duration;
+    private long duration;
     @DatabaseField(canBeNull = false, useGetSet = true)
-    private int totalCalories;
+    private double totalCalories;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private double paceAvg;
     @DatabaseField(canBeNull = false, useGetSet = true)
@@ -59,11 +59,11 @@ public class Workout {
         this.id = id;
     }
 
-    public int getUser() {
+    public User getUser() {
         return user;
     }
 
-    public void setUser(int user) {
+    public void setUser(User user) {
         this.user = user;
     }
 
@@ -91,27 +91,27 @@ public class Workout {
         this.status = status;
     }
 
-    public int getDistance() {
+    public double getDistance() {
         return distance;
     }
 
-    public void setDistance(int distance) {
+    public void setDistance(double distance) {
         this.distance = distance;
     }
 
-    public int getDuration() {
+    public long getDuration() {
         return duration;
     }
 
-    public void setDuration(int duration) {
+    public void setDuration(long duration) {
         this.duration = duration;
     }
 
-    public int getTotalCalories() {
+    public double getTotalCalories() {
         return totalCalories;
     }
 
-    public void setTotalCalories(int totalCalories) {
+    public void setTotalCalories(double totalCalories) {
         this.totalCalories = totalCalories;
     }
 

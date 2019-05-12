@@ -1,5 +1,5 @@
 #
-# generated on 2019/05/11 10:39:05
+# generated on 2019/05/12 10:04:16
 #
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint
@@ -7,13 +7,14 @@ tableName=gpsPoints
 # --table-fields-start--
 # --field-start--
 fieldName=id
-id=true
+generatedId=true
 useGetSet=true
 # --field-end--
 # --field-start--
 fieldName=workout
-canBeNull=false
-useGetSet=true
+foreign=true
+foreignAutoRefresh=true
+maxForeignAutoRefreshLevel=2
 # --field-end--
 # --field-start--
 fieldName=sessionNumber
@@ -69,7 +70,7 @@ tableName=workouts
 # --table-fields-start--
 # --field-start--
 fieldName=id
-id=true
+generatedId=true
 useGetSet=true
 # --field-end--
 # --field-start--
@@ -131,7 +132,7 @@ tableName=users
 # --table-fields-start--
 # --field-start--
 fieldName=id
-id=true
+generatedId=true
 useGetSet=true
 # --field-end--
 # --field-start--
@@ -153,7 +154,7 @@ tableName=userProfiles
 # --table-fields-start--
 # --field-start--
 fieldName=id
-id=true
+generatedId=true
 useGetSet=true
 # --field-end--
 # --field-start--

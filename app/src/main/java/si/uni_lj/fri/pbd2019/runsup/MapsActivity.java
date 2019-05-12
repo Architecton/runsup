@@ -25,7 +25,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     public static final String TAG = MapsActivity.class.getSimpleName();
     private GoogleMap mMap;
-    private ArrayList<ArrayList<Location>> positions;
+    private ArrayList<Location> positions;
 
     // ### /PROPERTIES ###
 
@@ -46,7 +46,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
 
         // Get list of lists of positions from intent.
-        this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
+        this.positions = (ArrayList<Location>) intent.getSerializableExtra("positions");
     }
 
 
@@ -96,10 +96,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
 
         // Get start and end position of route.
-        LatLng startPos = new LatLng(positionsLast.get(positionsLast.size()-1).getLatitude(),
+        LatLng endPos = new LatLng(positionsLast.get(positionsLast.size()-1).getLatitude(),
                 positionsLast.get(positionsLast.size()-1).getLongitude());
 
-        LatLng endPos = new LatLng(positionsLast.get(0).getLatitude(),
+        LatLng startPos = new LatLng(positionsLast.get(0).getLatitude(),
                 positionsLast.get(0).getLongitude());
 
 
@@ -124,15 +124,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Get map instance.
         this.mMap = googleMap;
 
-        // Get final list of locations.
-        ArrayList<Location> positionsLast = this.positions.get(this.positions.size()-1);
-
         // Draw trail created from locations.
-        this.create_trail(positionsLast);
+        this.create_trail(this.positions);
 
         // Zoom enough to see full route.
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (Location pos : positionsLast) {
+        for (Location pos : this.positions) {
            builder.include(new LatLng(pos.getLatitude(), pos.getLongitude()));
         }
         LatLngBounds bounds = builder.build();
@@ -141,7 +138,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         int padding = (int) (width * 0.10);
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
         mMap.animateCamera(cu);
-
     }
 
 }

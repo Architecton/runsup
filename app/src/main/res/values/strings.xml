@@ -83,8 +83,6 @@
 
     <!-- Example settings for Notifications -->
 
-    <string name="pref_ringtone_silent">Silent</string>
-
     <string name="pref_header_location">Location</string>
     <string name="pref_header_units">Units</string>
     <string name="pref_description_location_access">Allow this application to access your location. You will not be asked to allow location access every time you start a workout.</string>
@@ -92,6 +90,10 @@
     <string name="pref_title_set_dist_units">Distance Units</string>
     <string name="historysettings_actiondelete_history">Delete history</string>
     <string name="history_nohistorydata">No history to show</string>
+    <string name="all_labeldistanceunitkilometers">km</string>
+    <string name="all_labeldistanceunitmiles">mi</string>
+    <string name="all_labelpaceunitkilometers">min/km</string>
+    <string name="all_labelpaceunitmiles">min/mi</string>
 
     <!-- Strings related to Settings -->
 

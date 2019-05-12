@@ -69,7 +69,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     private double avgPace;
     private String workoutTitle;
 
-    private ArrayList<ArrayList<Location>> positions;
+    private ArrayList<Location> positions;
 
     // Date when the activity ended
     private String dateEnd;
@@ -92,7 +92,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.setDistance(intent.getDoubleExtra("distance", 0.0));
         this.setPace(intent.getDoubleExtra("pace", 0.0));
         this.workoutId = intent.getIntExtra("workoutId", -1);
-        this.positions = (ArrayList<ArrayList<Location>>) intent.getSerializableExtra("finalPositionsList");
+        this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
@@ -245,20 +245,17 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
                 // Start MapsActivity and pass locations to it.
                 Intent workoutMapIntent = new Intent(WorkoutDetailActivity.this, MapsActivity.class);
-                workoutMapIntent.putExtra("finalPositionsList", positions);
+                workoutMapIntent.putExtra("positions", positions);
                 WorkoutDetailActivity.this.startActivity(workoutMapIntent);
             }
         });
 
 
-        if (positions.size() > 0 && positions.get(positions.size()-1).size() > 0) {
-
-            // Get last list of locations.
-            ArrayList<Location> positionsLast = positions.get(positions.size()-1);
+        if (positions.size() > 0) {
 
             // Get starting and end positions.
-            Location startPos = positionsLast.get(positionsLast.size()-1);
-            Location endPos = positionsLast.get(0);
+            Location endPos = positions.get(positions.size()-1);
+            Location startPos = positions.get(0);
 
             // Mark starting and end position.
             mMap.addMarker(new MarkerOptions()
@@ -271,13 +268,13 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
 
             // Create route trail.
-            for (int i = 1; i < positionsLast.size(); i++) {
+            for (int i = 1; i < positions.size(); i++) {
                 mMap.addPolyline(new PolylineOptions()
                         .add(
-                                new LatLng(positionsLast.get(i-1).getLatitude(),
-                                        positionsLast.get(i-1).getLongitude()),
-                                new LatLng(positionsLast.get(i).getLatitude(),
-                                        positionsLast.get(i).getLongitude()))
+                                new LatLng(positions.get(i-1).getLatitude(),
+                                        positions.get(i-1).getLongitude()),
+                                new LatLng(positions.get(i).getLatitude(),
+                                        positions.get(i).getLongitude()))
                         .width(5.0f)
                         .color(Color.RED));
             }

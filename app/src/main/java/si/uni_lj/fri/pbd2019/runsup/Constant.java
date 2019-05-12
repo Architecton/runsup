@@ -1,5 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
+import android.app.Application;
+
 public class Constant {
 
     // Commands to Service
@@ -36,10 +38,10 @@ public class Constant {
     public static final int UNITS_KM = 0;
     public static final int UNITS_MI = 1;
 
-    public static final String UNITS_KM_ABBR = "km";
-    public static final String UNITS_MI_ABBR = "mi";
-    public static final String UNITS_MINPKM_ABBR = "min/km";
-    public static final String UNITS_MINPMI_ABBR = "min/mi";
+    public static final String UNITS_KM_ABBR = App.getAppResources().getString(R.string.all_labeldistanceunitkilometers);
+    public static final String UNITS_MI_ABBR = App.getAppResources().getString(R.string.all_labeldistanceunitmiles);
+    public static final String UNITS_MINPKM_ABBR = App.getAppResources().getString(R.string.all_labelpaceunitkilometers);
+    public static final String UNITS_MINPMI_ABBR = App.getAppResources().getString(R.string.all_labelpaceunitmiles);
 
 
     public static final int DEFAULT_WEIGHT = 65;
