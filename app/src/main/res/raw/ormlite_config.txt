@@ -1,9 +1,9 @@
 #
-# generated on 2019/05/12 10:04:16
+# generated on 2019/05/13 10:41:03
 #
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint
-tableName=gpsPoints
+tableName=gpspoint
 # --table-fields-start--
 # --field-start--
 fieldName=id
@@ -66,7 +66,7 @@ useGetSet=true
 #################################
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.Workout
-tableName=workouts
+tableName=workout
 # --table-fields-start--
 # --field-start--
 fieldName=id
@@ -75,8 +75,9 @@ useGetSet=true
 # --field-end--
 # --field-start--
 fieldName=user
-canBeNull=false
-useGetSet=true
+foreign=true
+foreignAutoRefresh=true
+maxForeignAutoRefreshLevel=2
 # --field-end--
 # --field-start--
 fieldName=title
@@ -128,7 +129,7 @@ useGetSet=true
 #################################
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.User
-tableName=users
+tableName=user
 # --table-fields-start--
 # --field-start--
 fieldName=id
@@ -150,7 +151,7 @@ useGetSet=true
 #################################
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.UserProfile
-tableName=userProfiles
+tableName=UserProfile
 # --table-fields-start--
 # --field-start--
 fieldName=id
@@ -159,12 +160,25 @@ useGetSet=true
 # --field-end--
 # --field-start--
 fieldName=user
-canBeNull=false
-useGetSet=true
+foreign=true
+foreignAutoRefresh=true
+maxForeignAutoRefreshLevel=2
 # --field-end--
 # --field-start--
 fieldName=weight
 canBeNull=false
+useGetSet=true
+# --field-end--
+# --table-fields-end--
+# --table-end--
+#################################
+# --table-start--
+dataClass=si.uni_lj.fri.pbd2019.runsup.model.SyncLog
+tableName=synclog
+# --table-fields-start--
+# --field-start--
+fieldName=id
+generatedId=true
 useGetSet=true
 # --field-end--
 # --table-fields-end--

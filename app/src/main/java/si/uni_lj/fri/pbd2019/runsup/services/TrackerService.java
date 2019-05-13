@@ -154,9 +154,7 @@ public class TrackerService extends Service {
                 if (positionList != null && !positionList.isEmpty() &&
                         SystemClock.elapsedRealtime() - positionList.get(positionList.size()-1)
                                 .getElapsedRealtimeNanos()*1.0e-6 < MIN_TIME_BETWEEN_UPDATES*2) {
-                    Log.d("LOLEK1", "HERE");
                     if (!speedList.isEmpty()) {
-                        Log.d("LOLEK", "HERE");
                        pace = 1.0/speedList.get(speedList.size() - 1)*(1000.0/60.0);
                     }
                 }

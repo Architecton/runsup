@@ -20,7 +20,7 @@ import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
 public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
 
     private static final String DATABASE_NAME = "tracker";
-    private static final int DATABASE_VERSION = 1;
+    private static final int DATABASE_VERSION = 2;
 
     /**
      * The data access object used to interact with the Sqlite database to do C.R.U.D operations.

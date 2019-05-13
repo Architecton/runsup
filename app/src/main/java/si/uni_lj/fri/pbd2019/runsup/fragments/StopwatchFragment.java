@@ -35,6 +35,7 @@ import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
+import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
 import static android.content.Context.MODE_PRIVATE;
 
@@ -56,10 +57,10 @@ public class StopwatchFragment extends Fragment {
     private double paceAccumulator; // average pace
     private long updateCounter;  // counter for number of data updates.
     private double calories;  // current calories used
-    private ArrayList<Location> positions;
-    private IntentFilter filter;
+    private ArrayList<Location> positions;  // list of positions
+    private IntentFilter filter;  // intent filter
 
-    // State of the stopwatch_shared (see Constant class for values)
+    // State of the stopwatch (see Constant class for values)
     private int state;
 
     // buttons for starting/pausing the workout and for ending the workout
@@ -68,12 +69,15 @@ public class StopwatchFragment extends Fragment {
     private Button showMapButton;
     private Button sportActivityButton;
 
-
-    public static final String STATE_PREF_NAME = "state";
+    // shared preferences
     private SharedPreferences preferences;
+    // OnSharedPreferenceChangeListener instance
     SharedPreferences.OnSharedPreferenceChangeListener prefListener;
+
+    // distance units to use (see Constant class for values)
     private int distUnits;
 
+    // firstRun: indicator that indicates fragment being run for first time
     private boolean firstRun = true;
 
 
@@ -130,40 +134,50 @@ public class StopwatchFragment extends Fragment {
     // ### /PROPERTIES ###
 
 
+    // onCreateView: method called when view is to be created.
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(true);  // Fragment has an options menu.
 
-        // Initialize shared preferences pointer.
-        this.preferences = getActivity().getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        // Initialize shared preferences instance.
+        this.preferences = getActivity().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
 
+        // Initialize OnSharedPreferenceChangeListener instance.
         prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
             public void onSharedPreferenceChanged(SharedPreferences prefs, String key) {
 
-                // Handle preference changes
-                if (key.equals("unit")) {
+                // Handle preference changes.
+                if (key.equals("unit")) {  // If value with key "unit" changed, change value of distUnits variable.
                     distUnits = preferences.getInt(key, Constant.UNITS_KM) == Constant.UNITS_KM
                             ? Constant.UNITS_KM : Constant.UNITS_MI;
-                    preferences.edit().putBoolean("unitsChanged", true).apply();
+                    preferences.edit().putBoolean("unitsChanged", true).apply();  // Set indicator that units changed.
                 }
                 if (key.equals("pref_location_access_value")) {
                     // pass
                 }
             }
         };
+
+        // Register OnSharedPreferenceChangeListener instance.
         preferences.registerOnSharedPreferenceChangeListener(prefListener);
 
+        // Set value of variable storing distance units.
         this.distUnits = this.preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM
                 ? Constant.UNITS_KM : Constant.UNITS_MI;
 
         return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
     }
 
+
+    // updateUnitsUI: update units displayed in user interface.
     private void updateUnitsUI(int distUnits) {
-        // Update unit abbreviations on UI.
+
+        // Get TextView instances containing the unit abbreviations.
         TextView distUnitsTextView = getActivity().findViewById(R.id.textview_stopwatch_distanceunit);
         TextView paceUnitsTextView = getActivity().findViewById(R.id.textview_stopwatch_unitpace);
+
+        // Set text on TextView instances
         if (distUnits == Constant.UNITS_KM) {
             distUnitsTextView.setText(Constant.UNITS_KM_ABBR);
             paceUnitsTextView.setText(Constant.UNITS_MINPKM_ABBR);
@@ -174,8 +188,7 @@ public class StopwatchFragment extends Fragment {
     }
 
 
-    // confirmSportActivitySelection: prompt user to confirm sport activity selection and apply selection
-    // if user confirmed.
+    // confirmSportActivitySelection: prompt user to confirm sport activity selection and apply selection if user confirmed.
     private void confirmSportActivitySelection(final int sportActivityCode) {
         new AlertDialog.Builder(getContext())
                 .setTitle("Change Sport Activity")
@@ -190,10 +203,11 @@ public class StopwatchFragment extends Fragment {
                 .show();
     }
 
-    // oncCreate: method called when the activity is created
+    // oncCreate: method called when view is created.
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        // Initialize buttons
+
+        // Initialize Button instances.
         this.stopwatchStartButton = view.findViewById(R.id.button_stopwatch_start);
         this.endWorkoutButton = view.findViewById(R.id.button_stopwatch_endworkout);
         this.showMapButton = view.findViewById(R.id.button_stopwatch_activeworkout);
@@ -201,12 +215,12 @@ public class StopwatchFragment extends Fragment {
 
         // Set listener on button to listen for workout start.
         this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {  // callback method for when the button is pressed
+            public void onClick(View v) {
                 startStopwatch();
             }
         });
 
-        // TODO write to shared preferences if units changed and only update UI in that case.
+        // If fragment loaded for first time or if units changed, set unit abbreviations on UI.
         if (firstRun || preferences.getBoolean("unitsChanged", true)) {
             updateUnitsUI(distUnits);
             preferences.edit().putBoolean("unitsChanged", false).apply();
@@ -217,7 +231,6 @@ public class StopwatchFragment extends Fragment {
         this.sportActivityButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // setup the alert builder
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
                         .setTitle("Select Activity")
                         .setItems(Constant.activities, new DialogInterface.OnClickListener() {
@@ -255,61 +268,74 @@ public class StopwatchFragment extends Fragment {
         // set listener on button to listen for workout end.
         this.endWorkoutButton.setOnClickListener(endListener);
 
-
-        // TODO: show alert and move this to settings
         // Check for location access permissions.
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(getActivity(), new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
+            // Prompt user to confirm decision to end workout.
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Access To Location")
+                    .setMessage("Please turn on location access in the application's settings for the best experience.")
+                    .setPositiveButton(R.string.go_to_settings, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent settingsActivityIntent = new Intent(getContext(), SettingsActivity.class);
+                            getContext().startActivity(settingsActivityIntent);
+                        }
+                    })
+                    .setNegativeButton(R.string.dismiss, null)  // Do nothing if user selects cancel.
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+
         }
 
         // property initializations
         this.positions = new ArrayList<>();     // initialize list of positions lists.
         this.paceAccumulator = 0;               // Initialize pace accumulator;
         this.updateCounter = 0;                 // Initialize counter of data updates.
-        this.state = Constant.STATE_STOPPED;
+        this.state = Constant.STATE_STOPPED;    // Initial state is STATE_STOPPED.
         this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
 
         // ## INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
-        this.filter = new IntentFilter();
+        this.filter = new IntentFilter();                  // Initialize intent filter.
         this.filter.addAction(Constant.TICK);              // Register action.
         getActivity().registerReceiver(receiver, filter);  // Register receiver.
-        this.receiverRegistered = true;
+        this.receiverRegistered = true;                    // Set flag that indicates receiver is registered.
         // ## /INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
 
 
         // Create a new service connection.
         sConn = new ServiceConnection() {
 
-            // callback that is called when the service is connected.
+            // callback that is called when the service is connected
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 service = ((TrackerService.LocalBinder)binder).getService();  // Call getService of passed binder.
                 bound = true;  // Set bound indicator to true.
             }
 
-            // callback that is called when the service is disconnected.
+            // callback that is called when the service is disconnected
             public void onServiceDisconnected(ComponentName name) {
                 bound = false; // Set bound indicator to false.
-                getActivity().unregisterReceiver(receiver);
+                getActivity().unregisterReceiver(receiver);  // Unregister receiver.
             }
         };
 
         // Bind service to activity.
         getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
-        this.bound = true;  // Set bound indicator.
+        this.bound = true;  // Set bound indicator to true.
     }
 
 
-    // onPause: method run when the activity is paused.
+    // onPause: method called when the activity is paused.
     @Override
     public void onPause() {
         super.onPause();
-        // Check if workout running.
+
+        // If workout is not running, unbind and stop service.
         if (this.state == Constant.STATE_STOPPED || this.state == Constant.STATE_PAUSED) {
             if (this.bound) {
                 getActivity().unbindService(sConn);
                 this.bound = false;
                 getActivity().stopService(new Intent(getContext(), TrackerService.class));
             }
+
             // If receiver registered, unregister.
             if (this.receiverRegistered) {
                 getActivity().unregisterReceiver(this.receiver);
@@ -318,12 +344,12 @@ public class StopwatchFragment extends Fragment {
         }
     }
 
-    // onResume: method run when the activity is resumed.
+    // onResume: method called when the activity is resumed.
     @Override
     public void onResume() {
-        super.onResume();  // Call onResume method of superclass.
+        super.onResume();
 
-        // rebind click listeners according to state.
+        // Rebind OnClickListener instances according to state.
         switch (this.state) {
             case Constant.STATE_RUNNING:
                 this.stopwatchStartButton.setOnClickListener(pauseListener);
@@ -339,32 +365,34 @@ public class StopwatchFragment extends Fragment {
         }
         // If service not bound, bind it.
         if (!this.bound) {
-            // Bind service to activity.
             getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
-            getActivity().registerReceiver(receiver, filter);
+            this.bound = true;
         }
 
         // If receiver not registered, register.
         if (!this.receiverRegistered) {
-            getContext().registerReceiver(this.receiver, this.filter);
+            getActivity().registerReceiver(this.receiver, this.filter);
             this.receiverRegistered = true;
         }
     }
 
-    // onDestroy: method called when the activity is destoryed.
+    // onDestroy: method called when the activity is destroyed.
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (this.bound) {  // If service still bounded, unbind.
+
+        // If service bound, unbind and stop it.
+        if (this.bound) {
             getActivity().unbindService(sConn);
             this.bound = false;
             getActivity().stopService(new Intent(getContext(), TrackerService.class));
             getActivity().unregisterReceiver(receiver);
         }
 
-        // If receiver not registered, register.
+        // If receiver registered, unregister it.
         if (this.receiverRegistered) {
-            getActivity().registerReceiver(this.receiver, this.filter);
+            getActivity().unregisterReceiver(this.receiver);
+            this.receiverRegistered = false;
         }
 
     }
@@ -397,7 +425,7 @@ public class StopwatchFragment extends Fragment {
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // Initialize intent for starting the service.
+                        // Initialize intent for startin the dharmag the service.
                         Intent startIntent = new Intent(getContext(), TrackerService.class);
                         startIntent.setAction(Constant.COMMAND_STOP);  // Set action.
                         getContext().startService(startIntent);
@@ -426,7 +454,7 @@ public class StopwatchFragment extends Fragment {
                 .show();
     }
 
-    // pauseStopWatch: method used to pause the stopwatch_shared.
+    // pauseStopWatch: method used to pause the stopwatch.
     public void pauseStopwatch() {
 
         // Initialize the intent for starting the service.
@@ -454,8 +482,9 @@ public class StopwatchFragment extends Fragment {
         // Initialize the intent for starting the service.
         Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_CONTINUE);
+
+        // Send list of positions to reconstruct service's list of speeds.
         if (this.positions.size() >= 1) {
-            Log.d("LOLEK", this.positions.toString());
             startIntent.putParcelableArrayListExtra("positions", this.positions);
         } else {
             startIntent.putParcelableArrayListExtra("positions", new ArrayList<Location>());
@@ -545,6 +574,7 @@ public class StopwatchFragment extends Fragment {
 
     // ### /METHODS FOR UPDATING THE UI ###
 
+
     // setSportActivity: handle requests to change the sports activity
     private void setSportActivity(int activityCode) {
 
@@ -563,6 +593,8 @@ public class StopwatchFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.stopwatch_shared, menu);
+
+        // If user not signed in, hide synchronization option in menu.
         if (!preferences.getBoolean("userSignedIn", false)) {
             MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
             menuItem.setVisible(false);

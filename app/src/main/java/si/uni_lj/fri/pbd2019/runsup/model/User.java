@@ -3,7 +3,7 @@ package si.uni_lj.fri.pbd2019.runsup.model;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
-@DatabaseTable(tableName = "User")
+@DatabaseTable
 public class User {
 
     @DatabaseField(generatedId = true, useGetSet = true)

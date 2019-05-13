@@ -1,7 +1,5 @@
 package si.uni_lj.fri.pbd2019.runsup.helpers;
 
-import android.util.Log;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;

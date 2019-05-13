@@ -18,97 +18,72 @@ public final class MainHelper {
     private static final float MINpKM_TO_MINpMI = 1.609344f;
 
 
-
-
-    /**
-     * return string of time in format HH:MM:SS
-     * @param time - in seconds
-     */
+    // formatDuration: format duration of workout to HH:mm:ss form.
     public static String formatDuration(long time) {
         SimpleDateFormat df = new SimpleDateFormat("HH:mm:ss");
         df.setTimeZone(TimeZone.getTimeZone("GMT"));
         return df.format(new Date(time * 1000L));
     }
 
-    /**
-     * convert m to km and round to 2 decimal places and return as string
-     */
+    // formatDistance: format distance (return distance in kilometers with 2 decimals)
     public static String formatDistance(double n) {
         return String.format("%.2f", n*1.0e-3);
     }
 
 
-    /**
-     * conver m to km and round to 2 decimal places and return as string with units
-     */
+    // formatDistanceWithUnits: format distance (return string representation /kilometers with 2 decimals and units abbreviation/)
     public static String formatDistanceWithUnits(double n) {
         return formatDistance(n) + " " + WorkoutDetailActivity.resources.getString(R.string.distance_unit);
     }
 
-    /**
-     * round number to 2 decimal places and return as string
-     */
+    // formatPace: format pace (return min/km with 2 decimals)
     public static String formatPace(double n) {
         return String.format("%.2f", n);
     }
 
-    /**
-     * round number to 2 decimal places and return as string
-     */
+
+    // formatPace: format pace (return min/km with 2 decimals and include pace units abbreviation)
     public static String formatPaceWithUnits(double n) {
         return formatPace(n) + " " + WorkoutDetailActivity.resources.getString(R.string.pace_unit);
     }
 
 
-    /**
-     * round number to integer
-     */
+    // formatCalories: format calories (return rounded integer)
     public static String formatCalories(double n) {
         return String.format("%d", (int)Math.round(n));
     }
 
-    /**
-     * round number to integer
-     */
+    // formatCaloriesWithUnits: format calories (return rounded integer with unit abbreviation appended
     public static String formatCaloriesWithUnits(double n) {
         return formatCalories(n) + " " + WorkoutDetailActivity.resources.getString(R.string.calories_unit);
     }
 
-    /**
-     * convert km to mi (multiply with a corresponding constant)
-     * */
+
+    // kmToMi: convert kilometers to miles.
     public static double kmToMi(double n) {
         return n*KM_TO_MI;
 
     }
 
-    /**
-     * convert m/s to mi/h (multiply with a corresponding constant)
-     * */
+    // mpsToMiph: convert meters/second to miles/hour
     public static float mpsToMiph(float n) {
         return n*MpS_TO_MIpH;
 
     }
 
-    /**
-     * convert m/s to mi/h (multiply with a corresponding constant)
-     * */
+    // kmphToMiph: conver kilometers/hour to miles/hour
     public static double kmphToMiph(Double n) {
         return n*KM_TO_MI;
     }
 
-    /**
-     *  convert min/km to min/mi (multiply with a corresponding constant)
-     * */
+
+    // minpkmToMinpmi: convert minutes/kilometer to minutes/mile
     public static double minpkmToMinpmi(double n) {
         return n*MINpKM_TO_MINpMI;
     }
 
-    /**
-     * Convert constant representing a sport activity to name of sport activity.
-     * @param sportActivity
-     * @return
-     */
+
+    // getSportActivityName: Get name of sport activity from its integer code.
     public static String getSportActivityName(int sportActivity) {
         switch (sportActivity) {
             case Constant.RUNNING:

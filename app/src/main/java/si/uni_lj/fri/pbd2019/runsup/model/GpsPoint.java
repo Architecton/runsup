@@ -8,7 +8,7 @@ import com.j256.ormlite.table.DatabaseTable;
 import java.util.Date;
 
 
-@DatabaseTable(tableName = "GpsPoint")
+@DatabaseTable
 public class GpsPoint {
 
 

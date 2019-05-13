@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.sql.SQLException;
 
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
+import si.uni_lj.fri.pbd2019.runsup.model.SyncLog;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
@@ -22,7 +23,7 @@ public class OrmliteDatabaseConfigUtil extends OrmLiteConfigUtil {
     /**
      * classes represents the models to use for generating the ormlite_config.txt file
      */
-    private static final Class<?>[] classes = new Class[] {GpsPoint.class, Workout.class, User.class, UserProfile.class};
+    private static final Class<?>[] classes = new Class[] {GpsPoint.class, Workout.class, User.class, UserProfile.class, SyncLog.class};
 
     /**
      * Given that this is a separate program from the android app, we have to use

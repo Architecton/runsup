@@ -48,4 +48,6 @@ public class Constant {
     public static final int DEFAULT_AGE = 30;
     public static final String DEFAULT_WORKOUT_TITLE_FORMAT_STRING = "Workout %d";
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
+
+    public static final String STATE_PREF_NAME = "state";
 }

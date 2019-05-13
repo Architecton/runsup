@@ -85,7 +85,7 @@
 
     <string name="pref_header_location">Location</string>
     <string name="pref_header_units">Units</string>
-    <string name="pref_description_location_access">Allow this application to access your location. You will not be asked to allow location access every time you start a workout.</string>
+    <string name="pref_description_location_access">Allow this application to access your location</string>
     <string name="pref_title_location_access">Location Access</string>
     <string name="pref_title_set_dist_units">Distance Units</string>
     <string name="historysettings_actiondelete_history">Delete history</string>
@@ -96,6 +96,8 @@
     <string name="all_labelpaceunitmiles">min/mi</string>
     <string name="all_min">min</string>
     <string name="all_labelcaloriesunit">kcal</string>
+    <string name="dismiss">dismiss</string>
+    <string name="go_to_settings">go to settings</string>
 
     <!-- Strings related to Settings -->
 

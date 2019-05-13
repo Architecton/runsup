@@ -18,18 +18,25 @@ import static si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity.STATE_PREF_
 
 public class HistoryFragment extends Fragment {
 
+    // ### PROPERTIES ###
+
     private SharedPreferences preferences;
 
+    // ### /PROPERTIES ###
+
+    // onCreateView: method called when view is to be created.
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        setHasOptionsMenu(true);
+        setHasOptionsMenu(true);  // Fragment has an options menu.
+
+        // Get shared preferences.
         this.preferences = getActivity().getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
         return inflater.inflate(R.layout.fragment_history, parent, false);
     }
 
 
-    // oncCreate: method called when the activity is created
+    // onViewCreated: method called when view is created.
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
@@ -38,11 +45,12 @@ public class HistoryFragment extends Fragment {
     // onCreateOptionsMenu: called when options menu created.
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.history, menu);
+        inflater.inflate(R.menu.history, menu);  // Inflate options menu.
+
+        // If user not signed in, hide synchronization option in menu.
         if (!preferences.getBoolean("userSignedIn", false)) {
             MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
             menuItem.setVisible(false);
         }
     }
-
 }
