@@ -10,7 +10,7 @@ public class Workout {
 
 
     @DatabaseField(generatedId = true, useGetSet = true)
-    private int id;
+    private long id;
     @DatabaseField(foreign=true, foreignAutoRefresh=true)
     private User user;
     @DatabaseField(canBeNull = false, useGetSet = true)
@@ -51,11 +51,11 @@ public class Workout {
         this.sportActivity = sportActivity;
     }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

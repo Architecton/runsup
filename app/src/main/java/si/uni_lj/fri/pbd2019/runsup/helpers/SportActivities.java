@@ -50,7 +50,10 @@ public final class SportActivities {
         put(Constant.CYCLING, 0.744444444);
     }};
 
-
+    // HERE FOR TESTING
+    static int RUNNING = Constant.RUNNING;
+    static int CYCLING = Constant.CYCLING;
+    static int WALKING = Constant.WALKING;
 
     /**
     * Returns MET value for an activity.
