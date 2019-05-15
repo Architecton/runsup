@@ -209,6 +209,7 @@ public class TrackerService extends Service {
         assert action != null;
         switch (action) {
             case Constant.COMMAND_START:
+                Log.d("HEREHERE", "HERE");
 
                 this.durationAccumulator = 0;  // Initialize duration accumulator.
 
@@ -226,15 +227,17 @@ public class TrackerService extends Service {
                 // TODO
                 // Initialize current workout
                 this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
+                this.currentWorkout.setCreated(new Date());
                 this.currentWorkout.setDistance(this.distanceAccumulator);
                 this.currentWorkout.setDuration(this.durationAccumulator);
                 this.currentWorkout.setTotalCalories(this.caloriesAcc);
                 this.currentWorkout.setPaceAvg(this.pace);
                 this.currentWorkout.setLastUpdate(new Date());
                 try {
-                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                    this.databaseHelper.workoutDao().create(currentWorkout);
+                    Log.d("BURBUR", Long.toString(this.databaseHelper.workoutDao().countOf()));
                 } catch (SQLException e) {
-                    e.printStackTrace();
+                    Log.d("ERRERR", "ERR");
                 }
 
                 break;
