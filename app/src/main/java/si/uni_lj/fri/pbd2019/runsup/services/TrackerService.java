@@ -209,12 +209,16 @@ public class TrackerService extends Service {
         assert action != null;
         switch (action) {
             case Constant.COMMAND_START:
-                Log.d("HEREHERE", "HERE");
 
-                this.durationAccumulator = 0;  // Initialize duration accumulator.
+                Workout pausedWorkout = null;
+                if (intent.hasExtra("pausedWorkout")) {
+                    pausedWorkout = (Workout) intent.getSerializableExtra("pausedWorkout");
+                }
+
+                this.durationAccumulator = (pausedWorkout == null) ? 0 : pausedWorkout.getDuration();  // Initialize duration accumulator.
 
                 this.trackingState = Constant.STATE_RUNNING;  // Set service state.
-                this.firstMeasAfterPause = false;  // initialize indicator.
+                this.firstMeasAfterPause = (pausedWorkout == null) ? false : true;  // initialize indicator.
 
                 // Initialize sport activity from start command.
                 this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
@@ -222,22 +226,25 @@ public class TrackerService extends Service {
                 this.startLocationUpdates();  // Start location updates.
                 this.broadcasting = true;  // Start broadcasting TICK actions.
                 this.h.postDelayed(this.r, this.BROADCAST_PERIOD);
-                this.sessionNumber = 0;
+                this.sessionNumber = (pausedWorkout == null) ? 0 : Integer.parseInt(pausedWorkout.getTitle().substring(pausedWorkout.getTitle().indexOf(' ')+1));
 
-                // TODO
                 // Initialize current workout
-                this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
-                this.currentWorkout.setCreated(new Date());
-                this.currentWorkout.setDistance(this.distanceAccumulator);
-                this.currentWorkout.setDuration(this.durationAccumulator);
-                this.currentWorkout.setTotalCalories(this.caloriesAcc);
-                this.currentWorkout.setPaceAvg(this.pace);
-                this.currentWorkout.setLastUpdate(new Date());
-                try {
-                    this.databaseHelper.workoutDao().create(currentWorkout);
-                    Log.d("BURBUR", Long.toString(this.databaseHelper.workoutDao().countOf()));
-                } catch (SQLException e) {
-                    Log.d("ERRERR", "ERR");
+                if (pausedWorkout == null) {
+                    this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
+                    this.currentWorkout.setCreated(new Date());
+                    this.currentWorkout.setDistance(this.distanceAccumulator);
+                    this.currentWorkout.setDuration(this.durationAccumulator);
+                    this.currentWorkout.setTotalCalories(this.caloriesAcc);
+                    this.currentWorkout.setPaceAvg(this.pace);
+                    this.currentWorkout.setLastUpdate(new Date());
+                    this.currentWorkout.setStatus(Workout.statusRunning);
+                    try {
+                        this.databaseHelper.workoutDao().create(currentWorkout);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                   this.currentWorkout = pausedWorkout;
                 }
 
                 break;
@@ -269,6 +276,7 @@ public class TrackerService extends Service {
                 this.currentWorkout.setPaceAvg(this.pace);
                 this.currentWorkout.setLastUpdate(new Date());
                 this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber));
+                this.currentWorkout.setStatus(Workout.statusRunning);
                 try {
                     this.databaseHelper.workoutDao().update(this.currentWorkout);
                 } catch (SQLException e) {
@@ -291,6 +299,7 @@ public class TrackerService extends Service {
                 this.currentWorkout.setTotalCalories(this.caloriesAcc);
                 this.currentWorkout.setPaceAvg(this.pace);
                 this.currentWorkout.setLastUpdate(new Date());
+                this.currentWorkout.setStatus(Workout.statusPaused);
                 try {
                     this.databaseHelper.workoutDao().update(this.currentWorkout);
                 } catch (SQLException e) {
@@ -309,6 +318,7 @@ public class TrackerService extends Service {
                 this.currentWorkout.setTotalCalories(this.caloriesAcc);
                 this.currentWorkout.setPaceAvg(this.pace);
                 this.currentWorkout.setLastUpdate(new Date());
+                this.currentWorkout.setStatus(Workout.statusEnded);
                 try {
                     this.databaseHelper.workoutDao().update(this.currentWorkout);
                 } catch (SQLException e) {
@@ -418,7 +428,7 @@ public class TrackerService extends Service {
                         databaseHelper.workoutDao().update(currentWorkout);
                         databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.size() > 0 ? speedList.get(speedList.size()-1) : 0, pace, caloriesAcc));
                     } catch (SQLException e) {
-                        // TODO
+                        e.printStackTrace();
                     }
                 }
             }

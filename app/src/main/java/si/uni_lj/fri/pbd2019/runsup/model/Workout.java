@@ -3,10 +3,11 @@ package si.uni_lj.fri.pbd2019.runsup.model;
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @DatabaseTable
-public class Workout {
+public class Workout implements Serializable {
 
 
     @DatabaseField(generatedId = true, useGetSet = true)
@@ -41,6 +42,8 @@ public class Workout {
     public static final int statusPaused = 2;
     // deleted workout
     public static final int statusDeleted= 3;
+    // running workout
+    public static final int statusRunning = 4;
 
 
     public Workout() {

@@ -27,13 +27,21 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.j256.ormlite.dao.Dao;
+import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.PreparedQuery;
+
+import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.ActiveWorkoutMapActivity;
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
+import si.uni_lj.fri.pbd2019.runsup.model.Workout;
+import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
@@ -79,6 +87,9 @@ public class StopwatchFragment extends Fragment {
 
     // firstRun: indicator that indicates fragment being run for first time
     private boolean firstRun = true;
+
+    // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
+    Workout lastPausedWorkout;
 
 
     // ## class level listeners ##
@@ -320,6 +331,38 @@ public class StopwatchFragment extends Fragment {
         // Bind service to activity.
         getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
         this.bound = true;  // Set bound indicator to true.
+
+
+        // Load last non-ended workout from database if it exists.
+
+        // initially null
+        lastPausedWorkout = null;
+        try {
+
+            // Get dao for workouts.
+            Dao<Workout, Long> workoutDao = new DatabaseHelper(getContext()).workoutDao();
+            //DeleteBuilder<Workout, Long> deleteBuilder = workoutDao.deleteBuilder();
+            //deleteBuilder.where().eq("status", 2);
+            //deleteBuilder.delete();
+
+            // Make a prepared query to get last paused workout from database.
+            PreparedQuery<Workout> query = workoutDao.queryBuilder().limit(1l).orderBy("lastUpdate", false).where().eq("status", 2).prepare();
+            List<Workout> lastPausedWorkoutList = workoutDao.query(query);  // Get last paused workout from database.
+            if (lastPausedWorkoutList.size() > 0) {  // if found
+                lastPausedWorkout = lastPausedWorkoutList.get(0);
+
+                // Update TextView fields in UI depending on found values of last paused workout.
+                updateDuration(Math.round(1.0e-3 * (double)lastPausedWorkout.getDuration()));
+                updateDistance(lastPausedWorkout.getDistance(), distUnits);
+                updatePace(lastPausedWorkout.getPaceAvg(), distUnits);
+                updateCalories(lastPausedWorkout.getTotalCalories());
+
+
+            } else {
+                Log.d(TAG, "No paused workouts found");            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -406,6 +449,9 @@ public class StopwatchFragment extends Fragment {
         Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_START);
         startIntent.putExtra("sportActivity", this.sportActivity);
+        if (this.lastPausedWorkout != null) {
+            startIntent.putExtra("pausedWorkout", this.lastPausedWorkout);
+        }
         getActivity().startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
