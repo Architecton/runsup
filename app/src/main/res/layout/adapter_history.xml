@@ -6,18 +6,21 @@
 
     <ImageView
         android:id="@+id/imageview_history_icon"
-        android:layout_width="20dp"
+        android:layout_width="match_parent"
         android:layout_height="20dp" />
+
     <TextView
         android:id="@+id/textview_history_title"
-        android:layout_width="20dp"
+        android:layout_width="match_parent"
         android:layout_height="20dp" />
+
     <TextView
         android:id="@+id/textview_history_datetime"
-        android:layout_width="20dp"
+        android:layout_width="match_parent"
         android:layout_height="20dp" />
+
     <TextView
         android:id="@+id/textview_history_sportactivity"
-        android:layout_width="20dp"
+        android:layout_width="match_parent"
         android:layout_height="20dp" />
 </LinearLayout>

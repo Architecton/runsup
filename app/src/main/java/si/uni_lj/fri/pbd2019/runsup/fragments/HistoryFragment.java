@@ -56,9 +56,15 @@ public class HistoryFragment extends Fragment {
         ArrayList<Workout> workouts = new ArrayList<Workout>();
         try {
             Dao<Workout, Long> workoutDao = dh.workoutDao();
-            Iterator it = workoutDao.iterator();
-            while(it.hasNext()) {
-                workouts.add((Workout) it.next());
+
+            // If workouts found in database, remove TextView instance that informs of
+            // absence of workouts.
+            if (workoutDao.countOf() > 0) {
+                getActivity()
+                        .findViewById(R.id.textview_history_noHistoryData).setVisibility(View.GONE);
+            }
+            for (Workout aWorkoutDao : workoutDao) {
+                workouts.add(aWorkoutDao);
             }
         } catch (SQLException e) {
             e.printStackTrace();

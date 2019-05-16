@@ -313,11 +313,11 @@ public class StopwatchFragment extends Fragment {
                             .limit(1l)
                             .orderBy("lastUpdate", false)
                             .where()
-                            .eq("status", 2)
+                            .eq("status", Constant.STATE_RUNNING)
                             .or()
-                            .eq("status", 3)
+                            .eq("status", Constant.STATE_CONTINUE)
                             .or()
-                            .eq("status", 4)
+                            .eq("status", Constant.STATE_PAUSED)
                             .prepare();
                     List<Workout> lastUnfinishedWorkoutList = workoutDao.query(query);  // Get last paused workout from database.
                     if (lastUnfinishedWorkoutList.size() > 0) {  // if found

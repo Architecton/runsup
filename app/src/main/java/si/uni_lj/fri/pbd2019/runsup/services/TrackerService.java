@@ -112,7 +112,7 @@ public class TrackerService extends Service {
             public void run() {
 
                 // Update workout in database.
-                updateWorkoutInDB();
+                updateWorkout(true);
             }
         };
 
@@ -222,7 +222,13 @@ public class TrackerService extends Service {
                 // Initialize current workout
                 if (unfinishedWorkout == null) {
                     this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
-                    updateWorkoutInDB();
+                    this.currentWorkout.setCreated(new Date());
+                    updateWorkout(false);
+                    try {
+                        this.databaseHelper.workoutDao().create(this.currentWorkout);
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
                 } else {
                    this.currentWorkout = unfinishedWorkout;
                 }
@@ -251,7 +257,7 @@ public class TrackerService extends Service {
                 this.sessionNumber += 1;
 
                 // Update workout in database.
-                updateWorkoutInDB();
+                updateWorkout(true);
                 break;
             case Constant.COMMAND_PAUSE:
                 this.trackingState = Constant.STATE_PAUSED;  // Set service state.
@@ -264,7 +270,7 @@ public class TrackerService extends Service {
                 this.preferences.edit().putInt("sportActivity", this.sportActivity).apply();
 
                 // Update workout in database.
-                updateWorkoutInDB();
+                updateWorkout(true);
                 break;
             case Constant.COMMAND_STOP:
                 this.trackingState = Constant.STATE_STOPPED;  // Set service state.
@@ -273,7 +279,7 @@ public class TrackerService extends Service {
                 this.preferences.edit().clear().apply();  // Clear all stored data about state in preferences.
 
                 // Update workout in database.
-                updateWorkoutInDB();
+                updateWorkout(true);
                 break;
             case Constant.UPDATE_SPORT_ACTIVITY:
 
@@ -281,27 +287,33 @@ public class TrackerService extends Service {
                 this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
 
                 // Update workout in database.
-                updateWorkoutInDB();
+                updateWorkout(true);
                 break;
         }
         return super.onStartCommand(intent, flags, startId);
     }
 
     // updateWorkoutInDb: update current workout in database
-    private void updateWorkoutInDB() {
+    private void updateWorkout(boolean save) {
         Log.d(TAG, "Workout updated in DB");
-        this.currentWorkout.setDistance(this.distanceAccumulator);
-        this.currentWorkout.setDuration(this.durationAccumulator);
-        this.currentWorkout.setTotalCalories(this.caloriesAcc);
-        this.currentWorkout.setPaceAvg(this.pace);
-        this.currentWorkout.setLastUpdate(new Date());
-        this.currentWorkout.setSportActivity(this.sportActivity);
-        this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, this.sessionNumber));
-        this.currentWorkout.setStatus(this.trackingState);
-        try {
-            this.databaseHelper.workoutDao().update(this.currentWorkout);
-        } catch (SQLException e) {
-            e.printStackTrace();
+        if (this.currentWorkout != null) {
+            this.currentWorkout.setDistance(this.distanceAccumulator);
+            this.currentWorkout.setDuration(this.durationAccumulator);
+            this.currentWorkout.setTotalCalories(this.caloriesAcc);
+            this.currentWorkout.setPaceAvg(this.pace);
+            this.currentWorkout.setLastUpdate(new Date());
+            this.currentWorkout.setSportActivity(this.sportActivity);
+            this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, this.sessionNumber));
+            this.currentWorkout.setStatus(this.trackingState);
+
+            // If flag to update in database set...
+            if (save) {
+                try {
+                    this.databaseHelper.workoutDao().update(this.currentWorkout);
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -378,7 +390,7 @@ public class TrackerService extends Service {
                     }
                     try {
                         int sessionNumber = 0;
-                        updateWorkoutInDB();
+                        updateWorkout(true);
                         databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.size() > 0 ? speedList.get(speedList.size()-1) : 0, pace, caloriesAcc));
                     } catch (SQLException e) {
                         e.printStackTrace();

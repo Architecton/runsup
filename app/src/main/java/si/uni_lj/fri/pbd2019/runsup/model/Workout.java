@@ -18,7 +18,7 @@ public class Workout implements Serializable {
     private String title;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private Date created;
-    @DatabaseField(canBeNull = false, useGetSet = true)
+    @DatabaseField(canBeNull = false, useGetSet = true, defaultValue = "0")
     private int status;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private double distance;
