@@ -2,6 +2,7 @@ package si.uni_lj.fri.pbd2019.runsup.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -31,7 +32,7 @@ public class AboutFragment extends Fragment {
         setHasOptionsMenu(true);  // Fragment has an options menu.
 
         // Get shared preferences.
-        this.preferences = getActivity().getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         return inflater.inflate(R.layout.fragment_about, parent, false);
     }
 

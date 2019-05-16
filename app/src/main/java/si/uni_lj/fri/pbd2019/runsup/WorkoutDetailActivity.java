@@ -3,6 +3,7 @@ package si.uni_lj.fri.pbd2019.runsup;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.icu.text.DateFormat;
@@ -75,6 +76,8 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     // Date when the activity ended
     private String dateEnd;
 
+    private SharedPreferences sharedPreferences;
+
     // ### /PROPERTIES ###
 
 
@@ -87,14 +90,19 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         setContentView(R.layout.activity_workout_detail);  // Set content of activity.
         resources = getResources();  // Initialize resources.
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
+
+        this.sharedPreferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        boolean convertUnits = this.sharedPreferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM;
+
         this.setDuration(intent.getLongExtra("duration", 0));
         this.setSportActivity(intent.getIntExtra("sportActivity", -1));
         this.setCalories(intent.getDoubleExtra("calories", 0.0));
-        this.setDistance(intent.getDoubleExtra("distance", 0.0));
-        this.setPace(intent.getDoubleExtra("pace", 0.0));
+        this.setDistance(intent.getDoubleExtra("distance", 0.0), convertUnits);
+        this.setPace(intent.getDoubleExtra("pace", 0.0), convertUnits);
         this.workoutId = intent.getIntExtra("workoutId", -1);
         this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
+
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
@@ -208,17 +216,25 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     // setDistance: format and display text on UI that indicates the distance of the workout.
     // also set property value.
-    public void setDistance(double distance) {
+    public void setDistance(double distance, boolean convertUnits) {
         TextView distanceText = findViewById(R.id.textview_workoutdetail_valuedistance);
-        distanceText.setText(MainHelper.formatDistanceWithUnits(distance));
+        distanceText.setText(MainHelper.formatDistance((convertUnits)
+                ? MainHelper.kmToMi(distance) : distance)
+                + " " + ((convertUnits)
+                ? getString(R.string.all_labeldistanceunitmiles)
+                : getString(R.string.all_labeldistanceunitkilometers)));
         this.distance = distance;
     }
 
     // setPace: format and display text on UI that indicates the average pace of the workout.
     // also set property value.
-    public void setPace(double avgPace) {
+    public void setPace(double avgPace, boolean convertUnits) {
         TextView paceText = findViewById(R.id.textview_workoutdetail_valueavgpace);
-        paceText.setText(MainHelper.formatPaceWithUnits(avgPace));
+        paceText.setText(MainHelper.formatPace((convertUnits)
+                ? MainHelper.minpkmToMinpmi(avgPace) : avgPace)
+                + " " + ((convertUnits)
+                ? getString(R.string.all_labelpaceunitmiles)
+                : getString(R.string.all_labelpaceunitkilometers)));
         this.avgPace = avgPace;
     }
 
@@ -306,6 +322,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             return true;
         }
         return super.onKeyDown(keyCode, event);
+
     }
 
     // onCreateOptionsMenu: called when options menu is created

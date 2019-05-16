@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -45,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);  // Set content view.
-        this.preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);  // Get shared preferences.
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(this);  // Get shared preferences.
 
         // Check if user logged in.
         if (preferences.getBoolean("userSignedIn", false)) {

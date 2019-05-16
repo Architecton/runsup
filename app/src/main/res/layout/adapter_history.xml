@@ -6,7 +6,7 @@
 
     <ImageView
         android:id="@+id/imageview_history_icon"
-        android:layout_width="match_parent"
+        android:layout_width="20dp"
         android:layout_height="20dp" />
 
     <TextView

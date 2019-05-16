@@ -85,8 +85,8 @@ public class StopwatchFragment extends Fragment {
     // distance units to use (see Constant class for values)
     private int distUnits;
 
-    // firstRun: indicator that indicates fragment being run for first time
-    private boolean firstRun = true;
+    // trackerServiceActivated: indicator that indicates if tracker service was activated after loading an unfinished workout.
+    private boolean trackerServiceActivated;
 
     // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
     Workout lastUnfinishedWorkout;
@@ -161,7 +161,6 @@ public class StopwatchFragment extends Fragment {
                 if (key.equals("unit")) {  // If value with key "unit" changed, change value of distUnits variable.
                     distUnits = preferences.getInt(key, Constant.UNITS_KM) == Constant.UNITS_KM
                             ? Constant.UNITS_KM : Constant.UNITS_MI;
-                    preferences.edit().putBoolean("unitsChanged", true).apply();  // Set indicator that units changed.
                 }
                 if (key.equals("pref_location_access_value")) {
                     // pass
@@ -274,6 +273,7 @@ public class StopwatchFragment extends Fragment {
     // oncCreate: method called when view is created.
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
+        Log.d("HEREIAM", "CALLED");
 
         // Initialize Button instances.
         this.stopwatchStartButton = view.findViewById(R.id.button_stopwatch_start);
@@ -303,7 +303,6 @@ public class StopwatchFragment extends Fragment {
 
                     // Get dao for workouts.
                     Dao<Workout, Long> workoutDao = new DatabaseHelper(getContext()).workoutDao();
-                    Log.d("HEREIAM", Long.toString(workoutDao.countOf()));
                     //DeleteBuilder<Workout, Long> deleteBuilder = workoutDao.deleteBuilder();
                     //deleteBuilder.where().eq("status", 2);
                     //deleteBuilder.delete();
@@ -321,7 +320,7 @@ public class StopwatchFragment extends Fragment {
                             .prepare();
                     List<Workout> lastUnfinishedWorkoutList = workoutDao.query(query);  // Get last paused workout from database.
                     if (lastUnfinishedWorkoutList.size() > 0) {  // if found
-                        Log.d(TAG, "Unfinished workout retreived from database.");
+                        Log.d(TAG, "Unfinished workout retrieved from database.");
 
                         // Get last workout.
                         lastUnfinishedWorkout = lastUnfinishedWorkoutList.get(0);
@@ -338,7 +337,7 @@ public class StopwatchFragment extends Fragment {
                         this.updateStartButtonText(Constant.STATE_PAUSED);
 
                         // Make button for showing map invisible and button for ending workout visible.
-                        this.showMapButton.setVisibility(View.INVISIBLE);
+                        this.showMapButton.setVisibility(View.GONE);
                         this.endWorkoutButton.setVisibility(View.VISIBLE);
 
                     } else {
@@ -370,19 +369,17 @@ public class StopwatchFragment extends Fragment {
 
                 // Set UI state.
                 this.updateStartButtonText(Constant.STATE_PAUSED);
+                this.showMapButton.setVisibility(View.GONE);
+                this.endWorkoutButton.setVisibility(View.VISIBLE);
                 this.updateDuration(this.duration);
                 this.updateCalories(this.calories);
                 this.updateDistance(this.distance, this.distUnits);
                 break;
         }
 
-
-        // If fragment loaded for first time or if units changed, set unit abbreviations on UI.
-        if (firstRun || preferences.getBoolean("unitsChanged", true)) {
-            updateUnitsUI(distUnits);
-            preferences.edit().putBoolean("unitsChanged", false).apply();
-            this.firstRun = false;
-        }
+        Log.d("HEREIAM", "Dist units are... " + preferences.getInt("unit", 0));
+        // Update units in UI.
+        updateUnitsUI(this.distUnits);
 
         // Set listener on button that is used to change the current sport activity.
         this.sportActivityButton.setOnClickListener(new View.OnClickListener() {
@@ -505,10 +502,18 @@ public class StopwatchFragment extends Fragment {
         getActivity().startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
+        // Make button for showing map invisible and button for ending workout visible.
+        this.endWorkoutButton.setVisibility(View.GONE);
+        this.showMapButton.setVisibility(View.VISIBLE);
+
+
         // set listener to button with id button_stopwatch_start - listen for pause.
         this.stopwatchStartButton.setOnClickListener(pauseListener);
 
         this.state = Constant.STATE_RUNNING;  // Update state.
+
+        // Set tracker service activation indicator to true.
+        this.trackerServiceActivated = true;
     }
 
     // endWorkout: method used to end current workout.
@@ -519,6 +524,7 @@ public class StopwatchFragment extends Fragment {
                 .setTitle("Stop Workout")
                 .setMessage("Are you sure you want to end this workout?")
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+
                     public void onClick(DialogInterface dialog, int which) {
 
                         // Initialize intent for startin the dharmag the service.
@@ -543,6 +549,16 @@ public class StopwatchFragment extends Fragment {
                         workoutDetailsIntent.putExtra("positions", positions);
                         workoutDetailsIntent.putExtra("workoutId", 129123);  // TODO
                         StopwatchFragment.this.startActivity(workoutDetailsIntent);
+
+                        // If last unfinished workout exists, make sure that its state is set to STATE_STOPPED.
+                        if (lastUnfinishedWorkout != null && !trackerServiceActivated) {
+                            lastUnfinishedWorkout.setStatus(Constant.STATE_STOPPED);
+                            try {
+                                new DatabaseHelper(getContext()).workoutDao().update(lastUnfinishedWorkout);
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        }
                     }
                 })
                 .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
@@ -565,7 +581,7 @@ public class StopwatchFragment extends Fragment {
         this.stopwatchStartButton.setOnClickListener(continueListener);
 
         // Make button for showing map invisible and button for ending workout visible.
-        this.showMapButton.setVisibility(View.INVISIBLE);
+        this.showMapButton.setVisibility(View.GONE);
         this.endWorkoutButton.setVisibility(View.VISIBLE);
 
         this.state = Constant.STATE_PAUSED;  // Update state.
@@ -594,9 +610,10 @@ public class StopwatchFragment extends Fragment {
         this.stopwatchStartButton.setOnClickListener(pauseListener);
 
         // Make button for ending workout invisible and button for showing map visible.
-        this.endWorkoutButton.setVisibility(View.INVISIBLE);
+        this.endWorkoutButton.setVisibility(View.GONE);
         this.showMapButton.setVisibility(View.VISIBLE);
         this.state = Constant.STATE_CONTINUE;  // Update state.
+
     }
 
     // ### /METHOD FOR CONTROLLING THE WORKOUT STATE ###

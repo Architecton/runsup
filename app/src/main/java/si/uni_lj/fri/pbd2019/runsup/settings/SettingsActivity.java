@@ -128,7 +128,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
     }
 
 

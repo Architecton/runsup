@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -95,11 +96,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
-        preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Check if necessary preferences values exist. If not, set defaults.
-        if (!preferences.contains("pref_units_value")) {
-            preferences.edit().putString("pref_units_value", "km").apply();
+        if (!preferences.contains("unit")) {
+            preferences.edit().putInt("unit", Constant.UNITS_KM).apply();
         }
         if(!preferences.contains("pref_location_access_value")) {
             preferences.edit().putString("pref_location_access_value", "false").apply();

@@ -31,20 +31,9 @@ public final class MainHelper {
     }
 
 
-    // formatDistanceWithUnits: format distance (return string representation /kilometers with 2 decimals and units abbreviation/)
-    public static String formatDistanceWithUnits(double n) {
-        return formatDistance(n) + " " + WorkoutDetailActivity.resources.getString(R.string.distance_unit);
-    }
-
     // formatPace: format pace (return min/km with 2 decimals)
     public static String formatPace(double n) {
         return String.format("%.2f", n);
-    }
-
-
-    // formatPace: format pace (return min/km with 2 decimals and include pace units abbreviation)
-    public static String formatPaceWithUnits(double n) {
-        return formatPace(n) + " " + WorkoutDetailActivity.resources.getString(R.string.pace_unit);
     }
 
 
@@ -55,7 +44,7 @@ public final class MainHelper {
 
     // formatCaloriesWithUnits: format calories (return rounded integer with unit abbreviation appended
     public static String formatCaloriesWithUnits(double n) {
-        return formatCalories(n) + " " + WorkoutDetailActivity.resources.getString(R.string.calories_unit);
+        return formatCalories(n) + " " + WorkoutDetailActivity.resources.getString(R.string.all_labelcaloriesunit);
     }
 
 
