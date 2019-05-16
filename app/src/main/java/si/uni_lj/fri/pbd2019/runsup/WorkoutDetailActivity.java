@@ -10,6 +10,7 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -257,38 +258,40 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             Location endPos = positions.get(positions.size()-1);
             Location startPos = positions.get(0);
 
-            // Mark starting and end position.
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(startPos.getLatitude(), startPos.getLongitude()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start_small)));
+            if (endPos != null && startPos != null) {
+                // Mark starting and end position.
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(startPos.getLatitude(), startPos.getLongitude()))
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start_small)));
 
-            mMap.addMarker(new MarkerOptions()
-                    .position(new LatLng(endPos.getLatitude(), endPos.getLongitude()))
-                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag_small)));
+                mMap.addMarker(new MarkerOptions()
+                        .position(new LatLng(endPos.getLatitude(), endPos.getLongitude()))
+                        .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag_small)));
 
+                // Create route trail.
+                for (int i = 1; i < positions.size(); i++) {
+                    mMap.addPolyline(new PolylineOptions()
+                            .add(
+                                    new LatLng(positions.get(i-1).getLatitude(),
+                                            positions.get(i-1).getLongitude()),
+                                    new LatLng(positions.get(i).getLatitude(),
+                                            positions.get(i).getLongitude()))
+                            .width(5.0f)
+                            .color(Color.RED));
 
-            // Create route trail.
-            for (int i = 1; i < positions.size(); i++) {
-                mMap.addPolyline(new PolylineOptions()
-                        .add(
-                                new LatLng(positions.get(i-1).getLatitude(),
-                                        positions.get(i-1).getLongitude()),
-                                new LatLng(positions.get(i).getLatitude(),
-                                        positions.get(i).getLongitude()))
-                        .width(5.0f)
-                        .color(Color.RED));
+                }
+
+                // Zoom enough to see start and end of route.
+                LatLngBounds.Builder builder = new LatLngBounds.Builder();
+                builder.include(new LatLng(startPos.getLatitude(), startPos.getLongitude()));
+                builder.include(new LatLng(endPos.getLatitude(), endPos.getLongitude()));
+                LatLngBounds bounds = builder.build();
+                int width = getResources().getDisplayMetrics().widthPixels;
+                int height = getResources().getDisplayMetrics().heightPixels / 5;
+                int padding = (int) (width * 0.1);
+                CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+                mMap.animateCamera(cu);
             }
-
-            // Zoom enough to see start and end of route.
-            LatLngBounds.Builder builder = new LatLngBounds.Builder();
-            builder.include(new LatLng(startPos.getLatitude(), startPos.getLongitude()));
-            builder.include(new LatLng(endPos.getLatitude(), endPos.getLongitude()));
-            LatLngBounds bounds = builder.build();
-            int width = getResources().getDisplayMetrics().widthPixels;
-            int height = getResources().getDisplayMetrics().heightPixels / 5;
-            int padding = (int) (width * 0.1);
-            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
-            mMap.animateCamera(cu);
         }
     }
 

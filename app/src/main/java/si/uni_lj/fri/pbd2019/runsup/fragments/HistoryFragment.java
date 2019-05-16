@@ -55,12 +55,9 @@ public class HistoryFragment extends Fragment {
         DatabaseHelper dh = new DatabaseHelper(getContext());
         ArrayList<Workout> workouts = new ArrayList<Workout>();
         try {
-            Log.d("HEREIAM", "HERE");
             Dao<Workout, Long> workoutDao = dh.workoutDao();
-            Log.d("BUR", Long.toString(workoutDao.countOf()));
             Iterator it = workoutDao.iterator();
             while(it.hasNext()) {
-                Log.d("HEREIAM", "HERE2");
                 workouts.add((Workout) it.next());
             }
         } catch (SQLException e) {

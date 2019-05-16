@@ -60,42 +60,45 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
             // Save received ArrayList of locations.
             ArrayList<Location> positions = intent.getParcelableArrayListExtra("positionList");
 
-            // Draw trail
-            if (receiveCounter % REDRAW_INTERVAL == 0) {
-                for (int i = 1; i < positions.size(); i++) {
-                    mMap.addPolyline(new PolylineOptions()
-                            .add(
-                                    new LatLng(positions.get(i-1).getLatitude(),
-                                            positions.get(i-1).getLongitude()),
-                                    new LatLng(positions.get(i).getLatitude(),
-                                            positions.get(i).getLongitude()))
-                            .width(5.0f)
-                            .color(Color.RED));
+            if (positions != null) {
+                // Draw trail
+                if (receiveCounter % REDRAW_INTERVAL == 0) {
+                    for (int i = 1; i < positions.size(); i++) {
+                        mMap.addPolyline(new PolylineOptions()
+                                .add(
+                                        new LatLng(positions.get(i-1).getLatitude(),
+                                                positions.get(i-1).getLongitude()),
+                                        new LatLng(positions.get(i).getLatitude(),
+                                                positions.get(i).getLongitude()))
+                                .width(5.0f)
+                                .color(Color.RED));
+                    }
+                }
+
+                // Get current location and set marker
+                currentLocation = new LatLng(positions.get(positions.size()-1).getLatitude(), positions.get(positions.size()-1).getLongitude());
+
+                // Add marker at user's current location (remove previous one if it exists).
+                if (currentMarker != null) {
+                    animateMarker(currentMarker, currentLocation, false);
+                } else {
+                    currentMarker = mMap.addMarker(new MarkerOptions()
+                            .position(currentLocation)
+                            .title("Your Current Location"));
+                }
+
+                if (lockPosition) {
+
+                    // Move camera to current location of user.
+                    CameraUpdate center = CameraUpdateFactory.newLatLng(currentLocation);
+                    CameraUpdate zoom = CameraUpdateFactory.zoomTo(15f);
+
+                    mMap.moveCamera(center);
+                    mMap.animateCamera(zoom);
+
                 }
             }
 
-            // Get current location and set marker
-            currentLocation = new LatLng(positions.get(positions.size()-1).getLatitude(), positions.get(positions.size()-1).getLongitude());
-
-            // Add marker at user's current location (remove previous one if it exists).
-            if (currentMarker != null) {
-                animateMarker(currentMarker, currentLocation, false);
-            } else {
-                currentMarker = mMap.addMarker(new MarkerOptions()
-                        .position(currentLocation)
-                        .title("Your Current Location"));
-            }
-
-            if (lockPosition) {
-
-                // Move camera to current location of user.
-                CameraUpdate center = CameraUpdateFactory.newLatLng(currentLocation);
-                CameraUpdate zoom = CameraUpdateFactory.zoomTo(15f);
-
-                mMap.moveCamera(center);
-                mMap.animateCamera(zoom);
-
-            }
         }
     };
 

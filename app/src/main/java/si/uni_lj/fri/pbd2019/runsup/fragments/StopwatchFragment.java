@@ -89,8 +89,7 @@ public class StopwatchFragment extends Fragment {
     private boolean firstRun = true;
 
     // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
-    Workout lastPausedWorkout;
-
+    Workout lastUnfinishedWorkout;
 
     // ## class level listeners ##
 
@@ -129,8 +128,10 @@ public class StopwatchFragment extends Fragment {
             updateCalories(intent.getDoubleExtra("calories", 0.0));
 
             // Add locations list to list of location lists.
-            positions.add(intent.<Location>getParcelableExtra("position"));
-
+            Location receivedLocation = intent.<Location>getParcelableExtra("position");
+            if (receivedLocation != null) {
+                positions.add(receivedLocation);
+            }
             // Set property indicating current sport activity.
             sportActivity = intent.getIntExtra("sportActivity", -1);
         }
@@ -145,11 +146,9 @@ public class StopwatchFragment extends Fragment {
     // ### /PROPERTIES ###
 
 
-    // onCreateView: method called when view is to be created.
-    @Nullable
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
-        setHasOptionsMenu(true);  // Fragment has an options menu.
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
 
         // Initialize shared preferences instance.
         this.preferences = getActivity().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
@@ -177,6 +176,64 @@ public class StopwatchFragment extends Fragment {
         this.distUnits = this.preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM
                 ? Constant.UNITS_KM : Constant.UNITS_MI;
 
+        // Check for location access permissions.
+        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            // Prompt user to confirm decision to end workout.
+            new AlertDialog.Builder(getContext())
+                    .setTitle("Access To Location")
+                    .setMessage("Please turn on location access in the application's settings for the best experience.")
+                    .setPositiveButton(R.string.go_to_settings, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            Intent settingsActivityIntent = new Intent(getContext(), SettingsActivity.class);
+                            getContext().startActivity(settingsActivityIntent);
+                        }
+                    })
+                    .setNegativeButton(R.string.dismiss, null)  // Do nothing if user selects cancel.
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
+
+        }
+
+        // property initializations
+        this.positions = new ArrayList<>();     // initialize list of positions lists.
+        this.paceAccumulator = 0;               // Initialize pace accumulator;
+        this.updateCounter = 0;                 // Initialize counter of data updates.
+        this.state = Constant.STATE_STOPPED;    // Initial state is STATE_STOPPED.
+        this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
+
+        // ## INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
+        this.filter = new IntentFilter();                  // Initialize intent filter.
+        this.filter.addAction(Constant.TICK);              // Register action.
+        getActivity().registerReceiver(receiver, filter);  // Register receiver.
+        this.receiverRegistered = true;                    // Set flag that indicates receiver is registered.
+        // ## /INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
+
+        // Create a new service connection.
+        sConn = new ServiceConnection() {
+
+            // callback that is called when the service is connected
+            public void onServiceConnected(ComponentName name, IBinder binder) {
+                service = ((TrackerService.LocalBinder) binder).getService();  // Call getService of passed binder.
+                bound = true;  // Set bound indicator to true.
+            }
+
+            // callback that is called when the service is disconnected
+            public void onServiceDisconnected(ComponentName name) {
+                bound = false; // Set bound indicator to false.
+                getActivity().unregisterReceiver(receiver);  // Unregister receiver.
+            }
+        };
+
+        // Bind service to activity.
+        getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
+        this.bound = true;  // Set bound indicator to true.
+    }
+
+    // onCreateView: method called when view is to be created.
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
+        setHasOptionsMenu(true);  // Fragment has an options menu.
         return inflater.inflate(R.layout.fragment_stopwatch, parent, false);
     }
 
@@ -224,18 +281,107 @@ public class StopwatchFragment extends Fragment {
         this.showMapButton = view.findViewById(R.id.button_stopwatch_activeworkout);
         this.sportActivityButton = view.findViewById(R.id.button_stopwatch_selectsport);
 
-        // Set listener on button to listen for workout start.
-        this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                startStopwatch();
-            }
-        });
+        // Set last paused workout to null.
+        lastUnfinishedWorkout = null;
+
+        switch (this.state) {
+            case Constant.STATE_STOPPED:
+                // Set listener on button to listen for workout start.
+                this.stopwatchStartButton.setOnClickListener(new View.OnClickListener() {
+                    public void onClick(View v) {
+                        startStopwatch();
+                    }
+                });
+
+                // Set UI state.
+                this.updateStartButtonText(Constant.STATE_STOPPED);
+                this.updateDuration(this.duration);
+                this.updateCalories(this.calories);
+                this.updateDistance(this.distance, this.distUnits);
+
+                try {
+
+                    // Get dao for workouts.
+                    Dao<Workout, Long> workoutDao = new DatabaseHelper(getContext()).workoutDao();
+                    Log.d("HEREIAM", Long.toString(workoutDao.countOf()));
+                    //DeleteBuilder<Workout, Long> deleteBuilder = workoutDao.deleteBuilder();
+                    //deleteBuilder.where().eq("status", 2);
+                    //deleteBuilder.delete();
+
+                    // Make a prepared query to get last unfinished workout from database.
+                    PreparedQuery<Workout> query = workoutDao.queryBuilder()
+                            .limit(1l)
+                            .orderBy("lastUpdate", false)
+                            .where()
+                            .eq("status", 2)
+                            .or()
+                            .eq("status", 3)
+                            .or()
+                            .eq("status", 4)
+                            .prepare();
+                    List<Workout> lastUnfinishedWorkoutList = workoutDao.query(query);  // Get last paused workout from database.
+                    if (lastUnfinishedWorkoutList.size() > 0) {  // if found
+                        Log.d(TAG, "Unfinished workout retreived from database.");
+
+                        // Get last workout.
+                        lastUnfinishedWorkout = lastUnfinishedWorkoutList.get(0);
+
+                        // Mock paused state.
+
+                        // Update TextView fields in UI depending on found values of last paused workout.
+                        updateDuration(Math.round(1.0e-3 * (double) lastUnfinishedWorkout.getDuration()));
+                        updateDistance(lastUnfinishedWorkout.getDistance(), distUnits);
+                        updatePace(lastUnfinishedWorkout.getPaceAvg(), distUnits);
+                        updateCalories(lastUnfinishedWorkout.getTotalCalories());
+
+                        // Set text on start button.
+                        this.updateStartButtonText(Constant.STATE_PAUSED);
+
+                        // Make button for showing map invisible and button for ending workout visible.
+                        this.showMapButton.setVisibility(View.INVISIBLE);
+                        this.endWorkoutButton.setVisibility(View.VISIBLE);
+
+                    } else {
+                        Log.d(TAG, "No paused workouts found");
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                break;
+            case Constant.STATE_RUNNING:
+                this.stopwatchStartButton.setOnClickListener(pauseListener);
+
+                // Set UI state.
+                this.updateStartButtonText(Constant.STATE_RUNNING);
+                this.updateDuration(this.duration);
+                this.updateCalories(this.calories);
+                this.updateDistance(this.distance, this.distUnits);
+                break;
+            case Constant.STATE_CONTINUE:
+
+                // Set UI state.
+                this.updateStartButtonText(Constant.STATE_RUNNING);
+                this.updateDuration(this.duration);
+                this.updateCalories(this.calories);
+                this.updateDistance(this.distance, this.distUnits);
+                break;
+            case Constant.STATE_PAUSED:
+                this.stopwatchStartButton.setOnClickListener(continueListener);
+
+                // Set UI state.
+                this.updateStartButtonText(Constant.STATE_PAUSED);
+                this.updateDuration(this.duration);
+                this.updateCalories(this.calories);
+                this.updateDistance(this.distance, this.distUnits);
+                break;
+        }
+
 
         // If fragment loaded for first time or if units changed, set unit abbreviations on UI.
         if (firstRun || preferences.getBoolean("unitsChanged", true)) {
             updateUnitsUI(distUnits);
             preferences.edit().putBoolean("unitsChanged", false).apply();
-            firstRun = false;
+            this.firstRun = false;
         }
 
         // Set listener on button that is used to change the current sport activity.
@@ -279,92 +425,10 @@ public class StopwatchFragment extends Fragment {
         // set listener on button to listen for workout end.
         this.endWorkoutButton.setOnClickListener(endListener);
 
-        // Check for location access permissions.
-        if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Prompt user to confirm decision to end workout.
-            new AlertDialog.Builder(getContext())
-                    .setTitle("Access To Location")
-                    .setMessage("Please turn on location access in the application's settings for the best experience.")
-                    .setPositiveButton(R.string.go_to_settings, new DialogInterface.OnClickListener() {
-                        public void onClick(DialogInterface dialog, int which) {
-                            Intent settingsActivityIntent = new Intent(getContext(), SettingsActivity.class);
-                            getContext().startActivity(settingsActivityIntent);
-                        }
-                    })
-                    .setNegativeButton(R.string.dismiss, null)  // Do nothing if user selects cancel.
-                    .setIcon(android.R.drawable.ic_dialog_alert)
-                    .show();
-
-        }
-
-        // property initializations
-        this.positions = new ArrayList<>();     // initialize list of positions lists.
-        this.paceAccumulator = 0;               // Initialize pace accumulator;
-        this.updateCounter = 0;                 // Initialize counter of data updates.
-        this.state = Constant.STATE_STOPPED;    // Initial state is STATE_STOPPED.
-        this.sportActivity = Constant.RUNNING;  // Initialize sportActivity indicator.
-
-        // ## INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
-        this.filter = new IntentFilter();                  // Initialize intent filter.
-        this.filter.addAction(Constant.TICK);              // Register action.
-        getActivity().registerReceiver(receiver, filter);  // Register receiver.
-        this.receiverRegistered = true;                    // Set flag that indicates receiver is registered.
-        // ## /INTENT FILTER INITIALIZATION AND RECEIVER REGISTRATION ##
-
-
-        // Create a new service connection.
-        sConn = new ServiceConnection() {
-
-            // callback that is called when the service is connected
-            public void onServiceConnected(ComponentName name, IBinder binder) {
-                service = ((TrackerService.LocalBinder)binder).getService();  // Call getService of passed binder.
-                bound = true;  // Set bound indicator to true.
-            }
-
-            // callback that is called when the service is disconnected
-            public void onServiceDisconnected(ComponentName name) {
-                bound = false; // Set bound indicator to false.
-                getActivity().unregisterReceiver(receiver);  // Unregister receiver.
-            }
-        };
-
-        // Bind service to activity.
-        getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
-        this.bound = true;  // Set bound indicator to true.
-
 
         // Load last non-ended workout from database if it exists.
-
         // initially null
-        lastPausedWorkout = null;
-        try {
-
-            // Get dao for workouts.
-            Dao<Workout, Long> workoutDao = new DatabaseHelper(getContext()).workoutDao();
-            //DeleteBuilder<Workout, Long> deleteBuilder = workoutDao.deleteBuilder();
-            //deleteBuilder.where().eq("status", 2);
-            //deleteBuilder.delete();
-
-            // Make a prepared query to get last paused workout from database.
-            PreparedQuery<Workout> query = workoutDao.queryBuilder().limit(1l).orderBy("lastUpdate", false).where().eq("status", 2).prepare();
-            List<Workout> lastPausedWorkoutList = workoutDao.query(query);  // Get last paused workout from database.
-            if (lastPausedWorkoutList.size() > 0) {  // if found
-                lastPausedWorkout = lastPausedWorkoutList.get(0);
-
-                // Update TextView fields in UI depending on found values of last paused workout.
-                updateDuration(Math.round(1.0e-3 * (double)lastPausedWorkout.getDuration()));
-                updateDistance(lastPausedWorkout.getDistance(), distUnits);
-                updatePace(lastPausedWorkout.getPaceAvg(), distUnits);
-                updateCalories(lastPausedWorkout.getTotalCalories());
-
-
-            } else {
-                Log.d(TAG, "No paused workouts found");            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
     }
-
 
     // onPause: method called when the activity is paused.
     @Override
@@ -392,20 +456,6 @@ public class StopwatchFragment extends Fragment {
     public void onResume() {
         super.onResume();
 
-        // Rebind OnClickListener instances according to state.
-        switch (this.state) {
-            case Constant.STATE_RUNNING:
-                this.stopwatchStartButton.setOnClickListener(pauseListener);
-                break;
-            case Constant.STATE_PAUSED:
-                this.stopwatchStartButton.setOnClickListener(continueListener);
-                break;
-            case Constant.STATE_STOPPED:
-                break;
-            case Constant.STATE_CONTINUE:
-                this.stopwatchStartButton.setOnClickListener(pauseListener);
-                break;
-        }
         // If service not bound, bind it.
         if (!this.bound) {
             getActivity().bindService(new Intent(getContext(), TrackerService.class), sConn, Context.BIND_AUTO_CREATE);
@@ -449,8 +499,8 @@ public class StopwatchFragment extends Fragment {
         Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_START);
         startIntent.putExtra("sportActivity", this.sportActivity);
-        if (this.lastPausedWorkout != null) {
-            startIntent.putExtra("pausedWorkout", this.lastPausedWorkout);
+        if (this.lastUnfinishedWorkout != null) {
+            startIntent.putExtra("unfinishedWorkout", this.lastUnfinishedWorkout);
         }
         getActivity().startService(startIntent);
         this.updateStartButtonText(Constant.STATE_RUNNING);
@@ -560,17 +610,21 @@ public class StopwatchFragment extends Fragment {
     private void updateDuration(long duration) {
         this.duration = duration;
         TextView durationText = getActivity().findViewById(R.id.textview_stopwatch_duration);
-        durationText.setText(MainHelper.formatDuration(duration));
+        if (durationText != null) {
+            durationText.setText(MainHelper.formatDuration(duration));
+        }
     }
 
     // updateDistance: update the workout distance display.
     private void updateDistance(double dist, int distUnits) {
        this.distance = dist;
-        TextView distanceText = getActivity().findViewById(R.id.textview_stopwatch_distance);
-       if (distUnits == Constant.UNITS_MI) {
-           distanceText.setText(MainHelper.formatDistance(MainHelper.kmToMi(dist)));
-       } else {
-           distanceText.setText(MainHelper.formatDistance(dist));
+       TextView distanceText = getActivity().findViewById(R.id.textview_stopwatch_distance);
+       if (distanceText!= null) {
+           if (distUnits == Constant.UNITS_MI) {
+               distanceText.setText(MainHelper.formatDistance(MainHelper.kmToMi(dist)));
+           } else {
+               distanceText.setText(MainHelper.formatDistance(dist));
+           }
        }
     }
 
@@ -578,10 +632,12 @@ public class StopwatchFragment extends Fragment {
     private void updatePace(double pace, int distUnits) {
         this.paceAccumulator += pace;
         TextView paceText = getActivity().findViewById(R.id.textview_stopwatch_pace);
-        if (distUnits == Constant.UNITS_MI) {
-            paceText.setText(MainHelper.formatPace(MainHelper.minpkmToMinpmi(pace)));
-        } else {
-            paceText.setText(MainHelper.formatPace(pace));
+        if (paceText != null) {
+            if (distUnits == Constant.UNITS_MI) {
+                paceText.setText(MainHelper.formatPace(MainHelper.minpkmToMinpmi(pace)));
+            } else {
+                paceText.setText(MainHelper.formatPace(pace));
+            }
         }
     }
 
@@ -589,7 +645,9 @@ public class StopwatchFragment extends Fragment {
     private void updateCalories(double calories) {
         this.calories = calories;
         TextView caloriesText = getActivity().findViewById(R.id.textview_stopwatch_calories);
-        caloriesText.setText(MainHelper.formatCalories(calories));
+        if (caloriesText != null) {
+            caloriesText.setText(MainHelper.formatCalories(calories));
+        }
     }
 
     // updateStartButton: update text on Start button.
@@ -604,7 +662,7 @@ public class StopwatchFragment extends Fragment {
                 this.stopwatchStartButton.setText(R.string.stopwatch_continue);
                 break;
             case Constant.STATE_STOPPED:
-                this.stopwatchStartButton.setText(R.string.stopwatch_continue);
+                this.stopwatchStartButton.setText(R.string.stopwatch_start);
                 break;
             case Constant.STATE_CONTINUE:
                 this.stopwatchStartButton.setText(R.string.stopwatch_stop);

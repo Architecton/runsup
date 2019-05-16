@@ -136,4 +136,14 @@ public class DatabaseHelper extends OrmLiteSqliteOpenHelper{
         }
         return syncLogDao;
     }
+
+    /**
+     * Clears table of workouts and gps points
+     * @return
+     * @throws SQLException
+     */
+    public void clearWorkoutTables() throws SQLException {
+        TableUtils.clearTable(getConnectionSource(), Workout.class);
+        TableUtils.clearTable(getConnectionSource(), GpsPoint.class);
+    }
 }

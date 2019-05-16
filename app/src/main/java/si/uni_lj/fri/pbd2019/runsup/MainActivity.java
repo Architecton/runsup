@@ -1,11 +1,9 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.provider.ContactsContract;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
@@ -23,17 +21,14 @@ import android.widget.TextView;
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
-import com.j256.ormlite.dao.Dao;
 
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.HistoryFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
-import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
@@ -59,6 +54,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     public static MainActivity mainActivity;
 
+    private StopwatchFragment stopwatchFragment;
+    private HistoryFragment historyFragment;
+    private AboutFragment aboutFragment;
+
     // ### /PROPERTIES ###
 
     // onCreate: method called when the activity is created.
@@ -66,6 +65,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        // Initialize fragment instances.
+        this.stopwatchFragment = new StopwatchFragment();
+        this.aboutFragment = new AboutFragment();
+        this.historyFragment = new HistoryFragment();
+
+        // Save context.
         mainActivity = this;
 
         setContentView(R.layout.activity_main);  // Set layout content.
@@ -87,8 +92,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager = getSupportFragmentManager();
 
         // Set default fragment (StopwatchFragment).
-        StopwatchFragment fragment = new StopwatchFragment();
-        this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, fragment).commit();
+        this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
         preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
@@ -198,7 +202,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
             // TODO
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
-            // TODO
+            try {
+                new DatabaseHelper(this).clearWorkoutTables();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         }
         return super.onOptionsItemSelected(item);
     }
@@ -218,8 +226,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // If current fragment not StopwatchFragment, set StopwatchFragment.
             if (currentFragment != FRAGMENT_STOPWATCH) {
                 // load StopwatchFragment
-                StopwatchFragment fragment = new StopwatchFragment();
-                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.stopwatchFragment).addToBackStack(null).commit();
                 this.currentFragment = FRAGMENT_STOPWATCH;
             }
 
@@ -229,8 +236,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (currentFragment != FRAGMENT_HISTORY) {
 
                 // load AboutFragment
-                HistoryFragment fragment = new HistoryFragment();
-                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.historyFragment).addToBackStack(null).commit();
                 currentFragment = FRAGMENT_HISTORY;
             }
         } else if (id == R.id.nav_settings) {
@@ -244,8 +250,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (currentFragment != FRAGMENT_ABOUT) {
 
                 // load AboutFragment
-                AboutFragment fragment = new AboutFragment();
-                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, fragment).addToBackStack(null).commit();
+                this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.aboutFragment).addToBackStack(null).commit();
                 currentFragment = FRAGMENT_ABOUT;
             }
         }
