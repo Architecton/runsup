@@ -12,6 +12,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.R;
 
 import static android.content.Context.MODE_PRIVATE;
@@ -32,7 +33,7 @@ public class AboutFragment extends Fragment {
         setHasOptionsMenu(true);  // Fragment has an options menu.
 
         // Get shared preferences.
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        this.preferences = getActivity().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
         return inflater.inflate(R.layout.fragment_about, parent, false);
     }
 

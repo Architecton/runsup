@@ -21,7 +21,6 @@ import android.view.KeyEvent;
 import android.view.MenuItem;
 
 import java.util.List;
-import java.util.Set;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.MainActivity;
@@ -66,7 +65,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                                 ? listPreference.getEntries()[index]
                                 : null);
 
-                if (preference.getKey().equals("unit")) {
+                if (preference.getKey().equals("units_pref")) {
                     preferences.edit().putInt("unit", stringValue.equals(Constant.UNITS_KM_ABBR) ? Constant.UNITS_KM : Constant.UNITS_MI).apply();
                 }
             } else {
@@ -128,7 +127,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
     }
 
 
@@ -218,7 +217,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
             // guidelines.
-            bindPreferenceSummaryToValue(findPreference("unit"));
+            bindPreferenceSummaryToValue(findPreference("units_pref"));
         }
 
         @Override

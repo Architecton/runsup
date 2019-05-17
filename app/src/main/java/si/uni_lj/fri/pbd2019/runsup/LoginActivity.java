@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);  // Set content view.
-        this.preferences = PreferenceManager.getDefaultSharedPreferences(this);  // Get shared preferences.
+        this.preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);  // Get shared preferences.
 
         // Check if user logged in.
         if (preferences.getBoolean("userSignedIn", false)) {

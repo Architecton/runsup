@@ -96,8 +96,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
-        preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
 
+        /*
         // Check if necessary preferences values exist. If not, set defaults.
         if (!preferences.contains("unit")) {
             preferences.edit().putInt("unit", Constant.UNITS_KM).apply();
@@ -105,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         if(!preferences.contains("pref_location_access_value")) {
             preferences.edit().putString("pref_location_access_value", "false").apply();
         }
+        */
     }
 
 
