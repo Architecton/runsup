@@ -10,6 +10,7 @@ import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
@@ -31,13 +32,17 @@ import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.j256.ormlite.stmt.DeleteBuilder;
 
+import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
-
+import si.uni_lj.fri.pbd2019.runsup.model.Workout;
+import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
+import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
 
 public class WorkoutDetailActivity extends AppCompatActivity implements OnMapReadyCallback{
@@ -48,7 +53,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     public static final String TAG = WorkoutDetailActivity.class.getSimpleName();
 
     // ID of this workout.
-    private int workoutId;
+    private long workoutId;
 
     // resource used by the activity
     public static Resources resources;
@@ -102,7 +107,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.setCalories(intent.getDoubleExtra("calories", 0.0));
         this.setDistance(intent.getDoubleExtra("distance", 0.0), convertUnits);
         this.setPace(intent.getDoubleExtra("pace", 0.0), convertUnits);
-        this.workoutId = intent.getIntExtra("workoutId", -1);
+        this.workoutId = intent.getLongExtra("workoutId", -1l);
         this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
 
@@ -349,11 +354,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
         // Handle selection.
         if (id == R.id.workoutdetail_menuitem_settings) {
-            // Start settings activity
-
-            // TODO
-            // Intent settingsIntent = new Intent(WorkoutDetailActivity.this, SettingsActivity.class);
-            // WorkoutDetailActivity.this.startActivity(settingsIntent);
+            // Start SettingsActivity
+            Intent settingsActivityIntent = new Intent(WorkoutDetailActivity.this, SettingsActivity.class);
+            WorkoutDetailActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.workoutdetail_menuitem_delete) {
 
             // Prompt user to confirm intention to delete activity.
@@ -362,7 +365,13 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                     .setMessage("Are you sure you want to delete this workout? You cannot undo this action.")
                     .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
-                            // TODO delete workout and destroy activity.
+                            try {
+                                DeleteBuilder<Workout, Long> deleteBuilder = new DatabaseHelper(WorkoutDetailActivity.this).workoutDao().deleteBuilder();
+                                deleteBuilder.where().eq("id", workoutId);
+                                deleteBuilder.delete();
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
                         }
                     })
                     .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.

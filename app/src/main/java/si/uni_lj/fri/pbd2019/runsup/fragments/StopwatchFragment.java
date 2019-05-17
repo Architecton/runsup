@@ -91,6 +91,7 @@ public class StopwatchFragment extends Fragment {
 
     // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
     Workout lastUnfinishedWorkout;
+    private long workoutId;
 
     // ## class level listeners ##
 
@@ -127,6 +128,7 @@ public class StopwatchFragment extends Fragment {
             updateDistance(intent.getDoubleExtra("distance", 0.0), distUnits);
             updatePace(intent.getDoubleExtra("pace", 0.0), distUnits);
             updateCalories(intent.getDoubleExtra("calories", 0.0));
+            workoutId = intent.getLongExtra("workoutId", -1l);
 
             // Add locations list to list of location lists.
             Location receivedLocation = intent.<Location>getParcelableExtra("position");
@@ -274,7 +276,6 @@ public class StopwatchFragment extends Fragment {
     // oncCreate: method called when view is created.
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
-        Log.d("HEREIAM", "CALLED");
 
         // Initialize Button instances.
         this.stopwatchStartButton = view.findViewById(R.id.button_stopwatch_start);
@@ -548,7 +549,7 @@ public class StopwatchFragment extends Fragment {
                         workoutDetailsIntent.putExtra("pace", paceAccumulator/updateCounter);
                         workoutDetailsIntent.putExtra("calories", calories);
                         workoutDetailsIntent.putExtra("positions", positions);
-                        workoutDetailsIntent.putExtra("workoutId", 129123);  // TODO
+                        workoutDetailsIntent.putExtra("workoutId", workoutId);
                         StopwatchFragment.this.startActivity(workoutDetailsIntent);
 
                         // If last unfinished workout exists, make sure that its state is set to STATE_STOPPED.
@@ -709,18 +710,6 @@ public class StopwatchFragment extends Fragment {
 
         // Update text on button.
         this.updateSportActivityText(activityCode);
-    }
-
-    // onCreateOptionsMenu: called when options menu created.
-    @Override
-    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.stopwatch_shared, menu);
-
-        // If user not signed in, hide synchronization option in menu.
-        if (!preferences.getBoolean("userSignedIn", false)) {
-            MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
-            menuItem.setVisible(false);
-        }
     }
 
 }

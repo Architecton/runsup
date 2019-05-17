@@ -169,6 +169,7 @@ public class TrackerService extends Service {
                 toSend.putExtra("state", trackingState);
                 toSend.putExtra("sportActivity", sportActivity);
                 toSend.putExtra("position", mCurrentLocation);
+                toSend.putExtra("workoutId", currentWorkout.getId());
                 sendBroadcast(toSend);
 
                 // If last location same than in previous broadcast, update noLocationCounter.

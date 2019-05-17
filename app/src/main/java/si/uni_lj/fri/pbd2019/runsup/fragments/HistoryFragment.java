@@ -82,13 +82,5 @@ public class HistoryFragment extends Fragment {
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.history, menu);  // Inflate options menu.
-
-        /*
-        // If user not signed in, hide synchronization option in menu.
-        if (!preferences.getBoolean("userSignedIn", false)) {
-            MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
-            menuItem.setVisible(false);
-        }
-        */
     }
 }

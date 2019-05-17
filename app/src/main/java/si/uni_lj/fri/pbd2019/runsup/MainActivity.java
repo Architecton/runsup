@@ -1,5 +1,6 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
@@ -10,6 +11,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -30,6 +32,7 @@ import java.sql.SQLException;
 import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.HistoryFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
+import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
@@ -120,7 +123,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStart() {
         super.onStart();
-        Log.d("HEREIAM DETAIL", "ON START CALLED");
 
         // Check if user signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
@@ -130,9 +132,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
-            Log.d("HEREIAM DETAIL", "IM IN");
 
-            if (!this.accountDataSet) {
+            if (!this.accountDataSet && this.userImage != null && this.userName != null) {
                 Glide
                         .with(MainActivity.this)
                         .load(userImageUri)
@@ -169,7 +170,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public boolean onCreateOptionsMenu(Menu menu) {
 
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.stopwatch_shared, menu);
 
         // user's profile image and full name.
         this.userImage = findViewById(R.id.menu_loggedInUserImage);
@@ -206,8 +207,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
         });
 
-
-
         return true;
     }
 
@@ -219,18 +218,30 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Get id of clicked item.
         int id = item.getItemId();
 
-        if (id == R.id.stopwatchfragment_menuitem_settings || id == R.id.historyfragment_menuitem_settings) {
+        if (id == R.id.stopwatchfragment_menuitem_settings) {
             // Start SettingsActivity
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
             // TODO
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
-            try {
-                new DatabaseHelper(this).clearWorkoutTables();
-            } catch (SQLException e) {
-                e.printStackTrace();
-            }
+            new AlertDialog.Builder(this)
+                    .setTitle("Delete History")
+                    .setMessage("Are you sure you want to delete your local history? You cannot undo this action.")
+                    .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                        public void onClick(DialogInterface dialog, int which) {
+                            try {
+                                new DatabaseHelper(MainActivity.this).clearWorkoutTables();
+                                fragmentManager.beginTransaction().detach(historyFragment).attach(historyFragment).commit();
+                                currentFragment = FRAGMENT_HISTORY;
+                            } catch (SQLException e) {
+                                e.printStackTrace();
+                            }
+                        }
+                    })
+                    .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
+                    .setIcon(android.R.drawable.ic_dialog_alert)
+                    .show();
         }
         return super.onOptionsItemSelected(item);
     }

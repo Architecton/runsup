@@ -95,24 +95,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         }
 
-        // Get start and end position of route.
-        LatLng endPos = new LatLng(positionsLast.get(positionsLast.size()-1).getLatitude(),
-                positionsLast.get(positionsLast.size()-1).getLongitude());
+        if (positionsLast.size() > 0) {
+            // Get start and end position of route.
+            LatLng endPos = new LatLng(positionsLast.get(positionsLast.size() - 1).getLatitude(),
+                    positionsLast.get(positionsLast.size() - 1).getLongitude());
 
-        LatLng startPos = new LatLng(positionsLast.get(0).getLatitude(),
-                positionsLast.get(0).getLongitude());
+            LatLng startPos = new LatLng(positionsLast.get(0).getLatitude(),
+                    positionsLast.get(0).getLongitude());
 
 
-        // Mark start and finish of workout.
-        mMap.addMarker(new MarkerOptions()
-                .position(startPos)
-                .title("Start of Workout")
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start)));
+            // Mark start and finish of workout.
+            mMap.addMarker(new MarkerOptions()
+                    .position(startPos)
+                    .title("Start of Workout")
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.start)));
 
-        mMap.addMarker(new MarkerOptions()
-                .position(endPos)
-                .title("End of Workout")
-                .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag)));
+            mMap.addMarker(new MarkerOptions()
+                    .position(endPos)
+                    .title("End of Workout")
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag)));
+        }
 
     }
 
@@ -127,17 +129,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Draw trail created from locations.
         this.create_trail(this.positions);
 
-        // Zoom enough to see full route.
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        for (Location pos : this.positions) {
-           builder.include(new LatLng(pos.getLatitude(), pos.getLongitude()));
+        if (this.positions.size() > 0) {
+            // Zoom enough to see full route.
+            LatLngBounds.Builder builder = new LatLngBounds.Builder();
+            for (Location pos : this.positions) {
+                builder.include(new LatLng(pos.getLatitude(), pos.getLongitude()));
+            }
+            LatLngBounds bounds = builder.build();
+            int width = getResources().getDisplayMetrics().widthPixels;
+            int height = getResources().getDisplayMetrics().heightPixels;
+            int padding = (int) (width * 0.10);
+            CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
+            mMap.animateCamera(cu);
         }
-        LatLngBounds bounds = builder.build();
-        int width = getResources().getDisplayMetrics().widthPixels;
-        int height = getResources().getDisplayMetrics().heightPixels;
-        int padding = (int) (width * 0.10);
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, width, height, padding);
-        mMap.animateCamera(cu);
     }
 
 }
