@@ -33,6 +33,7 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.j256.ormlite.stmt.DeleteBuilder;
+import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
@@ -86,6 +87,10 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     private boolean convertUnits;
 
+    private boolean titleSet;
+
+    private DatabaseHelper dh;
+
     // ### /PROPERTIES ###
 
 
@@ -94,13 +99,14 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);  // Call onCreate method of superclass.
-        this.dateEnd = DateFormat.getTimeInstance().format(new Date());  // Set date when activity ended.
         setContentView(R.layout.activity_workout_detail);  // Set content of activity.
         resources = getResources();  // Initialize resources.
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
 
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         this.convertUnits = this.sharedPreferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM;
+
+        this.dh = new DatabaseHelper(this);
 
         this.setDuration(intent.getLongExtra("duration", 0));
         this.setSportActivity(intent.getIntExtra("sportActivity", -1));
@@ -110,12 +116,33 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.workoutId = intent.getLongExtra("workoutId", -1l);
         this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
+        this.titleSet = intent.hasExtra("titleSet");
 
 
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_workoutdetail_map);
         mapFragment.getMapAsync(this);
+
+        if (intent.hasExtra("fromHistory")) {
+            Workout workoutThis = null;
+            try {
+                workoutThis = dh
+                        .workoutDao()
+                        .queryBuilder()
+                        .where()
+                        .eq("id", this.workoutId)
+                        .query()
+                        .get(0);
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            this.dateEnd = DateFormat.getTimeInstance().format((workoutThis != null)
+                    ? workoutThis.getLastUpdate()
+                    : new Date());
+        } else {
+            this.dateEnd = DateFormat.getTimeInstance().format(new Date());  // Set date when activity ended.
+        }
     }
 
     // onStart: method called when the activity UI becomes visible to the user.
@@ -131,6 +158,22 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.twitterShareButton = findViewById(R.id.button_workoutdetail_twittershare);
         this.confirmShareButton = findViewById(R.id.confirm_share_button);
         this.workoutTitleTextView = findViewById(R.id.textview_workoutdetail_workouttitle);
+
+        if (this.titleSet) {
+            try {
+                Workout workoutThis = dh.workoutDao()
+                        .queryBuilder()
+                        .where()
+                        .eq("id", this.workoutId)
+                        .query().get(0);
+
+                this.workoutTitleTextView.setText(workoutThis.getTitle());
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+        }
+
+
 
         // TODO
         // this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
@@ -166,6 +209,19 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                         String workoutTitleNew = input.getText().toString();
                         workoutTitleTextView.setText(workoutTitleNew);
                         workoutTitle = workoutTitleNew;
+                        try {
+                            Workout workoutThis = dh
+                                    .workoutDao()
+                                    .queryBuilder()
+                                    .where()
+                                    .eq("id", workoutId)
+                                    .query()
+                                    .get(0);
+                            workoutThis.setTitle(workoutTitle);
+                            dh.workoutDao().update(workoutThis);
+                        } catch (SQLException e) {
+                            e.printStackTrace();
+                        }
                     }
                 });
                 builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
@@ -237,9 +293,13 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     // setPace: format and display text on UI that indicates the average pace of the workout.
     // also set property value.
     public void setPace(double avgPace, boolean convertUnits) {
+        if (Double.isNaN(avgPace) || Double.isInfinite(avgPace)) {
+            avgPace = 0.0;
+        }
         TextView paceText = findViewById(R.id.textview_workoutdetail_valueavgpace);
         paceText.setText(MainHelper.formatPace((convertUnits)
-                ? MainHelper.minpkmToMinpmi(avgPace) : avgPace)
+                ? MainHelper.minpkmToMinpmi(avgPace)
+                : avgPace)
                 + " " + ((convertUnits)
                 ? getString(R.string.all_labelpaceunitmiles)
                 : getString(R.string.all_labelpaceunitkilometers)));
@@ -275,7 +335,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             }
         });
 
-
         if (positions.size() > 0) {
 
             // Get starting and end positions.
@@ -292,16 +351,43 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                         .position(new LatLng(endPos.getLatitude(), endPos.getLongitude()))
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag_small)));
 
+                int pauseCounter = 1;
+                int breakCounter = 1;
+
                 // Create route trail.
-                for (int i = 1; i < positions.size(); i++) {
-                    mMap.addPolyline(new PolylineOptions()
-                            .add(
-                                    new LatLng(positions.get(i-1).getLatitude(),
-                                            positions.get(i-1).getLongitude()),
-                                    new LatLng(positions.get(i).getLatitude(),
-                                            positions.get(i).getLongitude()))
-                            .width(5.0f)
-                            .color(Color.RED));
+                for (int i = 1; i < this.positions.size(); i++) {
+                    if (this.positions.get(i-1).distanceTo(this.positions.get(i)) < Constant.PAUSE_DIST_CHANGE_THRESH) {
+                        mMap.addPolyline(new PolylineOptions()
+                                .add(
+                                        new LatLng(positions.get(i - 1).getLatitude(),
+                                                positions.get(i - 1).getLongitude()),
+                                        new LatLng(positions.get(i).getLatitude(),
+                                                positions.get(i).getLongitude()))
+                                .width(5.0f)
+                                .color(Color.RED));
+                           // If location has pause flag set to 1, mark pause location.
+                        if (this.positions.get(i-1).getExtras() != null &&
+                                this.positions.get(i-1).getExtras().getByte("pauseFlag", (byte)0) == (byte)1) {
+
+                            // Add marker to end of previous session (before pausing).
+                            mMap.addMarker(new MarkerOptions()
+                                    .position(new LatLng(this.positions.get(i - 1).getLatitude(), this.positions.get(i - 1).getLongitude()))
+                                    .title(String.format("Break %d", breakCounter)));
+                            breakCounter += 1;  // Increment breaks counter.
+                        }
+                    } else {
+                        // Add marker to end of previous session (before pausing).
+                        mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(this.positions.get(i-1).getLatitude(), this.positions.get(i-1).getLongitude()))
+                                .title(String.format("Pause %d", pauseCounter)));
+
+                        // Add marker to start of new session (after continuing).
+                        mMap.addMarker(new MarkerOptions()
+                                .position(new LatLng(this.positions.get(i).getLatitude(), this.positions.get(i).getLongitude()))
+                                .title(String.format("Continue %d", pauseCounter)));
+
+                        pauseCounter += 1;  // Increment pause counter.
+                    }
 
                 }
 
@@ -329,6 +415,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                     (convertUnits
                             ? Constant.UNITS_MI
                             : Constant.UNITS_KM));
+            if (getIntent().hasExtra("fromHistory")) {
+                mainActivityIntent.putExtra("loadHistory", true);
+            }
             WorkoutDetailActivity.this.startActivity(mainActivityIntent);
             return true;
         }

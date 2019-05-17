@@ -20,16 +20,12 @@ import android.support.v4.app.Fragment;
 import android.support.v7.app.AlertDialog;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 
 import com.j256.ormlite.dao.Dao;
-import com.j256.ormlite.stmt.DeleteBuilder;
 import com.j256.ormlite.stmt.PreparedQuery;
 
 import java.sql.SQLException;
@@ -45,8 +41,6 @@ import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class StopwatchFragment extends Fragment {
 
@@ -133,7 +127,9 @@ public class StopwatchFragment extends Fragment {
             // Add locations list to list of location lists.
             Location receivedLocation = intent.<Location>getParcelableExtra("position");
             if (receivedLocation != null) {
-                positions.add(receivedLocation);
+                if (positions.size() == 0 || positions.get(positions.size() - 1).getElapsedRealtimeNanos() != receivedLocation.getElapsedRealtimeNanos()) {
+                    positions.add(receivedLocation);
+                }
             }
             // Set property indicating current sport activity.
             sportActivity = intent.getIntExtra("sportActivity", -1);
@@ -379,7 +375,6 @@ public class StopwatchFragment extends Fragment {
                 break;
         }
 
-        Log.d("HEREIAM", "Dist units are... " + preferences.getInt("unit", 0));
         // Update units in UI.
         updateUnitsUI(this.distUnits);
 
@@ -478,7 +473,6 @@ public class StopwatchFragment extends Fragment {
             getActivity().unbindService(sConn);
             this.bound = false;
             getActivity().stopService(new Intent(getContext(), TrackerService.class));
-            getActivity().unregisterReceiver(receiver);
         }
 
         // If receiver registered, unregister it.

@@ -149,6 +149,12 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.preferences.edit().putBoolean("userSignedIn", false).apply();
             this.preferences.edit().remove("userId").apply();
         }
+
+        if (getIntent().hasExtra("loadHistory")) {
+            // load AboutFragment
+            this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.historyFragment).addToBackStack(null).commit();
+            currentFragment = FRAGMENT_HISTORY;
+        }
     }
 
     // onBackPressed: method called when back button pressed.

@@ -157,6 +157,7 @@ public class TrackerService extends Service {
 
                 // Compute cumulative number of calories used until now. NOTE: weight is hardcoded for now.
                 double caloriesNxt = 0.0;
+                Log.d("AMEN2", speedList.toString());
                 if (speedList.size() >= 2) {
                     caloriesNxt = SportActivities.countCalories(sportActivity, 60, speedList, durationAccumulator*1.0e-3*Math.pow(60.0, -2.0));
                 }
@@ -302,6 +303,7 @@ public class TrackerService extends Service {
             this.currentWorkout.setDistance(this.distanceAccumulator);
             this.currentWorkout.setDuration(this.durationAccumulator);
             this.currentWorkout.setTotalCalories(this.caloriesAcc);
+            Log.d("AMEN", "" + this.caloriesAcc);
             this.currentWorkout.setPaceAvg(this.pace);
             this.currentWorkout.setLastUpdate(new Date());
             this.currentWorkout.setSportActivity(this.sportActivity);
@@ -391,9 +393,14 @@ public class TrackerService extends Service {
                         positionList.add(mCurrentLocation);  // Add location to list of locations.
                     }
                     try {
-                        int sessionNumber = 0;
                         updateWorkout(true);
-                        databaseHelper.gpsPointDao().create(new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.size() > 0 ? speedList.get(speedList.size()-1) : 0, pace, caloriesAcc));
+                        GpsPoint gpsPointNxt = new GpsPoint(currentWorkout, sessionNumber, nxtLocation, durationAccumulator, speedList.size() > 0 ? speedList.get(speedList.size()-1) : 0, pace, caloriesAcc);
+                        gpsPointNxt.setCreated(new Date());
+                        gpsPointNxt.setLastUpdate(new Date());
+                        if (mCurrentLocation.getExtras() != null && mCurrentLocation.getExtras().getByte("pauseFlag", (byte)0) == (byte)1) {
+                            gpsPointNxt.setPauseFlag((byte)1);
+                        }
+                        databaseHelper.gpsPointDao().create(gpsPointNxt);
                     } catch (SQLException e) {
                         e.printStackTrace();
                     }

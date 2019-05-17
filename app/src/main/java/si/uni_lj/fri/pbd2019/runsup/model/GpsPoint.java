@@ -32,9 +32,10 @@ public class GpsPoint {
     private double totalCalories;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private Date created;
-
     @DatabaseField(canBeNull = false, useGetSet = true)
     private Date lastUpdate;
+    @DatabaseField(canBeNull = false, useGetSet = true, defaultValue = "0")
+    private byte pauseFlag;
 
 
     public GpsPoint() {
@@ -138,5 +139,13 @@ public class GpsPoint {
 
     public void setLastUpdate(Date lastUpdate) {
         this.lastUpdate = lastUpdate;
+    }
+
+    public byte getPauseFlag() {
+        return pauseFlag;
+    }
+
+    public void setPauseFlag(byte pauseFlag) {
+        this.pauseFlag = pauseFlag;
     }
 }
