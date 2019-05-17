@@ -288,6 +288,7 @@ public class TrackerService extends Service {
 
                 // Set sent sport activity.
                 this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
+                this.preferences.edit().putInt("sportActivity", this.sportActivity).apply();
 
                 // Update workout in database.
                 updateWorkout(true);

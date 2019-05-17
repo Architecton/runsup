@@ -136,18 +136,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             if (!this.accountDataSet && this.userImage != null && this.userName != null) {
                 Glide
                         .with(MainActivity.this)
-                        .load(userImageUri)
+                        .load(this.userImageUri)
                         .centerCrop()
                         .override(150, 150)
-                        .into(userImage);
-                userImage.setImageURI(this.userImageUri);
-                userName.setText(this.userFullName);
+                        .into(this.userImage);
+                this.userImage.setImageURI(this.userImageUri);
+                this.userName.setText(this.userFullName);
                 this.accountDataSet = true;
             }
 
         } else {
-            this.preferences.edit().putBoolean("userSignedIn", false).apply();
-            this.preferences.edit().remove("userId").apply();
+            if (this.userImage != null && this.userName != null) {
+                this.userImage.setImageResource(R.mipmap.iconfinder_unknown2_628287);
+                this.userName.setText(getString(R.string.all_unknownuser));
+            }
         }
 
         if (getIntent().hasExtra("loadHistory")) {
@@ -156,6 +158,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             currentFragment = FRAGMENT_HISTORY;
         }
     }
+
 
     // onBackPressed: method called when back button pressed.
     @Override
@@ -251,7 +254,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return super.onOptionsItemSelected(item);
     }
-
 
     // onNavigationItemSelected: handle navigation view item clicks
     @SuppressWarnings("StatementWithEmptyBody")

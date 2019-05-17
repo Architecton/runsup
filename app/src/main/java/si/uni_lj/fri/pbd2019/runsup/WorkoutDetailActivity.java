@@ -233,6 +233,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                 builder.show();
             }
         });
+
     }
 
     // onPause: method called when this activity is paused.
@@ -244,12 +245,35 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     // displayShareText: display EditText field for user to input text to share.
     public void displayShareText(View view) {
-        this.shareText.setVisibility(View.VISIBLE);
-        this.confirmShareButton.setVisibility(View.VISIBLE);
+        AlertDialog.Builder builder = new AlertDialog.Builder(WorkoutDetailActivity.this);
+        builder.setTitle("Share Your Workout");
+        final EditText input = new EditText(WorkoutDetailActivity.this);
+        input.setText(String.format(getString(R.string.workout_share_description),
+                MainHelper.getSportActivityName(this.sportActivity),
+                MainHelper.formatDistance(this.distance), getString(R.string.distance_unit),
+                MainHelper.formatDuration(this.duration)));
+        input.setInputType(InputType.TYPE_CLASS_TEXT);
+        builder.setView(input);
+        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                confirmShareButton.setVisibility(View.VISIBLE);
+            }
+        });
+        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+
+        /*
         this.shareText.setText(String.format(getString(R.string.workout_share_description),
                 MainHelper.getSportActivityName(this.sportActivity),
                 MainHelper.formatDistance(this.distance), getString(R.string.distance_unit),
                 MainHelper.formatDuration(this.duration)));
+        */
     }
 
     // ### METHODS FOR FORMATTING THE UI ###
