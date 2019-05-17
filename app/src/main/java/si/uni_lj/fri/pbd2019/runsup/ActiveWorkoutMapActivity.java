@@ -40,6 +40,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
     private IntentFilter filter;
     private Marker currentMarker;
     private LatLng currentLocation;
+    private ArrayList<Location> positions;
     private boolean lockPosition;
 
     private final int REDRAW_INTERVAL = 15;
@@ -58,7 +59,8 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
             receiveCounter += 1;
 
             // Save received ArrayList of locations.
-            ArrayList<Location> positions = intent.getParcelableArrayListExtra("positionList");
+            Location positionNxt = intent.getParcelableExtra("position");
+            positions.add(positionNxt);
 
             if (positions != null) {
                 // Draw trail
@@ -76,7 +78,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
                 }
 
                 // Get current location and set marker
-                currentLocation = new LatLng(positions.get(positions.size()-1).getLatitude(), positions.get(positions.size()-1).getLongitude());
+                currentLocation = new LatLng(positionNxt.getLatitude(), positionNxt.getLongitude());
 
                 // Add marker at user's current location (remove previous one if it exists).
                 if (currentMarker != null) {
@@ -119,6 +121,8 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_activeworkoutmap_map);
         mapFragment.getMapAsync(this);
+
+        this.positions = new ArrayList<>();
 
         // ## INTENT FILTER INITIALIZATION ##
         this.filter = new IntentFilter();
