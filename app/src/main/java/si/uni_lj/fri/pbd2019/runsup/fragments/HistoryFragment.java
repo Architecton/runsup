@@ -2,6 +2,7 @@ package si.uni_lj.fri.pbd2019.runsup.fragments;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -43,7 +44,7 @@ public class HistoryFragment extends Fragment {
         setHasOptionsMenu(true);  // Fragment has an options menu.
 
         // Get shared preferences.
-        this.preferences = getActivity().getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         return inflater.inflate(R.layout.fragment_history, parent, false);
     }
 
@@ -82,10 +83,12 @@ public class HistoryFragment extends Fragment {
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.history, menu);  // Inflate options menu.
 
+        /*
         // If user not signed in, hide synchronization option in menu.
         if (!preferences.getBoolean("userSignedIn", false)) {
             MenuItem menuItem = menu.findItem(R.id.stopwatchfragment_menuitem_sync);
             menuItem.setVisible(false);
         }
+        */
     }
 }

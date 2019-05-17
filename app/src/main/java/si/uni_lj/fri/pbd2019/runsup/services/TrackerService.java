@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.SystemClock;
+import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
@@ -104,7 +105,7 @@ public class TrackerService extends Service {
         createLocationCallback();
 
         // Initialize shared preferences pointer.
-        this.preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         this.databaseHelper = new DatabaseHelper(this);
 

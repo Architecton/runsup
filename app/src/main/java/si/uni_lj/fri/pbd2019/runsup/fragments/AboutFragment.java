@@ -33,7 +33,7 @@ public class AboutFragment extends Fragment {
         setHasOptionsMenu(true);  // Fragment has an options menu.
 
         // Get shared preferences.
-        this.preferences = getActivity().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         return inflater.inflate(R.layout.fragment_about, parent, false);
     }
 

@@ -82,7 +82,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                     } else {
 
                     }
-                    preferences.edit().putString("pref_location_access_value", stringValue).apply();
+                    preferences.edit().putString("location_permission", stringValue).apply();
                 }
             }
             return true;
@@ -127,7 +127,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setupActionBar();
-        preferences = getSharedPreferences(STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
 
@@ -218,6 +218,15 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // updated to reflect the new value, per the Android Design
             // guidelines.
             bindPreferenceSummaryToValue(findPreference("units_pref"));
+
+            ListPreference listPref = (ListPreference) findPreference("units_pref");
+            if (preferences.contains("unit")) {
+                listPref.setValue((preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM)
+                        ? getString(R.string.all_labeldistanceunitkilometers)
+                        : getString(R.string.all_labeldistanceunitmiles));
+            } else {
+                listPref.setValue(getString(R.string.all_labeldistanceunitkilometers));
+            }
         }
 
         @Override

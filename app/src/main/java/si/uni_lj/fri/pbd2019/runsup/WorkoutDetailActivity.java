@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
 import android.util.Log;
@@ -78,6 +79,8 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     private SharedPreferences sharedPreferences;
 
+    private boolean convertUnits;
+
     // ### /PROPERTIES ###
 
 
@@ -91,8 +94,8 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         resources = getResources();  // Initialize resources.
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
 
-        this.sharedPreferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
-        boolean convertUnits = this.sharedPreferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM;
+        this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        this.convertUnits = this.sharedPreferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM;
 
         this.setDuration(intent.getLongExtra("duration", 0));
         this.setSportActivity(intent.getIntExtra("sportActivity", -1));
@@ -311,13 +314,16 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         }
     }
 
-
     // onKeyDown: override default action when user presses the back button
     // Present stopwatch_shared in initial state.
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             Intent mainActivityIntent = new Intent(WorkoutDetailActivity.this, MainActivity.class);
+            mainActivityIntent.putExtra("unit",
+                    (convertUnits
+                            ? Constant.UNITS_MI
+                            : Constant.UNITS_KM));
             WorkoutDetailActivity.this.startActivity(mainActivityIntent);
             return true;
         }

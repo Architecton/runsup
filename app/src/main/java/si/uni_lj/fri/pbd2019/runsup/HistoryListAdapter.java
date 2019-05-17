@@ -27,7 +27,7 @@ public class HistoryListAdapter extends ArrayAdapter<Workout> {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        SharedPreferences preferences = getContext().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
         String distUnitsAbbr = (preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM)
                 ?
                 getContext().getString(R.string.all_labeldistanceunitkilometers)

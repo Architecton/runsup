@@ -13,6 +13,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
@@ -151,7 +152,7 @@ public class StopwatchFragment extends Fragment {
         super.onCreate(savedInstanceState);
 
         // Initialize shared preferences instance.
-        this.preferences = getActivity().getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
 
         // Initialize OnSharedPreferenceChangeListener instance.
         prefListener = new SharedPreferences.OnSharedPreferenceChangeListener() {
@@ -162,7 +163,7 @@ public class StopwatchFragment extends Fragment {
                     distUnits = preferences.getInt(key, Constant.UNITS_KM) == Constant.UNITS_KM
                             ? Constant.UNITS_KM : Constant.UNITS_MI;
                 }
-                if (key.equals("pref_location_access_value")) {
+                if (key.equals("location_permission")) {
                     // pass
                 }
             }

@@ -59,6 +59,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     private HistoryFragment historyFragment;
     private AboutFragment aboutFragment;
 
+    private ImageView userImage;
+    private TextView userName;
+
+    private boolean accountDataSet;
+
     // ### /PROPERTIES ###
 
     // onCreate: method called when the activity is created.
@@ -96,17 +101,18 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
-        preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);
+        preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        /*
         // Check if necessary preferences values exist. If not, set defaults.
-        if (!preferences.contains("unit")) {
+        if (!preferences.contains("unit") && !getIntent().hasExtra("unit")) {
             preferences.edit().putInt("unit", Constant.UNITS_KM).apply();
+        } else if (!preferences.contains("unit") && getIntent().hasExtra("unit")) {
+            preferences.edit().putInt("unit", getIntent().getIntExtra("unit", Constant.UNITS_KM)).apply();
         }
-        if(!preferences.contains("pref_location_access_value")) {
-            preferences.edit().putString("pref_location_access_value", "false").apply();
+
+        if(!preferences.contains("location_permission")) {
+            preferences.edit().putString("location_permission", "false").apply();
         }
-        */
     }
 
 
@@ -114,6 +120,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     protected void onStart() {
         super.onStart();
+        Log.d("HEREIAM DETAIL", "ON START CALLED");
 
         // Check if user signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
@@ -123,6 +130,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
+            Log.d("HEREIAM DETAIL", "IM IN");
+
+            if (!this.accountDataSet) {
+                Glide
+                        .with(MainActivity.this)
+                        .load(userImageUri)
+                        .centerCrop()
+                        .override(150, 150)
+                        .into(userImage);
+                userImage.setImageURI(this.userImageUri);
+                userName.setText(this.userFullName);
+                this.accountDataSet = true;
+            }
 
         } else {
             this.preferences.edit().putBoolean("userSignedIn", false).apply();
@@ -152,11 +172,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.main, menu);
 
         // user's profile image and full name.
-        ImageView userImage = findViewById(R.id.menu_loggedInUserImage);
-        TextView userName = findViewById(R.id.menu_loggedInUserFullName);
+        this.userImage = findViewById(R.id.menu_loggedInUserImage);
+        this.userName = findViewById(R.id.menu_loggedInUserFullName);
 
         // If user logged in, set profile image and full name.
-        if (this.userImageUri != null && this.userFullName != null)  {
+        if (this.userImageUri != null && this.userFullName != null && !accountDataSet)  {
             Glide
                     .with(MainActivity.this)
                     .load(userImageUri)
@@ -165,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .into(userImage);
             userImage.setImageURI(this.userImageUri);
             userName.setText(this.userFullName);
+            this.accountDataSet = true;
         }
 
         // Set on click listeners.
@@ -234,7 +255,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         } else if (id == R.id.nav_history) {
-            Log.d(TAG, "history menu item selected.");
             // load HistoryFragment
             if (currentFragment != FRAGMENT_HISTORY) {
 
@@ -243,12 +263,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 currentFragment = FRAGMENT_HISTORY;
             }
         } else if (id == R.id.nav_settings) {
-            Log.d(TAG, "settings menu item selected.");
             // Start SettingsActivity.
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.nav_about) {
-            Log.d(TAG, "about menu item selected.");
             // If current fragment not AboutFragment, set AboutFragment.
             if (currentFragment != FRAGMENT_ABOUT) {
 

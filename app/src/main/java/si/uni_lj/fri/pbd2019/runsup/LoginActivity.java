@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_login);  // Set content view.
-        this.preferences = getSharedPreferences(Constant.STATE_PREF_NAME, MODE_PRIVATE);  // Get shared preferences.
+        this.preferences = PreferenceManager.getDefaultSharedPreferences(this);  // Get shared preferences.
 
         // Check if user logged in.
         if (preferences.getBoolean("userSignedIn", false)) {
@@ -202,10 +202,7 @@ public class LoginActivity extends AppCompatActivity {
                 LoginActivity.this.startActivity(mainActivityIntent);
             }
         });
-
-
     }
-
 
     // updateUI: update user interface depending on whether user is signed in
     private void updateUiLoggedIn(GoogleSignInAccount account) {
