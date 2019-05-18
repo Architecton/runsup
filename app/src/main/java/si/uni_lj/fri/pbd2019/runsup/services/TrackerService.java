@@ -250,6 +250,7 @@ public class TrackerService extends Service {
                 // Initialize current workout
                 if (unfinishedWorkout == null) {
                     this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
+                    this.currentWorkout.setId(new Date().hashCode());
                     this.currentWorkout.setCreated(new Date());
                     this.currentWorkout.setUser(this.currentUser);
                     updateWorkout(false);

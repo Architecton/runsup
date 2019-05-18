@@ -79,6 +79,7 @@ public class HistoryFragment extends Fragment {
                         .findViewById(R.id.textview_history_noHistoryData).setVisibility(View.GONE);
             }
             for (Workout workout : userWorkouts) {
+                Log.d("BUREK", "" + workout.getId());
                 workouts.add(workout);
             }
         } catch (SQLException e) {

@@ -10,7 +10,7 @@ import java.util.Date;
 public class Workout implements Serializable {
 
 
-    @DatabaseField(generatedId = true, useGetSet = true)
+    @DatabaseField(generatedId = true, useGetSet = true, allowGeneratedIdInsert = true)
     private long id;
     @DatabaseField(foreign=true, foreignAutoRefresh=true, foreignAutoCreate = true, canBeNull = false)
     private User user;

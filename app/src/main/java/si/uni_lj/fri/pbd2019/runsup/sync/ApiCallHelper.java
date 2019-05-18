@@ -215,6 +215,9 @@ class ApiCallHelper {
             // Get ids of workouts missing from here.
             presentCloud.removeAll(presentHere);
 
+            Log.d("HERE", presentHere2.toString());
+            Log.d("MISSING", presentCloud.toString());
+
             // Get indices of workouts missing in cloud.
             presentHere2.removeAll(presentCloud2);
 
