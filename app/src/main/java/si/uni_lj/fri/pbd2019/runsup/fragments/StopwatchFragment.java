@@ -450,6 +450,7 @@ public class StopwatchFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
+        ((MainActivity)getActivity()).currentFragment = ((MainActivity)getActivity()).FRAGMENT_STOPWATCH;
 
         // If service not bound, bind it.
         if (!this.bound) {

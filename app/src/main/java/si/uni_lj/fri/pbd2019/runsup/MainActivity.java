@@ -14,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -43,15 +44,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // ### PROPERTIES ###
     public static final String TAG = MainActivity.class.getSimpleName();
 
-    private static final int FRAGMENT_STOPWATCH = 0;
-    private static final int FRAGMENT_HISTORY = 1;
-    private static final int FRAGMENT_ABOUT = 2;
+    public static final int FRAGMENT_STOPWATCH = 0;
+    public static final int FRAGMENT_HISTORY = 1;
+    public static final int FRAGMENT_ABOUT = 2;
 
     private Uri userImageUri;
     private String userFullName;
 
     private FragmentManager fragmentManager;
-    private int currentFragment;
+    public int currentFragment;
 
     private SharedPreferences preferences;
 
@@ -77,6 +78,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // onCreate: method called when the activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        Log.d("AHMAD", "ONCREATE");
         super.onCreate(savedInstanceState);
 
         // Initialize fragment instances.
@@ -137,6 +139,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // onStart: method called when activity becomes visible to user.
     @Override
     protected void onStart() {
+        Log.d("AHMAD", "ONSTART");
         super.onStart();
 
         // Check if user signed in.
@@ -376,5 +379,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void onPause() {
         super.onPause();  // Call method of superclass.
+    }
+
+    @Override
+    protected void onResume() {
+        Log.d("AHMAD", "ONRESUME");
+        super.onResume();
     }
 }
