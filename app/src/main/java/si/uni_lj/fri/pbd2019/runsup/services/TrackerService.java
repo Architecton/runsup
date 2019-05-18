@@ -26,10 +26,12 @@ import com.google.android.gms.location.LocationServices;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.helpers.SportActivities;
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
+import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 
@@ -85,6 +87,8 @@ public class TrackerService extends Service {
     private Workout currentWorkout;
 
     private int sessionNumber;
+
+    private User currentUser;
     // ### /PROPERTIES ###
 
 
@@ -157,9 +161,8 @@ public class TrackerService extends Service {
 
                 // Compute cumulative number of calories used until now. NOTE: weight is hardcoded for now.
                 double caloriesNxt = 0.0;
-                Log.d("AMEN2", speedList.toString());
                 if (speedList.size() >= 2) {
-                    caloriesNxt = SportActivities.countCalories(sportActivity, 60, speedList, durationAccumulator*1.0e-3*Math.pow(60.0, -2.0));
+                    caloriesNxt = SportActivities.countCalories(sportActivity, preferences.getInt("weight", Constant.DEFAULT_WEIGHT), speedList, durationAccumulator*1.0e-3*Math.pow(60.0, -2.0));
                 }
 
                 caloriesAcc = caloriesNxt;
@@ -222,10 +225,33 @@ public class TrackerService extends Service {
                 this.h.postDelayed(this.r, this.BROADCAST_PERIOD);
                 this.sessionNumber = (unfinishedWorkout == null) ? 0 : Integer.parseInt(unfinishedWorkout.getTitle().substring(unfinishedWorkout.getTitle().indexOf(' ')+1));
 
+                // Get current user
+                long userId = intent.getLongExtra("userId", -1l);
+                if (userId != -1l) {
+                    try {
+                        List<User> res = databaseHelper
+                                .userDao()
+                                .queryBuilder()
+                                .where()
+                                .eq("accId", userId)
+                                .query();
+                        if (res.size() > 0) {
+                            this.currentUser = res.get(0);
+                        } else {
+                            this.currentUser = new User("anonymous");
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    this.currentUser = new User("anonymous");
+                }
+
                 // Initialize current workout
                 if (unfinishedWorkout == null) {
                     this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
                     this.currentWorkout.setCreated(new Date());
+                    this.currentWorkout.setUser(this.currentUser);
                     updateWorkout(false);
                     try {
                         this.databaseHelper.workoutDao().create(this.currentWorkout);
@@ -235,6 +261,7 @@ public class TrackerService extends Service {
                 } else {
                    this.currentWorkout = unfinishedWorkout;
                 }
+
 
                 break;
             case Constant.COMMAND_CONTINUE:
@@ -299,17 +326,16 @@ public class TrackerService extends Service {
 
     // updateWorkoutInDb: update current workout in database
     private void updateWorkout(boolean save) {
-        Log.d(TAG, "Workout updated in DB");
         if (this.currentWorkout != null) {
             this.currentWorkout.setDistance(this.distanceAccumulator);
             this.currentWorkout.setDuration(this.durationAccumulator);
             this.currentWorkout.setTotalCalories(this.caloriesAcc);
-            Log.d("AMEN", "" + this.caloriesAcc);
             this.currentWorkout.setPaceAvg(this.pace);
             this.currentWorkout.setLastUpdate(new Date());
             this.currentWorkout.setSportActivity(this.sportActivity);
             this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, this.sessionNumber));
             this.currentWorkout.setStatus(this.trackingState);
+            this.currentWorkout.setUser(this.currentUser);
 
             // If flag to update in database set...
             if (save) {

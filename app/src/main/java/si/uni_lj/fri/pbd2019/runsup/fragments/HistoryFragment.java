@@ -7,11 +7,11 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentTransaction;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -22,25 +22,23 @@ import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.HistoryListAdapter;
+import si.uni_lj.fri.pbd2019.runsup.MainActivity;
 import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
-import si.uni_lj.fri.pbd2019.runsup.model.SyncLog;
+import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
-
-import static android.content.Context.MODE_PRIVATE;
-import static si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity.STATE_PREF_NAME;
 
 public class HistoryFragment extends Fragment {
 
     // ### PROPERTIES ###
 
     private SharedPreferences preferences;
+    private User currentUser;
 
     // ### /PROPERTIES ###
 
@@ -52,9 +50,9 @@ public class HistoryFragment extends Fragment {
 
         // Get shared preferences.
         this.preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+        this.currentUser = ((MainActivity)getActivity()).currentUser;
         return inflater.inflate(R.layout.fragment_history, parent, false);
     }
-
 
     // onViewCreated: method called when view is created.
     @Override
@@ -65,14 +63,19 @@ public class HistoryFragment extends Fragment {
         try {
             Dao<Workout, Long> workoutDao = dh.workoutDao();
 
+            QueryBuilder<User, Long> userQb = dh.userDao().queryBuilder();
+            QueryBuilder<Workout, Long> workoutQb = dh.workoutDao().queryBuilder();
+            userQb.where().eq("accId", currentUser.getAccId());
+            List<Workout> userWorkouts = workoutQb.join(userQb).query();
+
             // If workouts found in database, remove TextView instance that informs of
             // absence of workouts.
-            if (workoutDao.countOf() > 0) {
+            if (userWorkouts.size() > 0) {
                 getActivity()
                         .findViewById(R.id.textview_history_noHistoryData).setVisibility(View.GONE);
             }
-            for (Workout aWorkoutDao : workoutDao) {
-                workouts.add(aWorkoutDao);
+            for (Workout workout : userWorkouts) {
+                workouts.add(workout);
             }
         } catch (SQLException e) {
             e.printStackTrace();

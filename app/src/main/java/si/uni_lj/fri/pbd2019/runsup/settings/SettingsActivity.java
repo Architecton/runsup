@@ -15,8 +15,10 @@ import android.preference.PreferenceActivity;
 import android.preference.PreferenceFragment;
 import android.preference.PreferenceManager;
 import android.preference.SwitchPreference;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 
@@ -41,6 +43,8 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
 
     static SharedPreferences preferences;
     public static final String STATE_PREF_NAME = "state";
+    public static SwitchPreference locationPref;
+    public static SettingsActivity settingsActivity;
 
     /**
      * A preference value change listener that updates the preference's summary
@@ -74,13 +78,9 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
                 if (preference.getKey().equals("pref_location_access_value")) {
                     // Check for location access permissions.
                     if (value.equals(true)) {
-                        if (ActivityCompat.checkSelfPermission(MainActivity.mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(MainActivity.mainActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
-                        } else {
-
+                        if (ActivityCompat.checkSelfPermission(SettingsActivity.settingsActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(SettingsActivity.settingsActivity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Constant.LOCATION_PERMISSION_REQUEST_CODE);
                         }
-                    } else {
-
                     }
                     preferences.edit().putString("location_permission", stringValue).apply();
                 }
@@ -88,6 +88,16 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             return true;
         }
     };
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        if (grantResults[0] == 0) {
+            locationPref.setEnabled(false);
+        } else {
+            locationPref.setChecked(false);
+        }
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    }
 
     /**
      * Helper method to determine if the device has an extra-large screen. For
@@ -128,6 +138,7 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
         super.onCreate(savedInstanceState);
         setupActionBar();
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
+        settingsActivity = this;
     }
 
 
@@ -182,11 +193,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             setHasOptionsMenu(true);
             bindSwitchPreferenceToListener(findPreference("pref_location_access_value"));
 
-            SwitchPreference locationPref = (SwitchPreference) findPreference("pref_location_access_value");
+            locationPref = (SwitchPreference) findPreference("pref_location_access_value");
             if (ActivityCompat.checkSelfPermission(MainActivity.mainActivity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 locationPref.setChecked(false);
             } else {
                 locationPref.setChecked(true);
+                locationPref.setEnabled(false);
             }
         }
 

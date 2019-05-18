@@ -14,7 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -28,11 +28,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import org.jetbrains.annotations.NotNull;
 
 import java.sql.SQLException;
+import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.HistoryFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
-import si.uni_lj.fri.pbd2019.runsup.model.Workout;
+import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 
@@ -67,6 +68,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     private boolean accountDataSet;
 
+    private DatabaseHelper dh;
+
+    public User currentUser;
+
     // ### /PROPERTIES ###
 
     // onCreate: method called when the activity is created.
@@ -100,6 +105,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize fragmentManager instance.
         this.fragmentManager = getSupportFragmentManager();
 
+        this.dh = new DatabaseHelper(this);
+
         // Set default fragment (StopwatchFragment).
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
@@ -115,6 +122,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         if(!preferences.contains("location_permission")) {
             preferences.edit().putString("location_permission", "false").apply();
+        }
+
+        if(!preferences.contains("weight")) {
+           preferences.edit().putInt("weight", Constant.DEFAULT_WEIGHT).apply();
+        }
+
+        if (!preferences.contains("age")) {
+           preferences.edit().putInt("age", Constant.DEFAULT_AGE).apply();
         }
     }
 
@@ -145,11 +160,48 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.accountDataSet = true;
             }
 
+            // ### Set user ###
+
+            // Check if user in database
+            this.currentUser = null;
+            User existingUser = null;
+            try {
+                List<User> res = dh.userDao()
+                        .queryBuilder()
+                        .where()
+                        .eq("accId", account.getId().hashCode())
+                        .query();
+
+                if (res.size() > 0) {
+                    existingUser = res.get(0);
+                }
+
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+
+            // If user not found in database, add to database.
+            if (existingUser == null) {
+                User newUser = new User(account.getId());
+                try {
+                    dh.userDao().create(newUser);
+                    this.currentUser = newUser;
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            } else {
+                this.currentUser = existingUser;
+            }
+
+
         } else {
             if (this.userImage != null && this.userName != null) {
                 this.userImage.setImageResource(R.mipmap.iconfinder_unknown2_628287);
                 this.userName.setText(getString(R.string.all_unknownuser));
             }
+
+            // Set user.
+            this.currentUser = new User("anonymous");
         }
 
         if (getIntent().hasExtra("loadHistory")) {
@@ -204,6 +256,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 // Start LoginActivity.
                 Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                if (currentFragment == FRAGMENT_HISTORY) {
+                    loginIntent.putExtra("fromHistory", true);
+                }
                 MainActivity.this.startActivity(loginIntent);
             }
         });
@@ -212,6 +267,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             public void onClick(View v) {
                 // Start LoginActivity.
                 Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                if (currentFragment == FRAGMENT_HISTORY) {
+                    loginIntent.putExtra("fromHistory", true);
+                }
                 MainActivity.this.startActivity(loginIntent);
             }
         });
@@ -299,6 +357,19 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         DrawerLayout drawer = findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
+    }
+
+
+    // onKeyDown: override default action when user presses the back button
+    // If on stopwatch fragment, close application.
+    @Override
+    public boolean onKeyDown(int keyCode, KeyEvent event) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && currentFragment == FRAGMENT_STOPWATCH) {
+            finishAffinity();
+            return true;
+        }
+        return super.onKeyDown(keyCode, event);
+
     }
 
     // onPause: method called when activity paused.

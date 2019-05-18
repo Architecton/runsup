@@ -12,7 +12,7 @@ public class Workout implements Serializable {
 
     @DatabaseField(generatedId = true, useGetSet = true)
     private long id;
-    @DatabaseField(foreign=true, foreignAutoRefresh=true)
+    @DatabaseField(foreign=true, foreignAutoRefresh=true, foreignAutoCreate = true, canBeNull = false)
     private User user;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private String title;

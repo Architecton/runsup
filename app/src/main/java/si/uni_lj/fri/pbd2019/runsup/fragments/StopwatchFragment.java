@@ -34,9 +34,11 @@ import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.ActiveWorkoutMapActivity;
 import si.uni_lj.fri.pbd2019.runsup.Constant;
+import si.uni_lj.fri.pbd2019.runsup.MainActivity;
 import si.uni_lj.fri.pbd2019.runsup.R;
 import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
+import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.services.TrackerService;
@@ -86,6 +88,8 @@ public class StopwatchFragment extends Fragment {
     // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
     Workout lastUnfinishedWorkout;
     private long workoutId;
+
+    private User currentUser;
 
     // ## class level listeners ##
 
@@ -419,9 +423,6 @@ public class StopwatchFragment extends Fragment {
         // set listener on button to listen for workout end.
         this.endWorkoutButton.setOnClickListener(endListener);
 
-
-        // Load last non-ended workout from database if it exists.
-        // initially null
     }
 
     // onPause: method called when the activity is paused.
@@ -488,6 +489,9 @@ public class StopwatchFragment extends Fragment {
     // startStopwatch: method used to start the workout
     public void startStopwatch() {
 
+        // Get current user.
+        this.currentUser = ((MainActivity)getActivity()).currentUser;
+
         // start TrackerService with action si.uni_lj.fri.pbd2019.runsup.COMMAND_START
         Intent startIntent = new Intent(getContext(), TrackerService.class);
         startIntent.setAction(Constant.COMMAND_START);
@@ -495,7 +499,9 @@ public class StopwatchFragment extends Fragment {
         if (this.lastUnfinishedWorkout != null) {
             startIntent.putExtra("unfinishedWorkout", this.lastUnfinishedWorkout);
         }
+        startIntent.putExtra("userId", this.currentUser.getAccId());
         getActivity().startService(startIntent);
+
         this.updateStartButtonText(Constant.STATE_RUNNING);
 
         // Make button for showing map invisible and button for ending workout visible.

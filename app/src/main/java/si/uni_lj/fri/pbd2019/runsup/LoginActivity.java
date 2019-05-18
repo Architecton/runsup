@@ -240,20 +240,19 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    /*
     // onKeyDown: override default action when user presses the back button
-    // Present stopwatch_shared in initial state.
+    // Present updated history if user came from history.
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if (keyCode == KeyEvent.KEYCODE_BACK) {
+        if (keyCode == KeyEvent.KEYCODE_BACK && getIntent().hasExtra("fromHistory")) {
             Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
+            mainActivityIntent.putExtra("loadHistory", true);
             LoginActivity.this.startActivity(mainActivityIntent);
             return true;
         }
         return super.onKeyDown(keyCode, event);
 
     }
-    */
 
     // updateUI: update user interface depending on whether user is signed in
     private void updateUiLoggedIn(GoogleSignInAccount account) {

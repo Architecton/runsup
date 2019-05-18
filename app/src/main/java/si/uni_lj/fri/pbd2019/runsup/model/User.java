@@ -10,7 +10,7 @@ public class User {
     private long id;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private long accId;
-    @DatabaseField(canBeNull = false, useGetSet = true)
+    @DatabaseField(useGetSet = true)
     private int authToken;
 
 
