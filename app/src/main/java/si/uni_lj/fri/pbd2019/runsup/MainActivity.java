@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -37,6 +38,7 @@ import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
+import si.uni_lj.fri.pbd2019.runsup.sync.CloudSyncHelper;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -293,7 +295,29 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
-            // TODO
+            CloudSyncHelper csh = new CloudSyncHelper(Constant.BASE_CLOUD_URL);
+            try {
+                csh.syncWithCloud(Constant.BASE_CLOUD_URL, currentUser);
+                if (this.currentFragment == FRAGMENT_HISTORY) {
+                    final Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            fragmentManager.beginTransaction().detach(historyFragment).attach(historyFragment).commit();
+                            currentFragment = FRAGMENT_HISTORY;
+                        }
+                    }, 2000);
+
+                }
+                new AlertDialog.Builder(this)
+                        .setTitle("Synchronization Finished")
+                        .setMessage("Workouts have been successfully synchronized with the cloud!")
+                        .setPositiveButton(R.string.yes, null)
+                        .setIcon(R.drawable.checked)
+                        .show();
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
             new AlertDialog.Builder(this)
                     .setTitle("Delete History")
@@ -312,6 +336,10 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
+        } else if (id == R.id.historyfragment_menuitem_refresh) {
+            // load AboutFragment
+            this.fragmentManager.beginTransaction().detach(this.historyFragment).attach(this.historyFragment).commit();
+            currentFragment = FRAGMENT_HISTORY;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -373,17 +401,5 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
         return super.onKeyDown(keyCode, event);
 
-    }
-
-    // onPause: method called when activity paused.
-    @Override
-    public void onPause() {
-        super.onPause();  // Call method of superclass.
-    }
-
-    @Override
-    protected void onResume() {
-        Log.d("AHMAD", "ONRESUME");
-        super.onResume();
     }
 }

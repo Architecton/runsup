@@ -4,4 +4,9 @@
         android:id="@+id/historyfragment_menuitem_delete_history"
         android:orderInCategory="100"
         android:title="@string/historysettings_actiondelete_history"/>
+
+    <item
+        android:id="@+id/historyfragment_menuitem_refresh"
+        android:orderInCategory="100"
+        android:title="@string/historysettings_action_refresh"/>
 </menu>

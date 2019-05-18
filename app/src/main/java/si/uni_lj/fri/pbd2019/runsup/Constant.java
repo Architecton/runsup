@@ -50,4 +50,6 @@ public class Constant {
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 
     public static final String STATE_PREF_NAME = "state";
+
+    public static final String BASE_CLOUD_URL = "http://10.0.2.2:3000";
 }

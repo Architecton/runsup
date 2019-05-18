@@ -1,0 +1,8 @@
+in terminal 1:
+	cd mongodb
+	./mongod_local
+
+in terminal 2:
+	cd runsUp-api
+	npm install
+	npm start
