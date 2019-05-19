@@ -5,6 +5,8 @@ import android.location.Location;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -68,6 +70,16 @@ public class HistoryFragment extends Fragment {
                 }
             });
             */
+
+
+            final SwipeRefreshLayout pullToRefresh = getActivity().findViewById(R.id.pullToRefresh);
+            pullToRefresh.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+                @Override
+                public void onRefresh() {
+                    getFragmentManager().beginTransaction().detach(HistoryFragment.this).attach(HistoryFragment.this).commit();
+                    pullToRefresh.setRefreshing(false);
+                }
+            });
 
             // If workouts found in database, remove TextView instance that informs of
             // absence of workouts.
