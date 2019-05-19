@@ -3,7 +3,6 @@ package si.uni_lj.fri.pbd2019.runsup;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,12 +10,12 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
-
-import static android.content.Context.MODE_PRIVATE;
 
 public class HistoryListAdapter extends ArrayAdapter<Workout> {
 
@@ -24,10 +23,13 @@ public class HistoryListAdapter extends ArrayAdapter<Workout> {
         super(context, 0, workouts);
     }
 
+    @NotNull
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
+    public View getView(int position, View convertView, @NotNull ViewGroup parent) {
 
         SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+        // Get unit abbreviations.
         String distUnitsAbbr = (preferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM)
                 ?
                 getContext().getString(R.string.all_labeldistanceunitkilometers)
@@ -38,22 +40,24 @@ public class HistoryListAdapter extends ArrayAdapter<Workout> {
                 getContext().getString(R.string.all_labelpaceunitkilometers)
                 :
                 getContext().getString(R.string.all_labelpaceunitmiles);
+
+        // convert to miles?
         boolean convertToMi = preferences.getInt("unit", Constant.UNITS_KM) != Constant.UNITS_KM;
 
-        // Get the data item for this position
+        // Get the data item for this position.
         Workout workoutNxt = getItem(position);
-        // Check if an existing view is being reused, otherwise inflate the view
+        // Check if an existing view is being reused, otherwise inflate the view.
         if (convertView == null) {
             convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_history, parent, false);
         }
-        // Lookup view for data population
-        TextView workoutTitle = (TextView) convertView.findViewById(R.id.textview_history_title);
-        TextView workoutTime = (TextView) convertView.findViewById(R.id.textview_history_datetime);
-        TextView workoutSportActivity = (TextView) convertView.findViewById(R.id.textview_history_sportactivity);
-        ImageView workoutIcon = (ImageView) convertView.findViewById(R.id.imageview_history_icon);
+
+        // Lookup view for data population.
+        TextView workoutTitle = convertView.findViewById(R.id.textview_history_title);
+        TextView workoutTime = convertView.findViewById(R.id.textview_history_datetime);
+        TextView workoutSportActivity = convertView.findViewById(R.id.textview_history_sportactivity);
+        ImageView workoutIcon = convertView.findViewById(R.id.imageview_history_icon);
 
         // Populate the data into the template view using the data object
-        // tvName.setText(user);
         workoutTitle.setText(workoutNxt.getTitle());
         workoutTime.setText(workoutNxt.getCreated().toString());
         workoutSportActivity.setText(String.format("%s %s | %s | %s | %s",
@@ -68,6 +72,7 @@ public class HistoryListAdapter extends ArrayAdapter<Workout> {
                         : workoutNxt.getPaceAvg()) + " " + paceUnitsAbbr
         ));
 
+        // Set sport activity icon.
         switch (workoutNxt.getSportActivity()) {
             case Constant.CYCLING:
                 workoutIcon.setImageResource(R.drawable.bicycle);
@@ -80,10 +85,11 @@ public class HistoryListAdapter extends ArrayAdapter<Workout> {
                 break;
         }
 
-        // Return the completed view to render on screen
+        // Return the completed view to render on screen.
         return convertView;
     }
 
+    // string formatter methods
     public static class HistoryStringFormatter {
         static String formatDuration(long duration) {
             return MainHelper.formatDuration(Math.round(duration*1e-3));

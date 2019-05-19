@@ -11,7 +11,7 @@ public final class SportActivities {
     // ### Define tables for MET values. ###
 
     // speed to MET conversion for running
-    public static Map<Integer, Double> speedToMET_running = new HashMap<Integer, Double>() {{
+    private static Map<Integer, Double> speedToMET_running = new HashMap<Integer, Double>() {{
         put(4, 6.0);
         put(5, 8.3);
         put(6, 9.8);
@@ -26,7 +26,7 @@ public final class SportActivities {
     }};
 
     // speed to MET conversion for walking
-    public static Map<Integer, Double> speedToMET_walking = new HashMap<Integer, Double>() {{
+    private static Map<Integer, Double> speedToMET_walking = new HashMap<Integer, Double>() {{
         put(1, 2.0);
         put(2, 2.8);
         put(3, 3.1);
@@ -34,7 +34,7 @@ public final class SportActivities {
     }};
 
     // speed to MET conversion for cycling.
-    public static Map<Integer, Double> speedToMET_cycling = new HashMap<Integer, Double>() {{
+    private static Map<Integer, Double> speedToMET_cycling = new HashMap<Integer, Double>() {{
         put(10, 6.8);
         put(12, 8.0);
         put(14, 10.0);
@@ -44,24 +44,25 @@ public final class SportActivities {
     }};
 
     // Map sports activities to multipliers to use when actual speed not in tables.
-    public static Map<Integer, Double> MET_aux = new HashMap<Integer, Double>() {{
+    private static Map<Integer, Double> MET_aux = new HashMap<Integer, Double>() {{
         put(Constant.RUNNING, 1.535353535);
         put(Constant.WALKING, 1.14);
         put(Constant.CYCLING, 0.744444444);
     }};
 
-    // HERE FOR TESTING
+
+    // ### HERE FOR TESTING ###
     public static int RUNNING = Constant.RUNNING;
     public static int CYCLING = Constant.CYCLING;
     public static int WALKING = Constant.WALKING;
+
 
     /**
     * Returns MET value for an activity.
     * @param activityType - sport activity type (0 - running, 1 - walking, 2 - cycling)
     * @param speed - speed in m/s
-    * @return
     */
-    public static double getMET(int activityType, float speed) {
+    private static double getMET(int activityType, float speed) {
         switch (activityType) {
             case Constant.RUNNING:
                 if (speedToMET_running.containsKey((int)Math.ceil(speed))) {
@@ -93,7 +94,6 @@ public final class SportActivities {
      * @param weight - weight in kg
      * @param speedList - list of all speed values recorded (unit = m/s)
      * @param timeFillingSpeedListInHours - time of collecting speed list (duration of sport activity from first to last speedPoint in speedList)
-     * @return
      */
     public static double countCalories(int sportActivity, float weight, List<Float> speedList, double timeFillingSpeedListInHours) {
 

@@ -87,8 +87,9 @@ public class StopwatchFragment extends Fragment {
 
     // lastPausedWorkout - if not null, it holds the last paused workout found in the database.
     Workout lastUnfinishedWorkout;
-    private long workoutId;
+    private long workoutId;  // Id of current workout
 
+    // user that is using the application. If not logged in accId == "anonymous".hashCode()
     private User currentUser;
 
     // ## class level listeners ##
@@ -116,7 +117,7 @@ public class StopwatchFragment extends Fragment {
 
     // ## BROADCAST RECEIVER ##
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
-        /* Anonymous BroadcastReceiver instance that receives commands */
+        /* Anonymous BroadcastReceiver instance that receives updates from service */
         @Override
         public void onReceive(Context context, Intent intent) {
             updateCounter++;  // Increment update counter.
@@ -126,15 +127,16 @@ public class StopwatchFragment extends Fragment {
             updateDistance(intent.getDoubleExtra("distance", 0.0), distUnits);
             updatePace(intent.getDoubleExtra("pace", 0.0), distUnits);
             updateCalories(intent.getDoubleExtra("calories", 0.0));
-            workoutId = intent.getLongExtra("workoutId", -1l);
+            workoutId = intent.getLongExtra("workoutId", -1L);
 
             // Add locations list to list of location lists.
-            Location receivedLocation = intent.<Location>getParcelableExtra("position");
+            Location receivedLocation = intent.getParcelableExtra("position");
             if (receivedLocation != null) {
                 if (positions.size() == 0 || positions.get(positions.size() - 1).getElapsedRealtimeNanos() != receivedLocation.getElapsedRealtimeNanos()) {
                     positions.add(receivedLocation);
                 }
             }
+
             // Set property indicating current sport activity.
             sportActivity = intent.getIntExtra("sportActivity", -1);
         }
@@ -180,7 +182,7 @@ public class StopwatchFragment extends Fragment {
 
         // Check for location access permissions.
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            // Prompt user to confirm decision to end workout.
+            // Prompt user to go to settings to turn on location permissions.
             new AlertDialog.Builder(getContext())
                     .setTitle("Access To Location")
                     .setMessage("Please turn on location access in the application's settings for the best experience.")
@@ -231,7 +233,6 @@ public class StopwatchFragment extends Fragment {
         this.bound = true;  // Set bound indicator to true.
     }
 
-    // onCreateView: method called when view is to be created.
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup parent, Bundle savedInstanceState) {
@@ -273,7 +274,6 @@ public class StopwatchFragment extends Fragment {
                 .show();
     }
 
-    // oncCreate: method called when view is created.
     @Override
     public void onViewCreated(View view, Bundle savedInstanceState) {
 
@@ -303,15 +303,11 @@ public class StopwatchFragment extends Fragment {
 
                 try {
 
-                    // Get dao for workouts.
                     Dao<Workout, Long> workoutDao = new DatabaseHelper(getContext()).workoutDao();
-                    //DeleteBuilder<Workout, Long> deleteBuilder = workoutDao.deleteBuilder();
-                    //deleteBuilder.where().eq("status", 2);
-                    //deleteBuilder.delete();
 
                     // Make a prepared query to get last unfinished workout from database.
                     PreparedQuery<Workout> query = workoutDao.queryBuilder()
-                            .limit(1l)
+                            .limit(1L)
                             .orderBy("lastUpdate", false)
                             .where()
                             .eq("status", Constant.STATE_RUNNING)
@@ -324,12 +320,12 @@ public class StopwatchFragment extends Fragment {
                     if (lastUnfinishedWorkoutList.size() > 0) {  // if found
                         Log.d(TAG, "Unfinished workout retrieved from database.");
 
-                        // Get last workout.
+                        // Get last workout unfinished.
                         lastUnfinishedWorkout = lastUnfinishedWorkoutList.get(0);
 
                         // Mock paused state.
 
-                        // Update TextView fields in UI depending on found values of last paused workout.
+                        // Update TextView fields in UI depending on found values of last unfinished workout.
                         updateDuration(Math.round(1.0e-3 * (double) lastUnfinishedWorkout.getDuration()));
                         updateDistance(lastUnfinishedWorkout.getDistance(), distUnits);
                         updatePace(lastUnfinishedWorkout.getPaceAvg(), distUnits);
@@ -425,7 +421,6 @@ public class StopwatchFragment extends Fragment {
 
     }
 
-    // onPause: method called when the activity is paused.
     @Override
     public void onPause() {
         super.onPause();
@@ -446,7 +441,6 @@ public class StopwatchFragment extends Fragment {
         }
     }
 
-    // onResume: method called when the activity is resumed.
     @Override
     public void onResume() {
         super.onResume();
@@ -465,7 +459,6 @@ public class StopwatchFragment extends Fragment {
         }
     }
 
-    // onDestroy: method called when the activity is destroyed.
     @Override
     public void onDestroy() {
         super.onDestroy();
@@ -530,7 +523,7 @@ public class StopwatchFragment extends Fragment {
 
                     public void onClick(DialogInterface dialog, int which) {
 
-                        // Initialize intent for startin the dharmag the service.
+                        // Initialize intent.
                         Intent startIntent = new Intent(getContext(), TrackerService.class);
                         startIntent.setAction(Constant.COMMAND_STOP);  // Set action.
                         getContext().startService(startIntent);

@@ -35,19 +35,23 @@ public class Constant {
     public static final int PAUSE_DIST_CHANGE_THRESH = 100;
 
 
+    // distance unit codes.
     public static final int UNITS_KM = 0;
     public static final int UNITS_MI = 1;
 
+    // units abbreviations.
     public static final String UNITS_KM_ABBR = App.getAppResources().getString(R.string.all_labeldistanceunitkilometers);
     public static final String UNITS_MI_ABBR = App.getAppResources().getString(R.string.all_labeldistanceunitmiles);
     public static final String UNITS_MINPKM_ABBR = App.getAppResources().getString(R.string.all_labelpaceunitkilometers);
     public static final String UNITS_MINPMI_ABBR = App.getAppResources().getString(R.string.all_labelpaceunitmiles);
 
 
+    // Default values of user.
     public static final int DEFAULT_WEIGHT = 65;
     public static final int DEFAULT_AGE = 30;
     public static final String DEFAULT_WORKOUT_TITLE_FORMAT_STRING = "Workout %d";
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 
+    // Base url for the back-end on the cloud.
     public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
 }

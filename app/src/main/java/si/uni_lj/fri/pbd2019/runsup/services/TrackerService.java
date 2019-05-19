@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.os.SystemClock;
 import android.preference.PreferenceManager;
 import android.support.v4.app.ActivityCompat;
-import android.util.Log;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationCallback;
@@ -27,6 +26,7 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.helpers.SportActivities;
@@ -189,7 +189,6 @@ public class TrackerService extends Service {
     // onDestroy: method called when the service is destroyed.
     @Override
     public void onDestroy() {
-        Log.d(TAG, "Service destroyed.");
         super.onDestroy();  // Call onDestroy method of superclass.
         stopLocationUpdates();  // Disable location updates.
     }
@@ -215,7 +214,7 @@ public class TrackerService extends Service {
                 this.durationAccumulator = (unfinishedWorkout == null) ? 0 : unfinishedWorkout.getDuration();  // Initialize duration accumulator.
 
                 this.trackingState = Constant.STATE_RUNNING;  // Set service state.
-                this.firstMeasAfterPause = (unfinishedWorkout == null) ? false : true;  // initialize indicator.
+                this.firstMeasAfterPause = unfinishedWorkout != null;  // initialize indicator.
 
                 // Initialize sport activity from start command.
                 this.sportActivity = intent.getIntExtra("sportActivity", Constant.RUNNING);
@@ -226,8 +225,8 @@ public class TrackerService extends Service {
                 this.sessionNumber = (unfinishedWorkout == null) ? 0 : Integer.parseInt(unfinishedWorkout.getTitle().substring(unfinishedWorkout.getTitle().indexOf(' ')+1));
 
                 // Get current user
-                long userId = intent.getLongExtra("userId", -1l);
-                if (userId != -1l) {
+                long userId = intent.getLongExtra("userId", -1L);
+                if (userId != -1L) {
                     try {
                         List<User> res = databaseHelper
                                 .userDao()
@@ -249,7 +248,7 @@ public class TrackerService extends Service {
 
                 // Initialize current workout
                 if (unfinishedWorkout == null) {
-                    this.currentWorkout = new Workout(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
+                    this.currentWorkout = new Workout(String.format(Locale.getDefault(), Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, sessionNumber), sportActivity);
                     this.currentWorkout.setId(new Date().hashCode());
                     this.currentWorkout.setCreated(new Date());
                     this.currentWorkout.setUser(this.currentUser);
@@ -334,7 +333,7 @@ public class TrackerService extends Service {
             this.currentWorkout.setPaceAvg(this.pace);
             this.currentWorkout.setLastUpdate(new Date());
             this.currentWorkout.setSportActivity(this.sportActivity);
-            this.currentWorkout.setTitle(String.format(Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, this.sessionNumber));
+            this.currentWorkout.setTitle(String.format(Locale.getDefault(), Constant.DEFAULT_WORKOUT_TITLE_FORMAT_STRING, this.sessionNumber));
             this.currentWorkout.setStatus(this.trackingState);
             this.currentWorkout.setUser(this.currentUser);
 

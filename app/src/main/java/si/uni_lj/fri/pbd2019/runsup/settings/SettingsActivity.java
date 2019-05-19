@@ -18,7 +18,6 @@ import android.preference.SwitchPreference;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 
@@ -42,7 +41,6 @@ import si.uni_lj.fri.pbd2019.runsup.R;
 public class SettingsActivity extends AppCompatPreferenceActivity {
 
     static SharedPreferences preferences;
-    public static final String STATE_PREF_NAME = "state";
     public static SwitchPreference locationPref;
     public static SettingsActivity settingsActivity;
 

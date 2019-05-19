@@ -41,14 +41,19 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
     private Marker currentMarker;
     private LatLng currentLocation;
     private ArrayList<Location> positions;
+
+    // lockPosition: inidicator whether position is locked.
     private boolean lockPosition;
 
+
+    // interval at which to redraw the trail.
     private final int REDRAW_INTERVAL = 15;
 
 
     // ## BROADCAST RECEIVER ##
     private final BroadcastReceiver receiver = new BroadcastReceiver() {
 
+        // Count received updates from service.
         int receiveCounter = 0;
 
         /* Anonymous BroadcastReceiver instance that receives commands */
@@ -62,6 +67,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
             Location positionNxt = intent.getParcelableExtra("position");
             positions.add(positionNxt);
 
+            // If positions array is not null, draw trail.
             if (positions != null) {
                 // Draw trail
                 if (receiveCounter % REDRAW_INTERVAL == 0) {
@@ -89,6 +95,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
                             .title("Your Current Location"));
                 }
 
+                // If user locked position
                 if (lockPosition) {
 
                     // Move camera to current location of user.
@@ -111,13 +118,12 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
 
     // ### /PROPERTIES ###
 
-    // onCreate: called when activity created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_active_workout_map);  // Set content.
 
-        // Get SupportMapFragment instance and get map (onMapReady gets called)
+        // Get SupportMapFragment instance and get map (onMapReady gets called).
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.fragment_activeworkoutmap_map);
         mapFragment.getMapAsync(this);
@@ -140,7 +146,6 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         toast.show();
     }
 
-    // onStart: called when activity becomes visible to user.
     @Override
     protected void onStart() {
         super.onStart();
@@ -168,7 +173,6 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         }
     }
 
-    // onPause: called when the activity is paused.
     @Override
     protected void onPause() {
         super.onPause();
@@ -180,7 +184,6 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         }
     }
 
-    // onResume: called when the activity is resumed.
     @Override
     protected void onResume() {
         super.onResume();
@@ -193,7 +196,6 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
     }
 
 
-    // onRestart: called when activity restarted.
     @Override
     protected void onRestart() {
         super.onRestart();
@@ -205,7 +207,6 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         }
     }
 
-    // onMapReady: called when map is ready.
     @Override
     public void onMapReady(GoogleMap map) {
         // Initialize map instance.
@@ -229,7 +230,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
         Point startPoint = proj.toScreenLocation(marker.getPosition());  // Get start point of animation.
         final LatLng startLatLng = proj.fromScreenLocation(startPoint);  // Get start point LatLng instance.
         final long duration = 500;  // Animation duration.
-        final Interpolator interpolator = new LinearInterpolator();  // Instantiate linear interpolator to iterpolate line through points.
+        final Interpolator interpolator = new LinearInterpolator();  // Instantiate linear interpolator to interpolate line through points.
         handler.post(new Runnable() {
             @Override
             public void run() {

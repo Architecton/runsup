@@ -15,7 +15,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,40 +43,49 @@ import si.uni_lj.fri.pbd2019.runsup.sync.CloudSyncHelper;
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
     // ### PROPERTIES ###
-    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = MainActivity.class.getSimpleName();  // TAG
 
+    // codes used to indicate current fragment
     public static final int FRAGMENT_STOPWATCH = 0;
     public static final int FRAGMENT_HISTORY = 1;
     public static final int FRAGMENT_ABOUT = 2;
 
+    // user image uri and user's full name
     private Uri userImageUri;
     private String userFullName;
 
+    // fragment manager instance
     private FragmentManager fragmentManager;
+
+    // variable that holds the current set fragment.
     public int currentFragment;
 
+    // shared preferences instance.
     private SharedPreferences preferences;
 
-    public static final String STATE_PREF_NAME = "state";
-
+    // Context of this activity.
     public static MainActivity mainActivity;
 
+    // fragments
     private StopwatchFragment stopwatchFragment;
     private HistoryFragment historyFragment;
     private AboutFragment aboutFragment;
 
+    // User's image and user's name UI components.
     private ImageView userImage;
     private TextView userName;
 
+    // variable that indicates whether the account data is set.
     private boolean accountDataSet;
 
+    // DatabaseHelper instance.
     private DatabaseHelper dh;
 
+    // Current user using the application.
     public User currentUser;
 
     // ### /PROPERTIES ###
 
-    // onCreate: method called when the activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,12 +116,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Initialize fragmentManager instance.
         this.fragmentManager = getSupportFragmentManager();
 
+        // Initialize DatabaseHelper instance.
         this.dh = new DatabaseHelper(this);
 
         // Set default fragment (StopwatchFragment).
         this.fragmentManager.beginTransaction().add(R.id.main_fragment_container, this.stopwatchFragment).commit();
         this.currentFragment = FRAGMENT_STOPWATCH;
 
+        // Get shared preferences.
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
 
         // Check if necessary preferences values exist. If not, set defaults.
@@ -137,7 +147,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     }
 
 
-    // onStart: method called when activity becomes visible to user.
     @Override
     protected void onStart() {
         super.onStart();
@@ -145,12 +154,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Check if user signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
+
             // Get user's photo url and user's full name.
             this.userImageUri = account.getPhotoUrl();
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
 
+            // Set user's avatar.
             if (!this.accountDataSet && this.userImage != null && this.userName != null) {
                 Glide
                         .with(MainActivity.this)
@@ -195,8 +206,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             } else {
                 this.currentUser = existingUser;
             }
-
-
         } else {
             if (this.userImage != null && this.userName != null) {
                 this.userImage.setImageResource(R.mipmap.iconfinder_unknown2_628287);
@@ -207,6 +216,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             this.currentUser = new User("anonymous");
         }
 
+        // If intent has extra that specifies history fragment to be loaded, load it.
         if (getIntent().hasExtra("loadHistory")) {
             // load AboutFragment
             this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.historyFragment).addToBackStack(null).commit();
@@ -230,6 +240,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
+
+        // If user not logged int, hide cloud sync option. Else display it.
         if (currentUser != null && currentUser.getAccId() == "anonymous".hashCode()) {
             menu.findItem(R.id.stopwatchfragment_menuitem_sync).setVisible(false);
         } else if (currentUser != null && !menu.findItem(R.id.stopwatchfragment_menuitem_sync).isVisible()) {
@@ -238,7 +250,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onPrepareOptionsMenu(menu);
     }
 
-    // onCreateOptionsMenu: method called when options menu created.
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
 
@@ -299,14 +310,22 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Get id of clicked item.
         int id = item.getItemId();
 
+        // If user selected settings option...
         if (id == R.id.stopwatchfragment_menuitem_settings) {
+
             // Start SettingsActivity
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
+
+            // If user selected cloud sync option
         } else if (id == R.id.stopwatchfragment_menuitem_sync) {
             CloudSyncHelper csh = new CloudSyncHelper(Constant.BASE_CLOUD_URL);
             try {
+
+                // Synchronize with cloud.
                 csh.syncWithCloud(Constant.BASE_CLOUD_URL, currentUser);
+
+                // If on history fragment, refresh fragment after 5 seconds.
                 if (this.currentFragment == FRAGMENT_HISTORY) {
                     final Handler handler = new Handler();
                     handler.postDelayed(new Runnable() {
@@ -318,6 +337,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     }, 5000);
 
                 }
+
+                // Notify user.
                 new AlertDialog.Builder(this)
                         .setTitle("Synchronization Started")
                         .setMessage("Workouts are being synchronized with the cloud! It may take some time for the process to finish.")
@@ -333,6 +354,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .show();
             }
+
+            // If user chose to delete history.
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
             new AlertDialog.Builder(this)
                     .setTitle("Delete History")
@@ -351,6 +374,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                     .setNegativeButton(R.string.no, null)  // Do nothing if user selects cancel.
                     .setIcon(android.R.drawable.ic_dialog_alert)
                     .show();
+
+            // If user chose to refresh fragment.
         } else if (id == R.id.historyfragment_menuitem_refresh) {
             // load AboutFragment
             this.fragmentManager.beginTransaction().detach(this.historyFragment).attach(this.historyFragment).commit();
@@ -376,7 +401,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.stopwatchFragment).addToBackStack(null).commit();
                 this.currentFragment = FRAGMENT_STOPWATCH;
             }
-
+        // If user chose to go to history fragment.
         } else if (id == R.id.nav_history) {
             // load HistoryFragment
             if (currentFragment != FRAGMENT_HISTORY) {
@@ -385,10 +410,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.historyFragment).addToBackStack(null).commit();
                 currentFragment = FRAGMENT_HISTORY;
             }
+
+            // If user chose to go to settings.
         } else if (id == R.id.nav_settings) {
             // Start SettingsActivity.
             Intent settingsActivityIntent = new Intent(MainActivity.this, SettingsActivity.class);
             MainActivity.this.startActivity(settingsActivityIntent);
+
+            // If user chose to load about fragment.
         } else if (id == R.id.nav_about) {
             // If current fragment not AboutFragment, set AboutFragment.
             if (currentFragment != FRAGMENT_ABOUT) {
@@ -418,6 +447,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    // ## FOR TESTING ##
     @Override
     public void onPause() {
         super.onPause();

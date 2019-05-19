@@ -5,6 +5,7 @@ import android.icu.text.SimpleDateFormat;
 import android.icu.util.TimeZone;
 
 import java.util.Date;
+import java.util.Locale;
 
 import si.uni_lj.fri.pbd2019.runsup.Constant;
 import si.uni_lj.fri.pbd2019.runsup.R;
@@ -27,19 +28,19 @@ public final class MainHelper {
 
     // formatDistance: format distance (return distance in kilometers with 2 decimals)
     public static String formatDistance(double n) {
-        return String.format("%.2f", n*1.0e-3);
+        return String.format(Locale.getDefault(), "%.2f", n*1.0e-3);
     }
 
 
     // formatPace: format pace (return min/km with 2 decimals)
     public static String formatPace(double n) {
-        return String.format("%.2f", n);
+        return String.format(Locale.getDefault(), "%.2f", n);
     }
 
 
     // formatCalories: format calories (return rounded integer)
     public static String formatCalories(double n) {
-        return String.format("%d", (int)Math.round(n));
+        return String.format(Locale.getDefault(), "%d", (int)Math.round(n));
     }
 
     // formatCaloriesWithUnits: format calories (return rounded integer with unit abbreviation appended

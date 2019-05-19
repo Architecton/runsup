@@ -5,14 +5,13 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -35,7 +34,7 @@ public class LoginActivity extends AppCompatActivity {
 
     // ### PROPERTIES ###
 
-    public static final String TAG  = LoginActivity.class.getSimpleName();
+    public static final String TAG  = LoginActivity.class.getSimpleName();  // TAG
     private SharedPreferences preferences;                                  // shared preferences
     public static final String STATE_PREF_NAME = "state";                   // name of preferences state
     private long userId;                                                    // user's id
@@ -48,7 +47,6 @@ public class LoginActivity extends AppCompatActivity {
     // ### /PROPERTIES ###
 
 
-    // onCreate: called when activity created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -61,13 +59,14 @@ public class LoginActivity extends AppCompatActivity {
                 .requestEmail()
                 .build();
 
+        // Set Google sign in client.
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Check if user logged in.
         if (preferences.getBoolean("userSignedIn", false)) {
             // Do nothing.
         } else {
-
+            // If user signed in, add click listener for sign in button.
             findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -84,6 +83,7 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);  // Call method of superclass.
+
         // Result returned from launching the Intent from GoogleSignInClient.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             // The Task returned from this call is always completed, no need to attach a listener.
@@ -110,7 +110,8 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
-    public static boolean setNumberPickerTextColor(NumberPicker numberPicker, int color)
+    // setNumberPickerTextColor: auxiliary method used to set the colors of the number picker.
+    public static void setNumberPickerTextColor(NumberPicker numberPicker, int color)
     {
         final int count = numberPicker.getChildCount();
         for(int i = 0; i < count; i++){
@@ -123,7 +124,7 @@ public class LoginActivity extends AppCompatActivity {
                     ((Paint)selectorWheelPaintField.get(numberPicker)).setColor(color);
                     ((EditText)child).setTextColor(color);
                     numberPicker.invalidate();
-                    return true;
+                    return;
                 }
                 catch(NoSuchFieldException e){
                     Log.w(TAG, e);
@@ -136,7 +137,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
             }
         }
-        return false;
     }
 
 

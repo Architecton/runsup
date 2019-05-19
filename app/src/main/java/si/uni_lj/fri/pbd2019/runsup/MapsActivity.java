@@ -18,19 +18,19 @@ import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 
 import java.util.ArrayList;
+import java.util.Locale;
 
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     // ### PROPERTIES ###
 
-    public static final String TAG = MapsActivity.class.getSimpleName();
-    private GoogleMap mMap;
-    private ArrayList<Location> positions;
+    public static final String TAG = MapsActivity.class.getSimpleName();  // TAG
+    private GoogleMap mMap;  // map instance.
+    private ArrayList<Location> positions;  // list of positions on map.
 
     // ### /PROPERTIES ###
 
 
-    // onCreate: called when activity created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -75,7 +75,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     // Add marker to end of previous session (before pausing).
                     mMap.addMarker(new MarkerOptions()
                             .position(new LatLng(positionsLast.get(i-1).getLatitude(), positionsLast.get(i-1).getLongitude()))
-                            .title(String.format("Break %d", breakCounter)));
+                            .title(String.format(Locale.getDefault(), "Break %d", breakCounter)));
                     breakCounter += 1;  // Increment breaks counter.
                 }
             } else {
@@ -84,12 +84,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // Add marker to end of previous session (before pausing).
                 mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(positionsLast.get(i-1).getLatitude(), positionsLast.get(i-1).getLongitude()))
-                        .title(String.format("Pause %d", pauseCounter)));
+                        .title(String.format(Locale.getDefault(), "Pause %d", pauseCounter)));
 
                 // Add marker to start of new session (after continuing).
                 mMap.addMarker(new MarkerOptions()
                         .position(new LatLng(positionsLast.get(i).getLatitude(), positionsLast.get(i).getLongitude()))
-                        .title(String.format("Continue %d", pauseCounter)));
+                        .title(String.format(Locale.getDefault(), "Continue %d", pauseCounter)));
 
                 pauseCounter += 1;  // Increment pause counter.
             }
@@ -129,8 +129,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Draw trail created from locations.
         this.create_trail(this.positions);
 
+        // Zoom enough to see full trail.
         if (this.positions.size() > 0) {
-            // Zoom enough to see full route.
             LatLngBounds.Builder builder = new LatLngBounds.Builder();
             for (Location pos : this.positions) {
                 builder.include(new LatLng(pos.getLatitude(), pos.getLongitude()));

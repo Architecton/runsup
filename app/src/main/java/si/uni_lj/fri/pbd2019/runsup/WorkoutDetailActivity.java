@@ -103,17 +103,22 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         resources = getResources();  // Initialize resources.
         Intent intent = getIntent();  // Get intent and unpack extras into methods that format and display data on UI.
 
+        // Get shared preferences.
         this.sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        // Get indicator whether to convert units to miles.
         this.convertUnits = this.sharedPreferences.getInt("unit", Constant.UNITS_KM) == Constant.UNITS_KM;
 
+        // Initialize database helper instance.
         this.dh = new DatabaseHelper(this);
 
+        // Initialize values from intent extras.
         this.setDuration(intent.getLongExtra("duration", 0));
         this.setSportActivity(intent.getIntExtra("sportActivity", -1));
         this.setCalories(intent.getDoubleExtra("calories", 0.0));
         this.setDistance(intent.getDoubleExtra("distance", 0.0), convertUnits);
         this.setPace(intent.getDoubleExtra("pace", 0.0), convertUnits);
-        this.workoutId = intent.getLongExtra("workoutId", -1l);
+        this.workoutId = intent.getLongExtra("workoutId", -1L);
         this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
         this.titleSet = intent.hasExtra("titleSet");
@@ -124,6 +129,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                 .findFragmentById(R.id.fragment_workoutdetail_map);
         mapFragment.getMapAsync(this);
 
+        // If intent has an indicator that activity started from history, instantiate current workout from database.
         if (intent.hasExtra("fromHistory")) {
             Workout workoutThis = null;
             try {
@@ -145,10 +151,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         }
     }
 
-    // onStart: method called when the activity UI becomes visible to the user.
     @Override
     protected void onStart() {
-        super.onStart();  // Call onStart method of superclass.
+        super.onStart();
 
         // Initialize UI elements.
         this.shareText = findViewById(R.id.share_message);
@@ -159,6 +164,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.confirmShareButton = findViewById(R.id.confirm_share_button);
         this.workoutTitleTextView = findViewById(R.id.textview_workoutdetail_workouttitle);
 
+        // If title of workout is set...
         if (this.titleSet) {
             try {
                 Workout workoutThis = dh.workoutDao()
@@ -245,6 +251,8 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     // displayShareText: display EditText field for user to input text to share.
     public void displayShareText(View view) {
+
+        // Create a dialog for user to type their message.
         AlertDialog.Builder builder = new AlertDialog.Builder(WorkoutDetailActivity.this);
         builder.setTitle("Share Your Workout");
         final EditText input = new EditText(WorkoutDetailActivity.this);
@@ -375,6 +383,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                         .position(new LatLng(endPos.getLatitude(), endPos.getLongitude()))
                         .icon(BitmapDescriptorFactory.fromResource(R.mipmap.racing_flag_small)));
 
+                // Initialize pause and break counters.
                 int pauseCounter = 1;
                 int breakCounter = 1;
 
