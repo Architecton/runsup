@@ -99,7 +99,7 @@
     <string name="dismiss">dismiss</string>
     <string name="go_to_settings">go to settings</string>
 
-    <string name="historysettings_actionclearhistory">todo</string>
+    <string name="historysettings_actionclearhistory">DeleteHistory</string>
     <string name="historysettings_action_refresh">Refresh</string>
     <!-- Strings related to Settings -->
 

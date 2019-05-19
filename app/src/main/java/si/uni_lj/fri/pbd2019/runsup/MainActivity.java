@@ -80,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // onCreate: method called when the activity is created.
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.d("AHMAD", "ONCREATE");
         super.onCreate(savedInstanceState);
 
         // Initialize fragment instances.
@@ -141,7 +140,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     // onStart: method called when activity becomes visible to user.
     @Override
     protected void onStart() {
-        Log.d("AHMAD", "ONSTART");
         super.onStart();
 
         // Check if user signed in.
@@ -230,6 +228,15 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        if (currentUser != null && currentUser.getAccId() == "anonymous".hashCode()) {
+            menu.findItem(R.id.stopwatchfragment_menuitem_sync).setVisible(false);
+        } else if (currentUser != null && !menu.findItem(R.id.stopwatchfragment_menuitem_sync).isVisible()) {
+            menu.findItem(R.id.stopwatchfragment_menuitem_sync).setVisible(true);
+        }
+        return super.onPrepareOptionsMenu(menu);
+    }
 
     // onCreateOptionsMenu: method called when options menu created.
     @Override
@@ -237,6 +244,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.stopwatch_shared, menu);
+
 
         // user's profile image and full name.
         this.userImage = findViewById(R.id.menu_loggedInUserImage);
@@ -278,6 +286,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 MainActivity.this.startActivity(loginIntent);
             }
         });
+
 
         return true;
     }
