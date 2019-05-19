@@ -51,9 +51,9 @@ public final class SportActivities {
     }};
 
     // HERE FOR TESTING
-    static int RUNNING = Constant.RUNNING;
-    static int CYCLING = Constant.CYCLING;
-    static int WALKING = Constant.WALKING;
+    public static int RUNNING = Constant.RUNNING;
+    public static int CYCLING = Constant.CYCLING;
+    public static int WALKING = Constant.WALKING;
 
     /**
     * Returns MET value for an activity.
