@@ -54,7 +54,7 @@ public class StopwatchFragment extends Fragment {
 
     private boolean bound;  // indicator that indicates whether the service is bound
     private ServiceConnection sConn;  // connection to service
-    private TrackerService service;  // Service proxy instance
+    // private TrackerService service;  // Service proxy instance
 
     private int sportActivity;  // current sport activity
     private long duration;  // current workout duration
@@ -217,7 +217,7 @@ public class StopwatchFragment extends Fragment {
 
             // callback that is called when the service is connected
             public void onServiceConnected(ComponentName name, IBinder binder) {
-                service = ((TrackerService.LocalBinder) binder).getService();  // Call getService of passed binder.
+                // service = ((TrackerService.LocalBinder) binder).getService();  // Call getService of passed binder.
                 bound = true;  // Set bound indicator to true.
             }
 
