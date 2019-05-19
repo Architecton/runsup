@@ -17,6 +17,8 @@ import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.HistoryListAdapter;
@@ -57,6 +59,14 @@ public class HistoryFragment extends Fragment {
             QueryBuilder<Workout, Long> workoutQb = dh.workoutDao().queryBuilder();
             userQb.where().eq("accId", currentUser.getAccId());
             List<Workout> userWorkouts = workoutQb.join(userQb).query();
+            Collections.reverse(userWorkouts);
+            /*
+            Collections.sort(userWorkouts, new Comparator<Workout>(){
+                public int compare(Workout w1, Workout w2) {
+                    return w1.getLastUpdate().compareTo(w2.getLastUpdate());
+                }
+            });
+            */
 
             // If workouts found in database, remove TextView instance that informs of
             // absence of workouts.
