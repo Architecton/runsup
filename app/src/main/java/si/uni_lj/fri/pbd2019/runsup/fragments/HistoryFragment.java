@@ -60,6 +60,7 @@ public class HistoryFragment extends Fragment {
             userQb.where().eq("accId", currentUser.getAccId());
             List<Workout> userWorkouts = workoutQb.join(userQb).query();
             Collections.reverse(userWorkouts);
+
             /*
             Collections.sort(userWorkouts, new Comparator<Workout>(){
                 public int compare(Workout w1, Workout w2) {

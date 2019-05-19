@@ -101,6 +101,7 @@
 
     <string name="historysettings_actionclearhistory">Delete History</string>
     <string name="historysettings_action_refresh">Refresh</string>
+    <string name="map_preview_not_available"><![CDATA[<Map preview not available>]]></string>
     <!-- Strings related to Settings -->
 
     <!-- Example General settings -->

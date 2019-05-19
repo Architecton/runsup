@@ -179,6 +179,12 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             }
         }
 
+        // If less than 2 gps points, hide map preview fragment.
+        if (this.positions.size() < 2) {
+            findViewById(R.id.fragment_workoutdetail_map).setVisibility(View.INVISIBLE);
+            findViewById(R.id.textview_workoutdetail_preview_not_available).setVisibility(View.VISIBLE);
+        }
+
 
 
         // TODO
