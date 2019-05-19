@@ -1,3 +1,7 @@
+The back-end is already running on https://runsup.herokuapp.com
+
+### To run locally: ###
+
 in terminal 1:
 	cd mongodb
 	./mongod_local
