@@ -11,7 +11,7 @@ public final class SportActivities {
     // ### Define tables for MET values. ###
 
     // speed to MET conversion for running
-    private static Map<Integer, Double> speedToMET_running = new HashMap<Integer, Double>() {{
+    public static Map<Integer, Double> speedToMET_running = new HashMap<Integer, Double>() {{
         put(4, 6.0);
         put(5, 8.3);
         put(6, 9.8);
@@ -26,7 +26,7 @@ public final class SportActivities {
     }};
 
     // speed to MET conversion for walking
-    private static Map<Integer, Double> speedToMET_walking = new HashMap<Integer, Double>() {{
+    public static Map<Integer, Double> speedToMET_walking = new HashMap<Integer, Double>() {{
         put(1, 2.0);
         put(2, 2.8);
         put(3, 3.1);
@@ -34,7 +34,7 @@ public final class SportActivities {
     }};
 
     // speed to MET conversion for cycling.
-    private static Map<Integer, Double> speedToMET_cycling = new HashMap<Integer, Double>() {{
+    public static Map<Integer, Double> speedToMET_cycling = new HashMap<Integer, Double>() {{
         put(10, 6.8);
         put(12, 8.0);
         put(14, 10.0);
@@ -62,7 +62,7 @@ public final class SportActivities {
     * @param activityType - sport activity type (0 - running, 1 - walking, 2 - cycling)
     * @param speed - speed in m/s
     */
-    private static double getMET(int activityType, float speed) {
+    public static double getMET(int activityType, float speed) {
         switch (activityType) {
             case Constant.RUNNING:
                 if (speedToMET_running.containsKey((int)Math.ceil(speed))) {
