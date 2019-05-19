@@ -92,7 +92,7 @@ public class ActiveWorkoutMapActivity extends AppCompatActivity implements OnMap
                 } else {
                     currentMarker = mMap.addMarker(new MarkerOptions()
                             .position(currentLocation)
-                            .title("Your Current Location"));
+                            .title(getString(R.string.map_marker_current_location)));
                 }
 
                 // If user locked position

@@ -184,8 +184,8 @@ public class StopwatchFragment extends Fragment {
         if (ActivityCompat.checkSelfPermission(getContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // Prompt user to go to settings to turn on location permissions.
             new AlertDialog.Builder(getContext())
-                    .setTitle("Access To Location")
-                    .setMessage("Please turn on location access in the application's settings for the best experience.")
+                    .setTitle(R.string.alertTitle_location)
+                    .setMessage(R.string.alertTitle_location_message)
                     .setPositiveButton(R.string.go_to_settings, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             Intent settingsActivityIntent = new Intent(getContext(), SettingsActivity.class);
@@ -383,7 +383,7 @@ public class StopwatchFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(getContext())
-                        .setTitle("Select Activity")
+                        .setTitle(R.string.sport_activity_selection_title)
                         .setItems(Constant.activities, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
@@ -517,8 +517,8 @@ public class StopwatchFragment extends Fragment {
 
         // Prompt user to confirm decision to end workout.
         new AlertDialog.Builder(getContext())
-                .setTitle("Stop Workout")
-                .setMessage("Are you sure you want to end this workout?")
+                .setTitle(R.string.alerttitle_stop_workout)
+                .setMessage(R.string.alertbody_stop_workout)
                 .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
 
                     public void onClick(DialogInterface dialog, int which) {

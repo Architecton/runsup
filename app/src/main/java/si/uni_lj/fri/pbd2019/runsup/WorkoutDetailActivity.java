@@ -261,7 +261,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
         // Create a dialog for user to type their message.
         AlertDialog.Builder builder = new AlertDialog.Builder(WorkoutDetailActivity.this);
-        builder.setTitle("Share Your Workout");
+        builder.setTitle(R.string.buildertitle_share_workout);
         final EditText input = new EditText(WorkoutDetailActivity.this);
         input.setText(String.format(getString(R.string.workout_share_description),
                 MainHelper.getSportActivityName(this.sportActivity),
@@ -490,8 +490,8 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
             // Prompt user to confirm intention to delete activity.
             new AlertDialog.Builder(this)
-                    .setTitle("Delete Workout")
-                    .setMessage("Are you sure you want to delete this workout? You cannot undo this action.")
+                    .setTitle(R.string.alerttitle_delete_workout)
+                    .setMessage(R.string.alertmessage_delete_workout)
                     .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             try {

@@ -218,8 +218,8 @@ public class LoginActivity extends AppCompatActivity {
             public void onClick(View v) {
                 // Prompt user to confirm intention to delete activity.
                 new AlertDialog.Builder(LoginActivity.this)
-                        .setTitle("Sign Out")
-                        .setMessage("Are you sure you want to sign out from RunsUp?")
+                        .setTitle(R.string.alterttitle_login_activity_signout)
+                        .setMessage(R.string.alert_sign_out_message)
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseAuth.getInstance().signOut();

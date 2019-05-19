@@ -340,16 +340,16 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
                 // Notify user.
                 new AlertDialog.Builder(this)
-                        .setTitle("Synchronization Started")
-                        .setMessage("Workouts are being synchronized with the cloud! It may take some time for the process to finish.")
+                        .setTitle(R.string.alerttitle_sync)
+                        .setMessage(R.string.alertmessage_sync)
                         .setPositiveButton(R.string.yes, null)
                         .setIcon(R.drawable.checked)
                         .show();
             } catch (SQLException e) {
                 e.printStackTrace();
                 new AlertDialog.Builder(this)
-                        .setTitle("Synchronization Error")
-                        .setMessage("There was an error when trying to synchronize your workouts with the cloud.")
+                        .setTitle(R.string.alerttitle_sync_error)
+                        .setMessage(R.string.alertmessage_sync_error)
                         .setPositiveButton(R.string.yes, null)
                         .setIcon(android.R.drawable.ic_dialog_info)
                         .show();
@@ -358,8 +358,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // If user chose to delete history.
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
             new AlertDialog.Builder(this)
-                    .setTitle("Delete History")
-                    .setMessage("Are you sure you want to delete your local history? You cannot undo this action.")
+                    .setTitle(R.string.alerttitle_delete_history)
+                    .setMessage(R.string.alertmessage_delete_history)
                     .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                         public void onClick(DialogInterface dialog, int which) {
                             try {
