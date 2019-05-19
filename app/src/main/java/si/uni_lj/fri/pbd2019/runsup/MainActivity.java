@@ -36,6 +36,7 @@ import si.uni_lj.fri.pbd2019.runsup.fragments.AboutFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.HistoryFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
+import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 import si.uni_lj.fri.pbd2019.runsup.sync.CloudSyncHelper;
@@ -199,20 +200,41 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             // If user not found in database, add to database.
             if (existingUser == null) {
                 User newUser = new User(account.getId());
+
+                // Create new user profile.
+                UserProfile newUserProfile =
+                        new UserProfile(newUser, preferences.getInt("weight",
+                                Constant.DEFAULT_WEIGHT),
+                                preferences.getInt("age", Constant.DEFAULT_AGE));
+                newUserProfile.setId(account.getId().hashCode());
                 try {
                     dh.userDao().create(newUser);
+                    dh.userProfileDao().create(newUserProfile);
                     this.currentUser = newUser;
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
             } else {
                 this.currentUser = existingUser;
+
+                // Get weight and age from current user.
+                try {
+                    List<UserProfile> res = dh.userProfileDao().queryBuilder().where().eq("id", this.currentUser.getAccId()).query();
+                    if (res != null && res.size() > 0) {
+                        // TODO
+                        // preferences.edit().putInt("age", res.get(0).getAge()).apply();
+                        // preferences.edit().putInt("weight", res.get(0).getWeight()).apply();
+                    }
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
         } else {
             if (this.userImage != null && this.userName != null) {
                 this.userImage.setImageResource(R.mipmap.iconfinder_unknown2_628287);
                 this.userName.setText(getString(R.string.all_unknownuser));
             }
+
 
             // Set user.
             this.currentUser = new User("anonymous");

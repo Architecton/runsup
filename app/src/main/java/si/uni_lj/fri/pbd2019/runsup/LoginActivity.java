@@ -28,6 +28,11 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.lang.reflect.Field;
+import java.sql.SQLException;
+import java.util.List;
+
+import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
+import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -179,13 +184,13 @@ public class LoginActivity extends AppCompatActivity {
         npWeight.setMaxValue(500);
         npWeight.setWrapSelectorWheel(false);
         npWeight.setDisplayedValues(weights);
-        npWeight.setValue(preferences.getInt("age", Constant.DEFAULT_AGE));
+        npWeight.setValue(preferences.getInt("age", Constant.DEFAULT_WEIGHT));
 
         npAge.setMinValue(1);
         npAge.setMaxValue(200);
         npAge.setWrapSelectorWheel(false);
         npAge.setDisplayedValues(ages);
-        npAge.setValue(preferences.getInt("weight", Constant.DEFAULT_WEIGHT));
+        npAge.setValue(preferences.getInt("weight", Constant.DEFAULT_AGE));
 
         npWeight.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override

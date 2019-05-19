@@ -1,5 +1,5 @@
 #
-# generated on 2019/05/19 12:50:37
+# generated on 2019/05/19 10:05:22
 #
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint
@@ -166,6 +166,7 @@ tableName=UserProfile
 fieldName=id
 generatedId=true
 useGetSet=true
+allowGeneratedIdInsert=true
 # --field-end--
 # --field-start--
 fieldName=user
@@ -175,6 +176,11 @@ maxForeignAutoRefreshLevel=2
 # --field-end--
 # --field-start--
 fieldName=weight
+canBeNull=false
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=age
 canBeNull=false
 useGetSet=true
 # --field-end--
