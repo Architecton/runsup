@@ -28,7 +28,7 @@ public class Constant {
     public static final int STATE_PAUSED = 2;
     public static final int STATE_CONTINUE = 3;
 
-    // Location Permission Eequest Code
+    // Location Permission request Code
     public static final int LOCATION_PERMISSION_REQUEST_CODE = 3273;
 
     // Threshold to consider workout after pause a new session
@@ -49,7 +49,5 @@ public class Constant {
     public static final String DEFAULT_WORKOUT_TITLE_FORMAT_STRING = "Workout %d";
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 
-    public static final String STATE_PREF_NAME = "state";
-
-    public static final String BASE_CLOUD_URL = "http://10.0.2.2:3000";
+    public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
 }

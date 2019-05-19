@@ -306,17 +306,23 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                             fragmentManager.beginTransaction().detach(historyFragment).attach(historyFragment).commit();
                             currentFragment = FRAGMENT_HISTORY;
                         }
-                    }, 2000);
+                    }, 5000);
 
                 }
                 new AlertDialog.Builder(this)
-                        .setTitle("Synchronization Finished")
-                        .setMessage("Workouts have been successfully synchronized with the cloud!")
+                        .setTitle("Synchronization Started")
+                        .setMessage("Workouts are being synchronized with the cloud! It may take some time for the process to finish.")
                         .setPositiveButton(R.string.yes, null)
                         .setIcon(R.drawable.checked)
                         .show();
             } catch (SQLException e) {
                 e.printStackTrace();
+                new AlertDialog.Builder(this)
+                        .setTitle("Synchronization Error")
+                        .setMessage("There was an error when trying to synchronize your workouts with the cloud.")
+                        .setPositiveButton(R.string.yes, null)
+                        .setIcon(android.R.drawable.ic_dialog_info)
+                        .show();
             }
         } else if (id == R.id.historyfragment_menuitem_delete_history) {
             new AlertDialog.Builder(this)
