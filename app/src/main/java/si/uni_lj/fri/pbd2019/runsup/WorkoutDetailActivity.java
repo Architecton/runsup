@@ -38,6 +38,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
@@ -411,19 +412,19 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                             // Add marker to end of previous session (before pausing).
                             mMap.addMarker(new MarkerOptions()
                                     .position(new LatLng(this.positions.get(i - 1).getLatitude(), this.positions.get(i - 1).getLongitude()))
-                                    .title(String.format("Break %d", breakCounter)));
+                                    .title(String.format(Locale.getDefault(),"Break %d", breakCounter)));
                             breakCounter += 1;  // Increment breaks counter.
                         }
                     } else {
                         // Add marker to end of previous session (before pausing).
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(this.positions.get(i-1).getLatitude(), this.positions.get(i-1).getLongitude()))
-                                .title(String.format("Pause %d", pauseCounter)));
+                                .title(String.format(Locale.getDefault(), "Pause %d", pauseCounter)));
 
                         // Add marker to start of new session (after continuing).
                         mMap.addMarker(new MarkerOptions()
                                 .position(new LatLng(this.positions.get(i).getLatitude(), this.positions.get(i).getLongitude()))
-                                .title(String.format("Continue %d", pauseCounter)));
+                                .title(String.format(Locale.getDefault(), "Continue %d", pauseCounter)));
 
                         pauseCounter += 1;  // Increment pause counter.
                     }

@@ -126,8 +126,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Get map instance.
         this.mMap = googleMap;
 
+
         // Draw trail created from locations.
-        this.create_trail(this.positions);
+        if (this.positions != null && this.positions.size() > 0) {
+            this.create_trail(this.positions);
+        }
 
         // Zoom enough to see full trail.
         if (this.positions.size() > 0) {
