@@ -359,7 +359,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             }
         });
 
-        if (positions.size() > 0) {
+        if (positions != null && positions.size() > 0) {
 
             // Get starting and end positions.
             Location endPos = positions.get(positions.size()-1);
