@@ -408,4 +408,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onKeyDown(keyCode, event);
 
     }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+    }
 }
