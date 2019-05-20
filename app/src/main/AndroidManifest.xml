@@ -43,6 +43,10 @@
             android:name=".fragments.StopwatchFragment"
             android:configChanges="layoutDirection|locale"
             android:exported="true" />
+
+        <activity
+            android:name="si.uni_lj.fri.pbd2019.runsup.StatsActivity"
+            android:exported="true" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
