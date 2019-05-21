@@ -9,6 +9,7 @@ var gpsPointSchema = new mongoose.Schema({
   sessionNumber: {type: Number},
   latitude: {type: Number},
   longitude: {type: Number},
+  elevation: {type: Number},
   duration: {type: Number},
   speed: {type: Number},
   pace: {type: Number},

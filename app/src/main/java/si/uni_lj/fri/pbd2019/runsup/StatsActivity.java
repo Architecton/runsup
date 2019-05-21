@@ -52,20 +52,20 @@ public class StatsActivity extends AppCompatActivity implements OnSeekBarChangeL
 
         setTitle("Statistics");
 
-        tvX = findViewById(R.id.tvXMax);
-        tvY = findViewById(R.id.tvYMax);
+        // tvX = findViewById(R.id.tvXMax);
+        //tvY = findViewById(R.id.tvYMax);
 
-        seekBarX = findViewById(R.id.seekBar1);
+        //seekBarX = findViewById(R.id.seekBar1);
         seekBarX.setOnSeekBarChangeListener(this);
 
-        seekBarY = findViewById(R.id.seekBar2);
+        //seekBarY = findViewById(R.id.seekBar2);
         seekBarY.setMax(180);
         seekBarY.setOnSeekBarChangeListener(this);
 
         tfRegular = Typeface.createFromAsset(getAssets(), "OpenSans-Regular.ttf");
 
         {
-            chart = findViewById(R.id.chart1);
+            //chart = findViewById(R.id.chart1);
             chart.setBackgroundColor(Color.WHITE);
             chart.getDescription().setEnabled(true);
             chart.setTouchEnabled(true);

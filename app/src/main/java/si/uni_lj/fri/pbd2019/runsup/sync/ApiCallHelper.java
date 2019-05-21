@@ -54,6 +54,7 @@ class ApiCallHelper {
         RequestBody requestBody = new FormBody.Builder()
                 .add("accId", Long.toString(userId))
                 .build();
+
         final Request request = new Request.Builder()
                 .post(requestBody)
                 .url(baseUrl + "/users/login")
@@ -284,6 +285,7 @@ class ApiCallHelper {
                 gpsPointNxt.setSessionNumber(point.getSessionNumber());
                 gpsPointNxt.setSpeed(point.getSpeed());
                 gpsPointNxt.setTotalCalories(point.getTotalCalories());
+                gpsPointNxt.setElevation(point.getElevation());
                 gpsPointsCloudData.add(gpsPointNxt);
             }
 

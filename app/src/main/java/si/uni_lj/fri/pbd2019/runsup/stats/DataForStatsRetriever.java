@@ -37,26 +37,7 @@ public class DataForStatsRetriever {
         });
     }
 
-    // retreiveDuration: retrieve duration of workout with specified id
-    public long retrieveDuration() throws SQLException {
-
-        // Find workout with specified id.
-        List<Workout> res = this.dh.workoutDao()
-                .queryBuilder()
-                .where()
-                .eq("id", this.idWorkout)
-                .query();
-
-        // Return duration of workout.
-        if (res != null && res.size() > 0) {
-            return res.get(0).getDuration();
-        } else {
-            return -1L;
-        }
-    }
-
-
-    // retreiveCalories: retrieve calories for each tick received during workout.
+    // retrieveCalories: retrieve calories for each tick received during workout.
     public ArrayList<Double> retrieveCaloriesByTick() {
 
 
@@ -75,7 +56,7 @@ public class DataForStatsRetriever {
         // Get list of elevations with respect to tick.
         ArrayList<Double> elevationsWithRespectToTick = new ArrayList<>(this.gpsPoints.size());
         for (GpsPoint p : gpsPoints) {
-            elevationsWithRespectToTick.add(p.getTotalCalories());
+            elevationsWithRespectToTick.add(p.getElevation());
         }
 
         // Store elevations in ArrayList instance and return it.

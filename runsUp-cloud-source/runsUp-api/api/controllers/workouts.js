@@ -120,14 +120,14 @@ module.exports.workoutGetById = function(request, response) {
               if (!workout) {
                 getJsonResponse(response, 404, {
                   "message": 
-                    "cannot find workout"
+                    "cannot find workout."
                 });
               } else {
                 getJsonResponse(response, 200, workout);
               }
             } else {
               getJsonResponse(response, 404, {
-                "message": "cannot find any workouts"
+                "message": "cannot find any workouts."
               });
             }
           }
@@ -154,7 +154,7 @@ var getLoggedId = function(request, response, callback) {
       .exec(function(error, user) {
         if (!user) {     // If user not found
           getJsonResponse(response, 404, {
-            "message": "User not found"
+            "message": "User not found."
           });
           return;
         } else if (error) {   // if encountered error
@@ -165,7 +165,7 @@ var getLoggedId = function(request, response, callback) {
       });
   } else {    // Else if no payload or if payload does not contain field "id"
     getJsonResponse(response, 400, {
-      "message": "Inadequate data in token"
+      "message": "Inadequate data in token."
     });
     return;
   }

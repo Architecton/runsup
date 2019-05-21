@@ -53,10 +53,18 @@ public class Constant {
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 
     // Base url for the back-end on the cloud.
-    public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
+    // public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
+    public static final String BASE_CLOUD_URL = "http://10.0.2.2:3000";
 
     // Color codes for stats charts.
     public static final int GRAPH_COLOR_GREEN = 0;
     public static final int GRAPH_COLOR_BLUE = 1;
     public static final int GRAPH_COLOR_RED = 2;
+
+    public static final int CHART_TYPE_ELEVATION = 0;
+    public static final int CHART_TYPE_PACE = 1;
+    public static final int CHART_TYPE_CALORIES = 2;
+
+    // Number of ticks to keep in view at one time.
+    public static final int PLOT_INTERVAL = 10;
 }

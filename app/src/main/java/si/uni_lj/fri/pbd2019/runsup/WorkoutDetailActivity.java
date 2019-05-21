@@ -247,23 +247,17 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.showParamsButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                long duration = -1l;
-                try {
-                    duration = dsr.retrieveDuration();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
                 ArrayList<Double> caloriesByTick = dsr.retrieveCaloriesByTick();
                 ArrayList<Double> paceByTick = dsr.retrievePaceByTick();
+                ArrayList<Double> elevationByTick = dsr.retrieveElevationByTick();
 
-                if (duration > 0 && caloriesByTick != null & caloriesByTick.size() > 0 && paceByTick != null && paceByTick.size() > 0) {
+                if (caloriesByTick != null & caloriesByTick.size() > 0 && paceByTick != null && paceByTick.size() > 0) {
 
                     // Initialize intent to start new activity and put additional data in extras.
                     Intent workoutStatsActivityIntent = new Intent(WorkoutDetailActivity.this, WorkoutStatsActivity.class);
-                    workoutStatsActivityIntent.putExtra("duration", duration);
                     workoutStatsActivityIntent.putExtra("caloriesByTick", caloriesByTick);
                     workoutStatsActivityIntent.putExtra("paceByTick", paceByTick);
-                    // TODO statsActivityIntent.putExtra("elevationByTick", elevationByTick);
+                    workoutStatsActivityIntent.putExtra("elevationByTick", elevationByTick);
 
                     WorkoutDetailActivity.this.startActivity(workoutStatsActivityIntent);
                 }

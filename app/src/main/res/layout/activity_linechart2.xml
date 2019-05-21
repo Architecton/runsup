@@ -5,19 +5,19 @@
     android:layout_height="match_parent">
 
     <TextView
-        android:id="@+id/elevation_chart_title"
+        android:id="@+id/pace_chart_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/chart_elevation_title"
+        android:text="@string/chart_pace_title"
         android:textSize="20sp"
-        android:gravity="center"
-        />
+        android:gravity="center" />
 
     <com.github.mikephil.charting.charts.LineChart
-        android:id="@+id/chart_elevation"
+        android:id="@+id/chart_pace"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_below="@+id/elevation_chart_title"
-        android:layout_marginTop="8dp"/>
+        android:layout_below="@+id/pace_chart_title"
+        android:layout_marginTop="8dp"
+        />
 
 </RelativeLayout>

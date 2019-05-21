@@ -1,6 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup.model;
 
 import android.location.Location;
+import android.util.Log;
 
 import com.j256.ormlite.field.DatabaseField;
 import com.j256.ormlite.table.DatabaseTable;
@@ -22,6 +23,8 @@ public class GpsPoint {
     private double latitude;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private double longitude;
+    @DatabaseField(canBeNull = false, useGetSet = true)
+    private double elevation;
     @DatabaseField(canBeNull = false, useGetSet = true)
     private long duration;
     @DatabaseField(canBeNull = false, useGetSet = true)
@@ -47,6 +50,7 @@ public class GpsPoint {
         this.sessionNumber = sessionNumber;
         this.latitude = location.getLatitude();
         this.longitude = location.getLongitude();
+        this.elevation = location.getAltitude();
         this.duration = duration;
         this.speed = speed;
         this.pace = pace;
@@ -147,5 +151,13 @@ public class GpsPoint {
 
     public void setPauseFlag(byte pauseFlag) {
         this.pauseFlag = pauseFlag;
+    }
+
+    public double getElevation() {
+        return elevation;
+    }
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
     }
 }

@@ -5,9 +5,13 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.fragments.WorkoutParamsFragment;
@@ -27,6 +31,10 @@ public class WorkoutStatsActivity extends AppCompatActivity {
     // fragment manager instance
     private FragmentManager fragmentManager;
 
+    public CompositeListener seekbarIntervalListener;
+
+    private int numTicks;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,15 +48,37 @@ public class WorkoutStatsActivity extends AppCompatActivity {
         ArrayList<Double> elevationByTick = (ArrayList<Double>) intent.getSerializableExtra("elevationByTick");
         ArrayList<Double> caloriesByTick = (ArrayList<Double>) intent.getSerializableExtra("caloriesByTick");
         ArrayList<Double> paceByTick = (ArrayList<Double>) intent.getSerializableExtra(("paceByTick"));
-        long duration = intent.getLongExtra("duration", -1);
+        this.numTicks = paceByTick.size();
 
         // Initialize fragments.
-        this.elevationParamsFragment = WorkoutParamsFragment.newInstance(elevationByTick, Constant.GRAPH_COLOR_GREEN);
-        this.paceParamsFragment = WorkoutParamsFragment.newInstance(paceByTick, Constant.GRAPH_COLOR_BLUE);
-        this.elevationParamsFragment = WorkoutParamsFragment.newInstance(caloriesByTick, Constant.GRAPH_COLOR_RED);
+        this.elevationParamsFragment = WorkoutParamsFragment.newInstance(elevationByTick, Constant.GRAPH_COLOR_GREEN, Constant.CHART_TYPE_ELEVATION);
+        this.paceParamsFragment = WorkoutParamsFragment.newInstance(paceByTick, Constant.GRAPH_COLOR_BLUE, Constant.CHART_TYPE_PACE);
+        this.caloriesParamsFragment = WorkoutParamsFragment.newInstance(caloriesByTick, Constant.GRAPH_COLOR_RED, Constant.CHART_TYPE_CALORIES);
+    }
 
+    public class CompositeListener implements SeekBar.OnSeekBarChangeListener {
+        private List<SeekBar.OnSeekBarChangeListener> registeredListeners = new ArrayList<>();
 
+        public void registerListener (SeekBar.OnSeekBarChangeListener listener) {
+            registeredListeners.add(listener);
+        }
 
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            for (SeekBar.OnSeekBarChangeListener listener : registeredListeners) {
+                listener.onProgressChanged(seekBar, progress, fromUser);
+            }
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+
+        }
     }
 
 
@@ -56,12 +86,23 @@ public class WorkoutStatsActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
-        Fragment stopwatchFragment = new StopwatchFragment();
+        // Initialize composite listener.
+        this.seekbarIntervalListener = new CompositeListener();
+
+
+        SeekBar seekBarInterval = findViewById(R.id.seekBar_interval);
+        seekBarInterval.setMax(this.numTicks-10);
+        seekBarInterval.setOnSeekBarChangeListener(this.seekbarIntervalListener);
 
         // Add fragments to containers.
-        // this.fragmentManager.beginTransaction().add(R.id.elevation_chart_container, this.elevationParamsFragment).commit();
-        Fragment test = new WorkoutParamsFragment();
-        this.fragmentManager.beginTransaction().add(R.id.pace_chart_container, test).commit();
-        // this.fragmentManager.beginTransaction().add(R.id.calories_chart_container, this.caloriesParamsFragment).commit();
+        this.fragmentManager.beginTransaction().add(R.id.elevation_chart_container, this.elevationParamsFragment).commit();
+        this.fragmentManager.beginTransaction().add(R.id.pace_chart_container, this.paceParamsFragment).commit();
+        this.fragmentManager.beginTransaction().add(R.id.calories_chart_container, this.caloriesParamsFragment).commit();
+
+        // Display toast with short instructions on position lock.
+        Toast toast = Toast.makeText(this, getString(R.string.params_toast_instructions), Toast.LENGTH_LONG);
+        toast.setGravity(Gravity.CENTER, 0, 0);
+        toast.show();
+
     }
 }

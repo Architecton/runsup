@@ -15,6 +15,7 @@ public class CloudDataGpsPoint implements Serializable {
     private long sessionNumber;
     private double latitude;
     private double longitude;
+    private double elevation;
     private long duration;
     private float speed;
     private double pace;
@@ -111,6 +112,13 @@ public class CloudDataGpsPoint implements Serializable {
         this.pauseFlag = pauseFlag;
     }
 
+    public double getElevation() {
+        return elevation;
+    }
+
+    public void setElevation(double elevation) {
+        this.elevation = elevation;
+    }
 
     @SuppressLint("NewApi")
     public GpsPoint toGpsPoint(Workout workout) {
@@ -125,6 +133,7 @@ public class CloudDataGpsPoint implements Serializable {
         res.setSessionNumber(this.sessionNumber);
         res.setSpeed(this.speed);
         res.setWorkout(workout);
+        res.setElevation(this.elevation);
 
         SimpleDateFormat sdf = new SimpleDateFormat("EEE MMM dd HH:mm:ss Z yyyy", new Locale("us"));
         try {
