@@ -212,119 +212,28 @@
         app:layout_constraintStart_toStartOf="@+id/guideline"
         app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_labelavgpace" />
 
-    <TextView
-        android:id="@+id/textview_workoutdetail_labelsocialshare"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:layout_marginEnd="8dp"
-        android:textSize="30sp"
-        android:text="@string/textview_workoutdetail_labelsocialshare_default"
-        android:textAppearance="@android:style/TextAppearance.Material.Display1"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_valuedistance" />
-
-    <View
-        android:id="@+id/divider7"
-        android:layout_width="0dp"
-        android:layout_height="2dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginEnd="8dp"
-        android:background="@color/colorPrimary"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_labelsocialshare" />
-
-    <Button
-        android:id="@+id/button_workoutdetail_fbsharebtn"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="8dp"
-        android:layout_weight="1"
-        android:background="@mipmap/facebook"
-        android:onClick="displayShareText"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/divider7" />
-
-    <Button
-        android:id="@+id/button_workoutdetail_gplusshare"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="8dp"
-        android:layout_weight="1"
-        android:background="@mipmap/iconfinder_google_plus_386644"
-        android:onClick="displayShareText"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_fbsharebtn"
-        app:layout_constraintTop_toBottomOf="@+id/divider7"
-        app:layout_constraintVertical_bias="0.51" />
-
-    <Button
-        android:id="@+id/button_workoutdetail_twittershare"
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="8dp"
-        android:layout_weight="1"
-        android:background="@mipmap/twitter"
-        android:onClick="displayShareText"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_gplusshare"
-        app:layout_constraintTop_toBottomOf="@+id/divider7"
-        app:layout_constraintVertical_bias="0.571" />
-
-    <Button
-        android:id="@+id/button_workoutdetail_emailshare"
-        android:layout_width="65dp"
-        android:layout_height="63dp"
-        android:layout_marginStart="10dp"
-        android:layout_marginTop="2dp"
-        android:layout_marginBottom="8dp"
-        android:layout_weight="1"
-        android:background="@mipmap/email"
-        android:onClick="displayShareText"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_twittershare"
-        app:layout_constraintTop_toBottomOf="@+id/divider7" />
-
     <EditText
         android:id="@+id/share_message"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
         android:layout_marginBottom="8dp"
         android:inputType="text"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/confirm_share_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/button_workoutdetail_gplusshare" />
+        app:layout_constraintStart_toStartOf="parent" />
 
     <Button
         android:id="@+id/confirm_share_button"
         android:layout_width="60dp"
         android:layout_height="60dp"
-        android:layout_marginStart="30dp"
-        android:layout_marginTop="6dp"
         android:layout_marginBottom="8dp"
         android:background="@mipmap/iconfinder_paperfly_701491"
         android:contentDescription="@string/confirm_share_button_description"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/button_workoutdetail_emailshare"
-        app:layout_constraintTop_toBottomOf="@+id/divider7" />
+        tools:layout_editor_absoluteX="255dp" />
 
     <fragment
         android:id="@+id/fragment_workoutdetail_map"
@@ -352,5 +261,32 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/button_workoutdetail_show_params"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorPrimary"
+        android:text="@string/workout_parameters"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/textview_workoutdetail_valuedistance" />
+
+    <Button
+        android:id="@+id/button_workoutdetail_send_to_friend"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="8dp"
+        android:background="@color/colorAccent"
+        android:text="@string/send_workout_to_a_friend"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/button_workoutdetail_show_params" />
 
 </android.support.constraint.ConstraintLayout>

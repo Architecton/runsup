@@ -16,9 +16,10 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+        <activity android:name=".WorkoutStatsActivity"></activity>
         <activity
             android:name=".settings.SettingsActivity"
-            android:label="@string/title_activity_settings"></activity>
+            android:label="@string/title_activity_settings" />
         <activity
             android:name=".MainActivity"
             android:label="@string/title_activity_main"
@@ -43,9 +44,8 @@
             android:name=".fragments.StopwatchFragment"
             android:configChanges="layoutDirection|locale"
             android:exported="true" />
-
         <activity
-            android:name="si.uni_lj.fri.pbd2019.runsup.StatsActivity"
+            android:name=".StatsActivity"
             android:exported="true" />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.

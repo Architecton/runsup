@@ -37,6 +37,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
@@ -45,6 +46,7 @@ import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
+import si.uni_lj.fri.pbd2019.runsup.stats.DataForStatsRetriever;
 
 
 public class WorkoutDetailActivity extends AppCompatActivity implements OnMapReadyCallback{
@@ -61,15 +63,13 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
     public static Resources resources;
 
     // UI components
-    private EditText shareText;
-    private Button confirmShareButton;
-    private Button facebookShareButton;
-    private Button emailShareButton;
-    private Button googlePlusShareButton;
-    private Button twitterShareButton;
-    private Button displayWorkoutMapButton;
+    private Button showParamsButton;
+    private Button shareWorkoutButton;
     private TextView workoutTitleTextView;
     private GoogleMap mMap;
+
+    // Workout data retriever.
+    DataForStatsRetriever dsr;
 
     // workout parameters
     private int sportActivity;
@@ -120,6 +120,14 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.setDistance(intent.getDoubleExtra("distance", 0.0), convertUnits);
         this.setPace(intent.getDoubleExtra("pace", 0.0), convertUnits);
         this.workoutId = intent.getLongExtra("workoutId", -1L);
+
+        // Initialize DataForStatsRetriever instance.
+        try {
+            this.dsr = new DataForStatsRetriever(this.workoutId);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
         this.positions = (ArrayList<Location>)intent.getSerializableExtra("positions");
         this.workoutTitle = getString(R.string.workoutdetail_workoutname_default);  // Set default workout name.
         this.titleSet = intent.hasExtra("titleSet");
@@ -157,13 +165,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         super.onStart();
 
         // Initialize UI elements.
-        this.shareText = findViewById(R.id.share_message);
-        this.facebookShareButton = findViewById(R.id.button_workoutdetail_fbsharebtn);
-        this.emailShareButton = findViewById(R.id.button_workoutdetail_emailshare);
-        this.googlePlusShareButton = findViewById(R.id.button_workoutdetail_gplusshare);
-        this.twitterShareButton = findViewById(R.id.button_workoutdetail_twittershare);
-        this.confirmShareButton = findViewById(R.id.confirm_share_button);
         this.workoutTitleTextView = findViewById(R.id.textview_workoutdetail_workouttitle);
+        this.shareWorkoutButton = findViewById(R.id.button_workoutdetail_send_to_friend);
+        this.showParamsButton = findViewById(R.id.button_workoutdetail_show_params);
 
         // If title of workout is set...
         if (this.titleSet) {
@@ -185,22 +189,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             findViewById(R.id.fragment_workoutdetail_map).setVisibility(View.INVISIBLE);
             findViewById(R.id.textview_workoutdetail_preview_not_available).setVisibility(View.VISIBLE);
         }
-
-
-
-        // TODO
-        // this.displayWorkoutMapButton = findViewById(R.id.button_workoutdetail_showmap);
-        /*
-        displayWorkoutMapButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Start MapsActivity and pass locations to it.
-                Intent workoutMapIntent = new Intent(WorkoutDetailActivity.this, MapsActivity.class);
-                workoutMapIntent.putExtra("finalPositionsList", positions);
-                WorkoutDetailActivity.this.startActivity(workoutMapIntent);
-            }
-        });
-        */
 
         // Set moment as end of workout.
         this.setActivityDate(this.dateEnd);  // Set date of end of activity.
@@ -247,6 +235,41 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             }
         });
 
+        // Set click listener for workout share button.
+        this.shareWorkoutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+            }
+        });
+
+        // Set click listener for workout parameters button:
+        this.showParamsButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                long duration = -1l;
+                try {
+                    duration = dsr.retrieveDuration();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+                ArrayList<Double> caloriesByTick = dsr.retrieveCaloriesByTick();
+                ArrayList<Double> paceByTick = dsr.retrievePaceByTick();
+
+                if (duration > 0 && caloriesByTick != null & caloriesByTick.size() > 0 && paceByTick != null && paceByTick.size() > 0) {
+
+                    // Initialize intent to start new activity and put additional data in extras.
+                    Intent workoutStatsActivityIntent = new Intent(WorkoutDetailActivity.this, WorkoutStatsActivity.class);
+                    workoutStatsActivityIntent.putExtra("duration", duration);
+                    workoutStatsActivityIntent.putExtra("caloriesByTick", caloriesByTick);
+                    workoutStatsActivityIntent.putExtra("paceByTick", paceByTick);
+                    // TODO statsActivityIntent.putExtra("elevationByTick", elevationByTick);
+
+                    WorkoutDetailActivity.this.startActivity(workoutStatsActivityIntent);
+                }
+            }
+        });
+
     }
 
     // onPause: method called when this activity is paused.
@@ -255,41 +278,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         super.onPause();
     }
 
-
-    // displayShareText: display EditText field for user to input text to share.
-    public void displayShareText(View view) {
-
-        // Create a dialog for user to type their message.
-        AlertDialog.Builder builder = new AlertDialog.Builder(WorkoutDetailActivity.this);
-        builder.setTitle(R.string.buildertitle_share_workout);
-        final EditText input = new EditText(WorkoutDetailActivity.this);
-        input.setText(String.format(getString(R.string.workout_share_description),
-                MainHelper.getSportActivityName(this.sportActivity),
-                MainHelper.formatDistance(this.distance), getString(R.string.distance_unit),
-                MainHelper.formatDuration(this.duration)));
-        input.setInputType(InputType.TYPE_CLASS_TEXT);
-        builder.setView(input);
-        builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                confirmShareButton.setVisibility(View.VISIBLE);
-            }
-        });
-        builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
-
-        /*
-        this.shareText.setText(String.format(getString(R.string.workout_share_description),
-                MainHelper.getSportActivityName(this.sportActivity),
-                MainHelper.formatDistance(this.distance), getString(R.string.distance_unit),
-                MainHelper.formatDuration(this.duration)));
-        */
-    }
 
     // ### METHODS FOR FORMATTING THE UI ###
 

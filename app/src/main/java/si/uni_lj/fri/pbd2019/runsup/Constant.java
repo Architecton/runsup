@@ -54,4 +54,9 @@ public class Constant {
 
     // Base url for the back-end on the cloud.
     public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
+
+    // Color codes for stats charts.
+    public static final int GRAPH_COLOR_GREEN = 0;
+    public static final int GRAPH_COLOR_BLUE = 1;
+    public static final int GRAPH_COLOR_RED = 2;
 }
