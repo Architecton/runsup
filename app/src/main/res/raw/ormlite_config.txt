@@ -1,5 +1,5 @@
 #
-# generated on 2019/05/21 09:46:58
+# generated on 2019/05/23 06:11:39
 #
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint
@@ -158,6 +158,16 @@ useGetSet=true
 # --field-end--
 # --field-start--
 fieldName=authToken
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=friends
+dataPersister=SERIALIZABLE
+useGetSet=true
+# --field-end--
+# --field-start--
+fieldName=messages
+dataPersister=SERIALIZABLE
 useGetSet=true
 # --field-end--
 # --table-fields-end--

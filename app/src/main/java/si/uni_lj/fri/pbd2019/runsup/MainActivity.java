@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Handler;
 import android.preference.PreferenceManager;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.FragmentManager;
@@ -15,6 +14,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -158,6 +158,9 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
             // Get user's photo url and user's full name.
             this.userImageUri = account.getPhotoUrl();
+            if (this.userImageUri == null) {
+                this.userImageUri = Uri.parse("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ594qCi5NafFyv4R69-Fpq_8IbbVQ1RtL208R8uM-RErUEUNp");
+            }
             this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
@@ -174,9 +177,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.userName.setText(this.userFullName);
                 this.accountDataSet = true;
             }
-
-
-            // ### Set user ###
 
             // Check if user in database
             this.currentUser = null;
@@ -325,13 +325,38 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    private void notifySyncResults(final boolean success) {
+        MainActivity.this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (success) {
+                    // Notify user of successful synchronization with the cloud.
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.alerttitle_sync_success)
+                            .setMessage(R.string.alertmessage_sync_success)
+                            .setPositiveButton(R.string.yes, null)
+                            .setIcon(R.drawable.checked)
+                            .show();
+                } else {
+                    // Notify user of unsuccessful synchronization with the cloud.
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle(R.string.alerttitle_sync_fail)
+                            .setMessage(R.string.alertmessage_sync_fail)
+                            .setPositiveButton(R.string.yes, null)
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .show();
+                }
+            }
+        });
+    }
+
 
     // onOptionsItemSelected: Handle action bar item selection
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
 
         // Get id of clicked item.
-        int id = item.getItemId();
+        final int id = item.getItemId();
 
         // If user selected settings option...
         if (id == R.id.stopwatchfragment_menuitem_settings) {
@@ -346,28 +371,21 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             try {
 
                 // Synchronize with cloud.
-                csh.syncWithCloud(Constant.BASE_CLOUD_URL, currentUser);
-
-                // If on history fragment, refresh fragment after 5 seconds.
-                if (this.currentFragment == FRAGMENT_HISTORY) {
-                    final Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                            fragmentManager.beginTransaction().detach(historyFragment).attach(historyFragment).commit();
-                            currentFragment = FRAGMENT_HISTORY;
+                csh.syncWithCloud(Constant.BASE_CLOUD_URL, currentUser, this.userFullName, this.userImageUri.toString(), new SyncCompleted() {
+                    @Override
+                    public void syncCompleted(boolean success) {
+                        if (success) {
+                            // If currently on history fragment, refresh it.
+                            if (currentFragment == FRAGMENT_HISTORY) {
+                                fragmentManager.beginTransaction().detach(historyFragment).attach(historyFragment).commit();
+                                currentFragment = FRAGMENT_HISTORY;
+                            }
+                            notifySyncResults(true);
+                        } else {
+                            notifySyncResults(false);
                         }
-                    }, 5000);
-
-                }
-
-                // Notify user.
-                new AlertDialog.Builder(this)
-                        .setTitle(R.string.alerttitle_sync)
-                        .setMessage(R.string.alertmessage_sync)
-                        .setPositiveButton(R.string.yes, null)
-                        .setIcon(R.drawable.checked)
-                        .show();
+                    }
+                });
             } catch (SQLException e) {
                 e.printStackTrace();
                 new AlertDialog.Builder(this)
@@ -449,6 +467,20 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.aboutFragment).addToBackStack(null).commit();
                 currentFragment = FRAGMENT_ABOUT;
             }
+        } else if (id == R.id.nav_messaging) {
+
+            // Start MessagingActivity.
+            Intent messagingActivityIntent = new Intent(MainActivity.this, MessagingActivity.class);
+            MainActivity.this.startActivity(messagingActivityIntent);
+        } else if (id == R.id.nav_friends) {
+
+            // Start FriendsActivity.
+            Intent friendsActivityIntent = new Intent(MainActivity.this, FriendsActivity.class);
+            Log.d("currentUser", "" + currentUser.getId());
+            friendsActivityIntent.putExtra("currentUser", this.currentUser);
+            friendsActivityIntent.putExtra("name", this.userFullName);
+            friendsActivityIntent.putExtra("profileImageUrl", this.userImageUri.toString());
+            MainActivity.this.startActivity(friendsActivityIntent);
         }
 
         // Close drawer.
@@ -470,14 +502,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
-    // ## FOR TESTING ##
-    @Override
-    public void onPause() {
-        super.onPause();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
+    public interface SyncCompleted {
+        void syncCompleted(boolean success);
     }
 }

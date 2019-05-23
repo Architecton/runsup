@@ -28,11 +28,6 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 
 import java.lang.reflect.Field;
-import java.sql.SQLException;
-import java.util.List;
-
-import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
-import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -221,14 +216,14 @@ public class LoginActivity extends AppCompatActivity {
         signedInConfirmationTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Prompt user to confirm intention to delete activity.
+                // Prompt user to confirm intention to log out.
                 new AlertDialog.Builder(LoginActivity.this)
                         .setTitle(R.string.alterttitle_login_activity_signout)
                         .setMessage(R.string.alert_sign_out_message)
                         .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
                             public void onClick(DialogInterface dialog, int which) {
                                 FirebaseAuth.getInstance().signOut();
-
+                                PreferenceManager.getDefaultSharedPreferences(LoginActivity.this).edit().clear().apply();
                                 mGoogleSignInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         preferences.edit().putBoolean("userSignedIn", false).apply();

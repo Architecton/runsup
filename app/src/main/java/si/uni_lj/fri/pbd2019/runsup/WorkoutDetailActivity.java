@@ -10,10 +10,8 @@ import android.icu.text.DateFormat;
 import android.location.Location;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.provider.ContactsContract;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -33,15 +31,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.j256.ormlite.stmt.DeleteBuilder;
-import com.j256.ormlite.stmt.QueryBuilder;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.Locale;
 
-import si.uni_lj.fri.pbd2019.runsup.fragments.StopwatchFragment;
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
@@ -258,7 +253,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                     workoutStatsActivityIntent.putExtra("caloriesByTick", caloriesByTick);
                     workoutStatsActivityIntent.putExtra("paceByTick", paceByTick);
                     workoutStatsActivityIntent.putExtra("elevationByTick", elevationByTick);
-
                     WorkoutDetailActivity.this.startActivity(workoutStatsActivityIntent);
                 }
             }

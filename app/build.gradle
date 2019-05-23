@@ -89,6 +89,12 @@ dependencies {
 
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+    implementation 'org.jetbrains:annotations-java5:15.0'
+}
+
+configurations {
+    cleanedAnnotations
+    compile.exclude group: 'org.jetbrains' , module:'annotations'
 }
 
 apply plugin: 'com.google.gms.google-services'

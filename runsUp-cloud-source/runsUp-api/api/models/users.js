@@ -22,7 +22,7 @@ var gpsPointSchema = new mongoose.Schema({
 
 // Schema representing a workout
 var workoutSchema = new mongoose.Schema({
-  _id: {type : Number, required: true, unique:true},
+  _id: {type : Number, required: true, unique: true},
   gpsPoints: [gpsPointSchema],
   title: {type : String},
   created: {type: String},
@@ -35,11 +35,18 @@ var workoutSchema = new mongoose.Schema({
   lastUpdate: {type: String}
 });
 
+var pendingFriendRequestSchema = new mongoose.Schema({
+  name: {type: String, required: true},
+  profileImageUrl: {type: String, required: true},
+  idUser: {type: Number, required: true}
+});
+
 
 // Schema representing a user
 var userSchema = new mongoose.Schema({                      
   _id: {type: Number, required: true, unique: true},
-  workouts: [workoutSchema]
+  workouts: [workoutSchema],
+  pendingFriendRequests: [pendingFriendRequestSchema]
 });
 
 

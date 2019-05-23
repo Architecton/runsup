@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="si.uni_lj.fri.pbd2019.runsup">
     <!--
          The ACCESS_COARSE/FINE_LOCATION permissions are not required to use
@@ -16,7 +17,14 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".WorkoutStatsActivity"></activity>
+        <activity android:name=".FriendsSearchActivity" />
+        <activity
+            android:name=".FriendsActivity"
+            android:label="@string/title_activity_friends"/>
+        <activity
+            android:name=".MessagingActivity"
+            android:label="@string/title_activity_messaging" />
+        <activity android:name=".WorkoutStatsActivity" />
         <activity
             android:name=".settings.SettingsActivity"
             android:label="@string/title_activity_settings" />

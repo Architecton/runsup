@@ -1,5 +1,6 @@
 var passport = require('passport');
 var mongoose = require('mongoose');
+var Friend = mongoose.model('Friend');
 var User = mongoose.model('User');
 var requestF = require('request');
 
@@ -38,10 +39,9 @@ module.exports.authLogIn = function(request, response) {
 	})(request, response);
 };
 
-
 // authSignUp: create new user and store in DB
 module.exports.authSignUp = function(request, response) {
-  if(request.body.accId) {
+  if(request.body.accId && request.body.profileImageUrl && request.body.name) {
     // Create new user.
     var newUser = new User();
     newUser.setAccId(request.body.accId);
@@ -57,8 +57,33 @@ module.exports.authSignUp = function(request, response) {
     if (error) {
       getJsonResponse(response, 500, error);
     } else {
-      getJsonResponse(response, 201, user);
+      var newFriend = new Friend();
+      newFriend.friendUserId = request.body.accId;
+      newFriend.name = request.body.name;
+      newFriend.profileImageUrl = request.body.profileImageUrl;
+      Friend
+        .create(newFriend, function(error, friend) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else {
+            getJsonResponse(response, 201, user);
+          }
+        });
     }
   });
 };
 
+module.exports.getAllUsers = function(request, response) {
+  User
+	.find({}, function(error, results) {
+	  if (error) {
+		getJsonResponse(response, 500, error);
+	  } else if (!results) {
+		getJsonResponse(response, 404, {
+		  'message' : 'No users found.'
+		});
+	  } else {
+		getJsonResponse(response, 200, results);
+	  }
+	});
+}

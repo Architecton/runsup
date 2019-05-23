@@ -1,7 +1,5 @@
 package si.uni_lj.fri.pbd2019.runsup.sync;
 
-import android.util.Log;
-
 import java.sql.SQLException;
 import java.util.List;
 
@@ -21,7 +19,7 @@ public class CloudSyncHelper {
     }
 
 
-    public void syncWithCloud(String baseUrl, User currentUser) throws SQLException {
+    public void syncWithCloud(String baseUrl, User currentUser, String name, String profileImageUrl, MainActivity.SyncCompleted syncCompleted) throws SQLException {
         List<Workout> presetWorkoutIdsRes = new DatabaseHelper(MainActivity.mainActivity)
                 .workoutDao()
                 .queryBuilder()
@@ -32,7 +30,7 @@ public class CloudSyncHelper {
             presentWorkoutIds[i] = presetWorkoutIdsRes.get(i).getId();
         }
 
-        this.apiCallHelper.logInOrSignUpAndSync(currentUser.getId(), presentWorkoutIds, currentUser);
+        this.apiCallHelper.logInOrSignUpAndSync(currentUser.getId(), presentWorkoutIds, currentUser, name, profileImageUrl, syncCompleted);
     }
 
 

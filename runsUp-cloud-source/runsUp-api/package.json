@@ -3,7 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "scripts": {
-    "start": "./run.sh",
+    "start": "node ./bin/www",
 	"test": "mocha"
   },
   "engines": {

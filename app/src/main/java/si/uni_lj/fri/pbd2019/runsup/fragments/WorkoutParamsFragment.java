@@ -185,7 +185,7 @@ public class WorkoutParamsFragment extends Fragment implements SeekBar.OnSeekBar
 
         }
 
-        WorkoutStatsActivity.CompositeListener listener = ((WorkoutStatsActivity)getActivity()).seekbarIntervalListener;
+        WorkoutStatsActivity.CompositeListener listener = ((WorkoutStatsActivity)getActivity()).seekBarIntervalListener;
         listener.registerListener(this);
 
         tfRegular = Typeface.createFromAsset(getActivity().getAssets(), "OpenSans-Regular.ttf");
@@ -213,7 +213,11 @@ public class WorkoutParamsFragment extends Fragment implements SeekBar.OnSeekBar
             yAxis = chart.getAxisLeft();
             chart.getAxisRight().setEnabled(false);
             yAxis.enableGridDashedLine(10f, 10f, 0f);
-            yAxis.setAxisMaximum((float)(double)Collections.max(this.receivedData));
+            if (getArguments().getInt("type") == Constant.CHART_TYPE_ELEVATION) {
+                yAxis.setAxisMaximum(((float)(double)Collections.max(this.receivedData) * 2));
+            } else {
+                yAxis.setAxisMaximum((float)(double)Collections.max(this.receivedData));
+            }
             yAxis.setAxisMinimum(0f);
         }
 

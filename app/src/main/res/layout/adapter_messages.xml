@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:layout_width="match_parent"
+android:layout_height="match_parent"
+android:orientation="vertical">
+
+<ImageView
+    android:id="@+id/imageview_messages_sender_profile_image"
+    android:layout_width="20dp"
+    android:layout_height="20dp"
+    android:contentDescription="@string/messages_sender_profile_image" />
+
+<TextView
+    android:id="@+id/textview_messages_sender"
+    android:layout_width="match_parent"
+    android:layout_height="20dp" />
+
+<TextView
+    android:id="@+id/textview_messages_date"
+    android:layout_width="match_parent"
+    android:layout_height="20dp" />
+
+<TextView
+    android:id="@+id/textview_messages_content"
+    android:layout_width="match_parent"
+    android:layout_height="20dp" />
+
+</LinearLayout>
