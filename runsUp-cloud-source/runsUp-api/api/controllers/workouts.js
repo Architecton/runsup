@@ -141,6 +141,52 @@ module.exports.workoutGetById = function(request, response) {
   });
 };
 
+
+module.exports.fetchSharedWorkouts = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params && request.params.idUser && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('sharedWorkouts')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'Message' : 'User not found'
+            });
+          } else {
+            if (user.sharedWorkouts) {
+              getJsonResponse(response, 200, user.sharedWorkouts)
+            } else {
+              getJsonResponse(response, 404, {
+                'Message': 'No shared workouts found.'
+              });
+            }
+          }
+        })
+    } else {
+      getJsonResponse(response, 400, {
+        'message': 'Bad request parameters.'
+      });
+    }
+  });
+}
+
+// TODO
+module.exports.shareWorkout = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params && request.params.idUser 
+      && request.params.idWorkout && request.params.idUser == accId) {
+        // Find workout by id and share. 
+    } else {
+      getJsonResponse(response, 400, {
+        'message' : 'Bad request parameters'
+      });
+    }
+  });
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 // Get user's id (username) from JWT

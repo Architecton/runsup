@@ -13,3 +13,4 @@ var friendSchema = new mongoose.Schema({
 // Compile the schema into a model.
 // Name of model, schema to be used, optional name of the mongoDB collection
 mongoose.model('Friend', friendSchema, 'Friends');
+module.exports = friendSchema;

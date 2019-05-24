@@ -1,6 +1,8 @@
 var mongoose = require("mongoose");
 var crypto = require('crypto');
 var jwt = require('jsonwebtoken');
+var friendSchema = require('./friends');
+var messageSchema = require('./messages');
 
 
 // Schema representing a gps point of a workout
@@ -35,6 +37,7 @@ var workoutSchema = new mongoose.Schema({
   lastUpdate: {type: String}
 });
 
+
 var pendingFriendRequestSchema = new mongoose.Schema({
   name: {type: String, required: true},
   profileImageUrl: {type: String, required: true},
@@ -46,7 +49,10 @@ var pendingFriendRequestSchema = new mongoose.Schema({
 var userSchema = new mongoose.Schema({                      
   _id: {type: Number, required: true, unique: true},
   workouts: [workoutSchema],
-  pendingFriendRequests: [pendingFriendRequestSchema]
+  pendingFriendRequests: [pendingFriendRequestSchema],
+  friends: [friendSchema],
+  messages: [messageSchema],
+  sharedWorkouts: [workoutSchema]
 });
 
 

@@ -1,5 +1,6 @@
 var mongoose = require('mongoose');
 var Friend = mongoose.model('Friend');
+var User = mongoose.model('User');
 
 // REST API database access methods
 
@@ -54,6 +55,8 @@ module.exports.allPotentialFriends = function(request, response) {
       });
 };
 
+
+// sendFriendRequest: send a friend request to a user with specified id.
 module.exports.sendFriendRequest = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
@@ -78,7 +81,8 @@ module.exports.sendFriendRequest = function(request, response) {
   }); 
 }
 
-// addTodoListToUser: auxiliary function for todoListCreate (see above)
+
+// addPendingFriendRequestToUser: auxiliary function for sendFriendRequest (see above)
 var addPendingFriendRequestToUser = function(request, response, user) {
   if (!user) {
     getJsonResponse(response, 404, {
@@ -114,6 +118,135 @@ var addPendingFriendRequestToUser = function(request, response, user) {
 };
 
 
+// fetchFriendRequests: fetch friend requests for users with specified id.
+module.exports.fetchFriendRequests = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('pendingFriendRequests')
+        .exec(
+          function(error, user) {
+            if (error) {
+              getJsonResponse(response, 400, error);
+            } else {
+		      getJsonResponse(response, 200, user.pendingFriendRequests);
+            }
+          }   
+        );  
+    } else {
+      getJsonResponse(response, 400, {
+        "message": 
+          "Bad request parameters"
+      }); 
+    }   
+  }); 
+}
+
+
+// fetchFriendRequests: fetch friend requests for users with specified id.
+module.exports.acceptFriendRequest = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .exec(
+          function(error, user) {
+            if (error) {
+              getJsonResponse(response, 400, error);
+            } else {
+              Friend
+                .find({'friendUserId' : request.params.idFriend}, function(error, results) {
+                  if (error) {
+                    getJsonResponse(response, 500, error);
+                  } else if (!results) {
+                    getJsonResponse(response, 404, {
+                      'message': 'User not found.'
+                    });
+                  } else {
+                    user.friends.push(results[0]);
+                    user.pendingFriendRequests = user.pendingFriendRequests.filter(x => x.idUser != request.params.idFriend);
+                    user.save(function(error, user) {
+                      if (error) {
+                        getJsonResponse(response, 500, error);
+                      } else {
+                        User
+                          .findById(request.params.idFriend, function(error, userOther) {
+                            if (error) {
+                              getJsonResponse(response, 500, error);
+                            } else if (!results) {
+                              getJsonResponse(response, 404, {
+                                'message' : 'User not found.'
+                              });
+                            } else {
+                              Friend
+                                .find({friendUserId: request.params.idUser}, function(error, results) {
+                                  if (error) {
+                                    getJsonResponse(response, 500, error);
+                                  } else if (!results) {
+                                    getJsonResponse(response, 404, {
+                                      'message' : 'User not found.'
+                                    });
+                                  } else {
+                                    userOther.friends.push(results[0])
+                                    userOther.save(function(error, userOther) {
+                                      if (error) {
+                                        getJsonResponse(response, 500, error);
+                                      } else {
+                                        getJsonResponse(response, 200, {
+                                          'message' : 'Friend request accepted.'
+                                        })
+                                      }
+                                    });
+                                  }
+                                });
+                            }
+                          });
+                      }
+                    });
+                  }
+                });
+            }
+          }   
+        );  
+    } else {
+      getJsonResponse(response, 400, {
+        "message": 
+          "Bad request parameters"
+      }); 
+    }   
+  }); 
+}
+
+
+
+// sendFriendRequest: send a friend request to a user with specified id.
+module.exports.fetchFriends = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('pendingFriendRequests')
+        .exec(
+          function(error, user) {
+            if (error) {
+              getJsonResponse(response, 400, error);
+            } else {
+              addPendingFriendRequestToUser(request, response, user);
+            }
+          }   
+        );  
+    } else {
+      getJsonResponse(response, 400, {
+        "message": 
+          "Bad request parameters"
+      }); 
+    }   
+  }); 
+}
+
+
+
 //////////////////////////////////////////////////////////////////////////
 
 // Get user's id (username) from JWT
@@ -121,9 +254,7 @@ var getLoggedId = function(request, response, callback) {
   // If request contains a payload and the payload contains the field "accId"
   if (request.payload && request.payload.accId != undefined) {
     User
-      .findById(
-        request.payload.accId
-      )
+      .findById(request.payload.accId)
       .exec(function(error, user) {
         if (!user) {     // If user not found
           getJsonResponse(response, 404, {
