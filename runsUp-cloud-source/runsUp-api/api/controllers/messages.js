@@ -1,5 +1,16 @@
+var mongoose = require('mongoose');
+var User = mongoose.model('User');
+var Message = mongoose.model('Message');
 
-module.exports.fetchMessages = function() {
+// getJsonResponse: take response, status and JSON data and add status and data to response.
+var getJsonResponse = function(response, status, data) {
+  // Add status and JSON to response.
+  response.status(status);
+  response.json(data);
+};
+
+
+module.exports.fetchMessages = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser && request.params.idUser == accId) {
       User
@@ -13,7 +24,11 @@ module.exports.fetchMessages = function() {
               'message' : 'User not found.'
             });
           } else {
-            getJsonResponse(response, 200, results);
+            if (results.messages) {
+              getJsonResponse(response, 200, results.messages);
+            } else {
+              getJsonResponse(response, 404, );
+            }
           }
         });
     } else {
@@ -24,7 +39,7 @@ module.exports.fetchMessages = function() {
   });
 } 
 
-module.exports.getMessagesBySender = function() {
+module.exports.getMessagesBySender = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser && request.params.idSender && request.params.idUser == accId) {
       User
@@ -38,7 +53,7 @@ module.exports.getMessagesBySender = function() {
               'message' : 'User not found.'
             });
           } else {
-            getJsonResponse(response, 200, user.messages.filter(x => x.idSender == request.params.idSender));
+            getJsonResponse(response, 200, user.messages.filter(x => x.fromId == request.params.idSender));
           }
         });
     } else {
@@ -49,7 +64,7 @@ module.exports.getMessagesBySender = function() {
   });
 }
 
-module.exports.sendMessage = function() {
+module.exports.sendMessage = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser 
       && request.params.idReciever 
@@ -110,27 +125,32 @@ module.exports.sendMessage = function() {
   });
 }
 
-// sendFriendRequest: send a friend request to a user with specified id.
-module.exports.sendFriendRequest = function(request, response) {
-  getLoggedId(request, response, function(request, response, accId) {
-    if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
-      User
-        .findById(request.params.idUser)
-        .select('pendingFriendRequests')
-        .exec(
-          function(error, user) {
-            if (error) {
-              getJsonResponse(response, 400, error);
-            } else {
-              addPendingFriendRequestToUser(request, response, user);
-            }
-          }
-        );
-    } else {
-      getJsonResponse(response, 400, {
-        "message":
-          "Bad request parameters"
+
+// Get user's id (username) from JWT
+var getLoggedId = function(request, response, callback) {
+  // If request contains a payload and the payload contains the field "accId"
+  if (request.payload && request.payload.accId != undefined) {
+    User
+      .findById(
+        request.payload.accId
+      )
+      .exec(function(error, user) {
+        if (!user) {     // If user not found
+          getJsonResponse(response, 404, {
+            "message": "User not found."
+          });
+          return;
+        } else if (error) {   // if encountered error
+          getJsonResponse(response, 500, error);
+          return;
+        }
+        callback(request, response, user._id);
       });
-    }
-  });
-}
+  } else {    // Else if no payload or if payload does not contain field "id"
+    getJsonResponse(response, 400, {
+      "message": "Inadequate data in token."
+    });
+    return;
+  }
+};
+

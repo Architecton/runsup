@@ -142,6 +142,7 @@ module.exports.workoutGetById = function(request, response) {
 };
 
 
+// fetchSharedWorkouts: fetch list of workouts shared with user with specified id
 module.exports.fetchSharedWorkouts = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params && request.params.idUser && request.params.idUser == accId) {
@@ -173,12 +174,48 @@ module.exports.fetchSharedWorkouts = function(request, response) {
   });
 }
 
+
 // TODO
+// shareWorkout: share workout of user with specified id with another user with specified id.
 module.exports.shareWorkout = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params && request.params.idUser 
       && request.params.idWorkout && request.params.idUser == accId) {
-        // Find workout by id and share. 
+        User
+          .findById(request.params.idUser)
+          .select('workouts')
+        .exec(function(error, results) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!results || !results.workouts) {
+            getJsonResponse(response, 404, {
+              'message': 'Not found'
+            });
+          } else {
+            var workoutToShare = results.workouts.id(request.params.idWorkout);
+            User
+              .findById(request.params.idUser)
+              .select('sharedWorkouts')
+              .exec(function(error, resultsOther) {
+                if (error) {
+                  getJsonResponse(response, 500, error);
+                } else if (!resultsOther || !resultsOther.sharedWorkouts) {
+                  getJsonResponse(response, 404, {
+                    'response': 'Not found'
+                  });
+                } else {
+                  resultsOther.sharedWorkouts.push(workoutToShare);
+                  resultsOther.save(function(error, resultsOther) {
+                    if (error) {
+                      getJsonResponse(response, 500, error);
+                    } else {
+                      getJsonResponse(response, 201, resultsOther);
+                    }
+                  })
+                }
+              });
+          }
+        });
     } else {
       getJsonResponse(response, 400, {
         'message' : 'Bad request parameters'

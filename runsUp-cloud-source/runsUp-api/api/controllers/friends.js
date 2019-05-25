@@ -99,19 +99,25 @@ var addPendingFriendRequestToUser = function(request, response, user) {
             'message' : 'user with specified id not found.'
           });
         } else {
-          var newPendingFriendRequest = {
-            name: request.body.name,
-            profileImageUrl: request.body.profileImageUrl,
-            idUser: request.body.idUser
-          };
-          user.pendingFriendRequests.push(newPendingFriendRequest);
-          user.save(function(error, user) {
-            if (error) {
-              getJsonResponse(response, 500, error);
-            } else {
-              getJsonResponse(response, 201, user.pendingFriendRequests.slice(-1)[0]);
-            }
-          });
+          if ((user.pendingFriendRequests.filter(x => x.idUser == request.body.idUser)).length > 0) {
+            getJsonResponse(response, 400, {
+              'message': 'Friend request already sent!'
+            });
+          } else {
+            var newPendingFriendRequest = {
+              name: request.body.name,
+              profileImageUrl: request.body.profileImageUrl,
+              idUser: request.body.idUser
+            };
+            user.pendingFriendRequests.push(newPendingFriendRequest);
+            user.save(function(error, user) {
+              if (error) {
+                getJsonResponse(response, 500, error);
+              } else {
+                getJsonResponse(response, 201, user.pendingFriendRequests.slice(-1)[0]);
+              }
+            });
+          }
         }
       });
   }
@@ -144,7 +150,7 @@ module.exports.fetchFriendRequests = function(request, response) {
 }
 
 
-// fetchFriendRequests: fetch friend requests for users with specified id.
+// acceptFriendRequest: accept friend request from user with specified id.
 module.exports.acceptFriendRequest = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
@@ -219,8 +225,40 @@ module.exports.acceptFriendRequest = function(request, response) {
 }
 
 
+// rejectFriendRequest: reject friend requests from users with specified id.
+module.exports.rejectFriendRequest = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params && 
+      request.params.idUser && 
+      request.params.idFriend && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('pendingFriendRequests')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'message': 'User not found'
+            });
+          } else {
+            user.pendingFriendRequests = user.pendingFriendRequests.filter(x => x.idUser != request.params.idFriend);
+            user.save(function(error, user) {
+              if (error) {
+                getJsonResponse(response, 500, error);
+              } else {
+                getJsonResponse(response, 200, {
+                  'message': 'Friend request rejected'
+                });
+              }
+            });
+          }
+        });
+    }
+  });
+}
 
-// sendFriendRequest: send a friend request to a user with specified id.
+// fetchFriends: fetch friends of user with specified id.
 module.exports.fetchFriends = function(request, response) {
   getLoggedId(request, response, function(request, response, accId) {
     if (request.params.idUser && request.params.idUser == accId) {

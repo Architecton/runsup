@@ -18,21 +18,23 @@ router.get('/workouts/:idUser', authentication, ctrlWorkouts.workoutGetIndices);
 router.get('/workouts/:idUser/:idWorkout', authentication, ctrlWorkouts.workoutGetById);  		    // TESTED
 router.post('/workouts/:idUser', authentication, ctrlWorkouts.workoutAddNew);  					    // TESTED
 
+// Controllers for working with shared workouts.
+router.get('/workout_share/:idUser', authentication, ctrlWorkouts.fetchSharedWorkouts);						// TESTED
+router.post('/workout_share/:idUser/:idReciever/:idWorkout', authentication, ctrlWorkouts.shareWorkout);    // TESTED
+
 // Controlles for working with friends.
 router.get('/friends/:searchTerm', ctrlFriends.searchFriends); 									    // TESTED
 router.get('/friends', ctrlFriends.allPotentialFriends);  										    // TESTED
 router.post('/friends/:idUser/:idFriend', authentication, ctrlFriends.sendFriendRequest); 		    // TESTED
 router.get('/friends/:idUser/fetch', authentication, ctrlFriends.fetchFriendRequests); 			    // TESTED
 router.post('/friends/:idUser/accept/:idFriend', authentication, ctrlFriends.acceptFriendRequest);  // TESTED
+router.post('/friends/:idUser/reject/:idFriend', authentication, ctrlFriends.rejectFriendRequest);  // TESTED
 
 // Controllers for working with messages.
-router.get('/messages/:idUser/fetch', authentication, ctrlMessages.fetchMessages);
-router.get('/messages/:idUser/:idSender', authentication, ctrlMessages.getMessagesBySender);
-router.post('/messages/:idUser/:idReciever', authentication, ctrlMessages.sendMessage);
+router.get('/messages/:idUser/fetch', authentication, ctrlMessages.fetchMessages); 					// TESTED
+router.get('/messages/:idUser/:idSender', authentication, ctrlMessages.getMessagesBySender);		// TESTED 
+router.post('/messages/:idUser/:idReciever', authentication, ctrlMessages.sendMessage);            	// TESTED 
 
-// Controllers for working with shared workouts.
-router.get('workouts/share/:idUser', authentication, ctrlWorkouts.fetchSharedWorkouts);
-router.post('workouts/share/:idUser/:idReciever/:idWorkout', authentication, ctrlWorkouts.shareWorkout);
 
 // Controllers for authentication
 router.post('/users', ctrlAuthentication.authSignUp);  											    // TESTED
