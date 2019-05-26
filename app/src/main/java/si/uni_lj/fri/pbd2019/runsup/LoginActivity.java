@@ -228,6 +228,13 @@ public class LoginActivity extends AppCompatActivity {
                                     public void onComplete(@NonNull Task<Void> task) {
                                         preferences.edit().putBoolean("userSignedIn", false).apply();
                                         updateUiLoggedIn(null);
+                                        findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
+                                            @Override
+                                            public void onClick(View v) {
+                                                Intent signInIntent = mGoogleSignInClient.getSignInIntent();
+                                                startActivityForResult(signInIntent, RC_SIGN_IN);
+                                            }
+                                        });
                                     }
                                 });
 

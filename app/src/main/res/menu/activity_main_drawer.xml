@@ -22,13 +22,13 @@
                 android:icon="@drawable/ic_info_black_24dp"
                 android:title="@string/menu_about" />
             <item
-                android:id="@+id/nav_messaging"
-                android:icon="@drawable/close_envelope"
-                android:title="@string/menu_messages" />
-            <item
                 android:id="@+id/nav_friends"
                 android:icon="@drawable/friends"
                 android:title="@string/menu_friends" />
+            <item
+                android:id="@+id/nav_shared_workouts"
+                android:icon="@drawable/dog_running"
+                android:title="@string/menu_shared" />
         </menu>
     </item>
 

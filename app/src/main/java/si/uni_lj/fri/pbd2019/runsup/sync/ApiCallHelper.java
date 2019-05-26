@@ -23,9 +23,11 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import si.uni_lj.fri.pbd2019.runsup.FriendsActivity;
 import si.uni_lj.fri.pbd2019.runsup.FriendsSearchActivity;
 import si.uni_lj.fri.pbd2019.runsup.MainActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.Friend;
+import si.uni_lj.fri.pbd2019.runsup.model.FriendRequest;
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
@@ -33,11 +35,11 @@ import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 
 class ApiCallHelper {
 
-    public static String TAG = ApiCallHelper.class.getSimpleName();
+    private static String TAG = ApiCallHelper.class.getSimpleName();
 
     private String baseUrl;
-    OkHttpClient client;
-    public static final MediaType JSON
+    private OkHttpClient client;
+    private static final MediaType JSON
             = MediaType.parse("application/json; charset=utf-8");
 
     private DatabaseHelper dh;
@@ -200,6 +202,111 @@ class ApiCallHelper {
             }
         });
     }
+
+    void loginOrSignUp(final long idUser, final String name, final String profileImageUrl, final FriendsActivity.GetJwtRequestResponse getJwtRequestResponse) {
+        RequestBody requestBody = new FormBody.Builder()
+                .add("accId", Long.toString(idUser))
+                .build();
+
+        final Request request = new Request.Builder()
+                .post(requestBody)
+                .url(baseUrl + "/users/login")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getJwtRequestResponse.response(null);
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Gson gson = new Gson();
+                    CloudLoginResponse res = gson.fromJson(response.body().string(), CloudLoginResponse.class);
+                    getJwtRequestResponse.response(res.getToken());
+                } else {
+                    RequestBody requestBody = new FormBody.Builder()
+                            .add("accId", Long.toString(idUser))
+                            .add("name", name)
+                            .add("profileImageUrl", profileImageUrl)
+                            .build();
+                    final Request request = new Request.Builder()
+                            .post(requestBody)
+                            .url(baseUrl + "/users")
+                            .build();
+
+                    client.newCall(request).enqueue(new Callback() {
+                        @Override
+                        public void onFailure(Call call, IOException e) {
+                            getJwtRequestResponse.response(null);
+                        }
+                        @Override
+                        public void onResponse(Call call, Response response) {
+                            loginOrSignUp(idUser, name, profileImageUrl, getJwtRequestResponse);
+                        }
+                    });
+                }
+            }
+        });
+    }
+
+    void sendMessage(long idUser, long idReceiver, String jwt, String message, final FriendsActivity.GetSendMessageRequestResponse getSendMessageRequestResponse) {
+        RequestBody requestBody = new FormBody.Builder()
+                .add("content", message)
+                .build();
+        final Request request = new Request.Builder()
+                .post(requestBody)
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/messages/" + idUser + "/" + idReceiver)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getSendMessageRequestResponse.response(false);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    getSendMessageRequestResponse.response(true);
+                } else {
+                    getSendMessageRequestResponse.response(false);
+                }
+            }
+        });
+    }
+
+    void unfriend(long idUser, long friendUserId, String jwt, final FriendsActivity.GetUnfriendRequestResponse getUnfriendRequestResponse) {
+        RequestBody requestBody = new FormBody.Builder()
+                .build();
+        final Request request = new Request.Builder()
+                .delete()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/friends/" + idUser + "/" + friendUserId)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getUnfriendRequestResponse.response(false);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    getUnfriendRequestResponse.response(true);
+                } else {
+                    getUnfriendRequestResponse.response(false);
+                }
+            }
+        });
+    }
+
 
     private interface TransferCompleted {
         void onTransferCompleted(boolean successful);
@@ -427,10 +534,14 @@ class ApiCallHelper {
         });
     }
 
-    void sendFriendRequest(final long idFriend, String jwt, FriendsSearchActivity.GetSendFriendRequestResponse getSendFriendRequestResponse) {
+    void sendFriendRequest(final long idUser, final long idFriend,
+                           String currentUserName, String currentUserImageUrl, String jwt,
+                           final FriendsSearchActivity.GetSendFriendRequestResponse getSendFriendRequestResponse) {
 
         RequestBody requestBody = new FormBody.Builder()
-                .add("idFriend", Long.toString(idFriend))
+                .add("name", currentUserName)
+                .add("profileImageUrl", currentUserImageUrl)
+                .add("idUser", Long.toString(idUser))
                 .build();
 
         final Request request = new Request.Builder()
@@ -438,7 +549,7 @@ class ApiCallHelper {
                 .addHeader("cache-control", "no-cache")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization" , "Bearer " + jwt)
-                .url(baseUrl + "/friends/" + Long.toString(idFriend) + "/request")
+                .url(baseUrl + "/friends/" + idUser + "/" + idFriend)
                 .build();
 
 
@@ -453,14 +564,16 @@ class ApiCallHelper {
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
                     // Show message that friend request successfully sent.
+                    getSendFriendRequestResponse.getResponse(true);
                 } else {
-                    // Show message that there was an error sending friend request.
+                    getSendFriendRequestResponse.getResponse(false);
                 }
             }
         });
     }
 
-    void acceptFriendRequest(final long idFriend, String jwt, FriendsSearchActivity.GetAcceptFriendRequestResponse getAcceptFriendRequestResponse) {
+
+    void acceptFriendRequest(final long idUser, final long idFriend, String jwt, final FriendsActivity.GetAcceptFriendRequestResponse getAcceptFriendRequestResponse) {
         RequestBody requestBody = new FormBody.Builder()
                 .add("idFriend", Long.toString(idFriend))
                 .build();
@@ -470,9 +583,37 @@ class ApiCallHelper {
                 .addHeader("cache-control", "no-cache")
                 .addHeader("Content-Type", "application/json")
                 .addHeader("Authorization" , "Bearer " + jwt)
-                .url(baseUrl + "/friends/" + Long.toString(idFriend) + "/accept")
+                .url(baseUrl + "/friends/" + idUser + "/accept/" + idFriend)
                 .build();
 
+
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+                getAcceptFriendRequestResponse.response(false);
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    getAcceptFriendRequestResponse.response(true);
+                } else {
+                    getAcceptFriendRequestResponse.response(false);
+                }
+            }
+        });
+    }
+
+    void fetchFriendRequests(long idUser, String jwt, final FriendsActivity.GetFetchFriendsRequestResponse getFetchFriendsRequestResponse) {
+        final Request request = new Request.Builder()
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/friends/" + idUser + "/fetch_requests")
+                .build();
 
         client.newCall(request).enqueue(new Callback() {
 
@@ -484,9 +625,62 @@ class ApiCallHelper {
             @Override
             public void onResponse(Call call, Response response) throws IOException {
                 if (response.isSuccessful()) {
-                    // Show message that friend request successfully sent.
+                    Gson gson = new Gson();
+                    String json = response.body().string();
+                    ArrayList<FriendRequest> reconstruction;
+                    if (json.charAt(0) == '[') {
+                        CloudDataFriendRequest[] receivedData = gson.fromJson(json, CloudDataFriendRequest[].class);
+                        reconstruction = new ArrayList<>(receivedData.length);
+                        for (CloudDataFriendRequest receivedDatum : receivedData) {
+                            reconstruction.add(receivedDatum.toFriendRequest());
+                        }
+                    } else {
+                        reconstruction = new ArrayList<>(1);
+                        reconstruction.add(gson.fromJson(json, CloudDataFriendRequest.class).toFriendRequest());
+                    }
+                    getFetchFriendsRequestResponse.response(reconstruction);
                 } else {
-                    // Show message that there was an error sending friend request.
+                    getFetchFriendsRequestResponse.response(null);
+                }
+            }
+        });
+    }
+
+    void fetchFriends(long idUser, String jwt, final FriendsActivity.GetFetchFriendsResponse getFetchFriendsResponse) {
+        final Request request = new Request.Builder()
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/friends/" + idUser + "/fetch")
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Gson gson = new Gson();
+                    String json = response.body().string();
+                    ArrayList<Friend> reconstruction;
+                    if (json.charAt(0) == '[') {
+                        CloudDataFriend[] receivedData = gson.fromJson(json, CloudDataFriend[].class);
+                        reconstruction = new ArrayList<>(receivedData.length);
+                        for (CloudDataFriend receivedDatum : receivedData) {
+                            reconstruction.add(receivedDatum.toFriend());
+                        }
+                    } else {
+                        reconstruction = new ArrayList<>(1);
+                        reconstruction.add(gson.fromJson(json, CloudDataFriend.class).toFriend());
+                    }
+                    getFetchFriendsResponse.response(reconstruction);
+                } else {
+                    getFetchFriendsResponse.response(null);
                 }
             }
         });

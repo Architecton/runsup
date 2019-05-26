@@ -14,12 +14,12 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 
-import si.uni_lj.fri.pbd2019.runsup.model.Message;
+import si.uni_lj.fri.pbd2019.runsup.model.FriendRequest;
 
-public class MessagesAdapter extends ArrayAdapter<Message> {
+public class FriendRequestsAdapter extends ArrayAdapter<FriendRequest> {
 
-    public MessagesAdapter(Context context, ArrayList<Message> messages) {
-        super(context, 0, messages);
+    public FriendRequestsAdapter(Context context, ArrayList<FriendRequest> requests) {
+        super(context, 0, requests);
     }
 
     @NotNull
@@ -27,25 +27,21 @@ public class MessagesAdapter extends ArrayAdapter<Message> {
     public View getView(int position, View convertView, @NotNull ViewGroup parent) {
 
         // Get the data item for this position.
-        Message messageNxt = getItem(position);
+        FriendRequest reqNext = getItem(position);
         // Check if an existing view is being reused, otherwise inflate the view.
         if (convertView == null) {
-            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_history, parent, false);  // TODO
+            convertView = LayoutInflater.from(getContext()).inflate(R.layout.adapter_friend_requests, parent, false);
         }
 
         // Lookup view for data population.
-        TextView messageContent = convertView.findViewById(R.id.textview_messages_content);
-        TextView sender = convertView.findViewById(R.id.textview_messages_sender);
-        TextView dateSent = convertView.findViewById(R.id.textview_messages_date);
-        ImageView userProfileImage = convertView.findViewById(R.id.imageview_messages_sender_profile_image);
+        TextView requestName = convertView.findViewById(R.id.textview_friendrequest_name);
+        ImageView userProfileImage = convertView.findViewById(R.id.imageview_friendrequest_profile_image);
 
         // Populate the data into the template view using the data object
-        messageContent.setText(messageNxt.getContent());
-        sender.setText("TODO");
-        dateSent.setText("TODO");
+        requestName.setText(reqNext.getName());
         Glide
                 .with(userProfileImage.getContext())
-                .load(messageNxt.getProfileImageUri())
+                .load(reqNext.getProfileImageUrl())
                 .centerCrop()
                 .override(150, 150)
                 .into(userProfileImage);

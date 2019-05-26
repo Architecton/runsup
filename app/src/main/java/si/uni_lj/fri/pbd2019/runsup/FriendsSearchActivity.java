@@ -1,7 +1,9 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.Editable;
@@ -26,6 +28,8 @@ public class FriendsSearchActivity extends AppCompatActivity {
     User currentUser;
     String currentUserName;
     String currentUserProfileImageUrl;
+    ArrayList<Friend> searchRes;
+    SharedPreferences pref;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +39,7 @@ public class FriendsSearchActivity extends AppCompatActivity {
         this.currentUser = (User) getIntent().getSerializableExtra("currentUser");
         this.currentUserName = getIntent().getStringExtra("name");
         this.currentUserProfileImageUrl = getIntent().getStringExtra("profileImageUrl");
+        this.pref = PreferenceManager.getDefaultSharedPreferences(this);
     }
 
     @Override
@@ -61,6 +66,7 @@ public class FriendsSearchActivity extends AppCompatActivity {
                                         fsh.searchForFriends(s.toString(), currentUser, currentUserName, currentUserProfileImageUrl, new GetFriendsSearchResponse() {
                                             @Override
                                             public void getSearchResultsList(final ArrayList<Friend> searchResults) {
+                                                searchRes = searchResults;
                                                 if (searchResults != null) {
                                                     // Remove current user from search results.
                                                     for (int i = 0; i < searchResults.size(); i++) {
@@ -100,16 +106,57 @@ public class FriendsSearchActivity extends AppCompatActivity {
         // Set up click listener for adapter items.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            public void onItemClick(AdapterView<?> parent, View view, final int position, long id) {
                 AlertDialog.Builder builder = new AlertDialog.Builder(FriendsSearchActivity.this);
                 builder.setTitle(R.string.dialogtitle_friend_request);
                 builder.setMessage(R.string.dialogmessage_friend_request);
                 builder.setPositiveButton(getString(R.string.yes), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-
+                        fsh.sendFriendRequest(currentUser.getId(), searchRes.get(position).getFriendUserId(),
+                                currentUserName, currentUserProfileImageUrl,
+                                pref.getString("jwt", ""),
+                                new GetSendFriendRequestResponse() {
+                            @Override
+                            public void getResponse(boolean success) {
+                                if (success) {
+                                    FriendsSearchActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            AlertDialog alertDialog = new AlertDialog.Builder(FriendsSearchActivity.this).create();
+                                            alertDialog.setTitle(getString(R.string.alerttitle_friendrequest_success));
+                                            alertDialog.setMessage(getString(R.string.alertmessage_message_success_sent));
+                                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.yes),
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            dialog.dismiss();
+                                                        }
+                                                    });
+                                            alertDialog.show();
+                                        }
+                                    });
+                                } else {
+                                    FriendsSearchActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            AlertDialog alertDialog = new AlertDialog.Builder(FriendsSearchActivity.this).create();
+                                            alertDialog.setTitle(getString(R.string.alerttitle_friendrequest_error));
+                                            alertDialog.setMessage("Friend request already sent!");
+                                            alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, getString(R.string.yes),
+                                                    new DialogInterface.OnClickListener() {
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            dialog.dismiss();
+                                                        }
+                                                    });
+                                            alertDialog.show();
+                                        }
+                                    });
+                                }
+                            }
+                        });
                     }
                 });
+
                 builder.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -128,10 +175,6 @@ public class FriendsSearchActivity extends AppCompatActivity {
     }
 
     public interface GetSendFriendRequestResponse {
-        void getResponse(boolean success);
-    }
-
-    public interface GetAcceptFriendRequestResponse {
         void getResponse(boolean success);
     }
 }

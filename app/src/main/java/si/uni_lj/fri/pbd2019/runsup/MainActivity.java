@@ -467,11 +467,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.aboutFragment).addToBackStack(null).commit();
                 currentFragment = FRAGMENT_ABOUT;
             }
-        } else if (id == R.id.nav_messaging) {
 
-            // Start MessagingActivity.
-            Intent messagingActivityIntent = new Intent(MainActivity.this, MessagingActivity.class);
-            MainActivity.this.startActivity(messagingActivityIntent);
         } else if (id == R.id.nav_friends) {
 
             // Start FriendsActivity.

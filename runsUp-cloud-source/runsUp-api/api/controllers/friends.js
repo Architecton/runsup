@@ -99,9 +99,13 @@ var addPendingFriendRequestToUser = function(request, response, user) {
             'message' : 'user with specified id not found.'
           });
         } else {
-          if ((user.pendingFriendRequests.filter(x => x.idUser == request.body.idUser)).length > 0) {
+          if ((friend.pendingFriendRequests.filter(x => x.idUser == request.body.idUser)).length > 0) {
             getJsonResponse(response, 400, {
               'message': 'Friend request already sent!'
+            });
+		  } else if ((friend.friends.filter(x => x.friendUserId == request.body.idUser)).length > 0) {
+            getJsonResponse(response, 400, {
+              'message': 'Already friends!'
             });
           } else {
             var newPendingFriendRequest = {
@@ -109,8 +113,8 @@ var addPendingFriendRequestToUser = function(request, response, user) {
               profileImageUrl: request.body.profileImageUrl,
               idUser: request.body.idUser
             };
-            user.pendingFriendRequests.push(newPendingFriendRequest);
-            user.save(function(error, user) {
+            friend.pendingFriendRequests.push(newPendingFriendRequest);
+            friend.save(function(error, user) {
               if (error) {
                 getJsonResponse(response, 500, error);
               } else {
@@ -264,13 +268,17 @@ module.exports.fetchFriends = function(request, response) {
     if (request.params.idUser && request.params.idUser == accId) {
       User
         .findById(request.params.idUser)
-        .select('pendingFriendRequests')
+        .select('friends')
         .exec(
           function(error, user) {
             if (error) {
               getJsonResponse(response, 400, error);
+            } else if(!user.friends) {
+              getJsonResponse(response, 404, {
+                'message': 'No friends found'
+              });
             } else {
-              addPendingFriendRequestToUser(request, response, user);
+              getJsonResponse(response, 200, user.friends);
             }
           }   
         );  
@@ -283,6 +291,61 @@ module.exports.fetchFriends = function(request, response) {
   }); 
 }
 
+// unfriend: unfriend user with specified id
+module.exports.unfriend = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
+      console.log("HERE");
+      User
+        .findById(request.params.idUser)
+        .select('friends')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'message': 'No users found'
+            });
+          } else {
+            user.friends = user.friends.filter(x => x.friendUserId != request.params.idFriend);
+            user.save(function(error, user) {
+              if (error) {
+                getJsonResponse(response, 500, error);
+              } else {
+                User
+                  .findById(request.params.idFriend)
+                  .select('friends')
+                  .exec(function(error, userOther) {
+                    if (error) {
+                      getJsonResponse(response, 500, error);
+                    } else if (!userOther) {
+                      getJsonResponse(response, 404, {
+                        'message': 'No users found'
+                      });
+                    } else {
+                      userOther.friends = userOther.friends.filter(x => x.friendUserId != request.params.idUser);
+                      userOther.save(function(error, user) {
+                        if (error) {
+                          getJsonResponse(response, 500, error);
+                        } else {
+                          getJsonResponse(response, 204, {
+                            'message': 'Unfriending successful'
+                          });
+                        }
+                      });
+                    }
+                  });
+              }
+            });
+          }
+        });
+    } else {
+      getJsonResponse(response, 400, {
+        'message': 'Bad request parameters.'
+      });
+    }
+  });
+}
 
 
 //////////////////////////////////////////////////////////////////////////

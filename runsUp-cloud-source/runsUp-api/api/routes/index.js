@@ -26,9 +26,11 @@ router.post('/workout_share/:idUser/:idReciever/:idWorkout', authentication, ctr
 router.get('/friends/:searchTerm', ctrlFriends.searchFriends); 									    // TESTED
 router.get('/friends', ctrlFriends.allPotentialFriends);  										    // TESTED
 router.post('/friends/:idUser/:idFriend', authentication, ctrlFriends.sendFriendRequest); 		    // TESTED
-router.get('/friends/:idUser/fetch', authentication, ctrlFriends.fetchFriendRequests); 			    // TESTED
+router.get('/friends/:idUser/fetch', authentication, ctrlFriends.fetchFriends); 		    		// TESTED
+route.get('/friends/:idUser/fetch_requests', authentication, ctrlFriends.fetchFriendRequests); 	// TESTED
 router.post('/friends/:idUser/accept/:idFriend', authentication, ctrlFriends.acceptFriendRequest);  // TESTED
 router.post('/friends/:idUser/reject/:idFriend', authentication, ctrlFriends.rejectFriendRequest);  // TESTED
+router.delete('/friends/:idUser/:idFriend', authentication, ctrlFriends.unfriend);
 
 // Controllers for working with messages.
 router.get('/messages/:idUser/fetch', authentication, ctrlMessages.fetchMessages); 					// TESTED
