@@ -9,6 +9,10 @@ During the fourth sprint, the application was extended to include searching for 
 
 ![picture](demo_imgs/drawer.png)
 
+The back-end is written in Node.js (Express framework). A part of an implementation of a function in the friends' controller is given below. The full source code of the back-end is available in the project folder.
+
+![picture](demo_imgs/apicode.png)
+
 As the user logs into the application, they are immediately put into the cloud database upon first interaction with any cloud functionality such as searching for friends, etc. 
 Other users can then search for the person and send them a friend request, as can be seen in the following images. The ability to share workouts is implemented on the back-end and also almost completely implemented on the client.
 
