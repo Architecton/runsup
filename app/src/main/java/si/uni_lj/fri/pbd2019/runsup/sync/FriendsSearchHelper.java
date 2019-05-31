@@ -2,6 +2,7 @@ package si.uni_lj.fri.pbd2019.runsup.sync;
 import si.uni_lj.fri.pbd2019.runsup.FriendsActivity;
 import si.uni_lj.fri.pbd2019.runsup.FriendsSearchActivity;
 import si.uni_lj.fri.pbd2019.runsup.MessagingActivity;
+import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 
 public class FriendsSearchHelper {
@@ -51,5 +52,17 @@ public class FriendsSearchHelper {
 
     public void deleteConversation(long idUser, long idFriend, String jwt, MessagingActivity.GetDeleteConversationRequestResponse getDeleteConversationRequestResponse) {
         this.apiCallHelper.deleteConversation(idUser, idFriend, jwt, getDeleteConversationRequestResponse);
+    }
+
+    public void getFriendLastMessageId(long idUser, String jwt, CloudContentUpdatesFetchHelper.GetLastMessageIdRequestResponse getLastMessageIdRequestResponse) {
+        this.apiCallHelper.getFriendLastMessageId(idUser, jwt, getLastMessageIdRequestResponse);
+    }
+
+    public void getFullNameById(long idHere, long idOther, String jwt, MessagingActivity.GetFullNameByIdRequestResponse getFullNameByIdRequestResponse) {
+        this.apiCallHelper.getFullNameById(idHere, idOther, jwt, getFullNameByIdRequestResponse);
+    }
+
+    public void shareWorkout(long userId, long friendId, long workoutId, String jwt, WorkoutDetailActivity.GetShareWorkoutRequestResponse getShareWorkoutRequestResponse) {
+        this.apiCallHelper.shareWorkout(userId, friendId, workoutId, jwt, getShareWorkoutRequestResponse);
     }
 }

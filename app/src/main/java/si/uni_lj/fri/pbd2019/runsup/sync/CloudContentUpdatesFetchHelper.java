@@ -30,6 +30,10 @@ public class CloudContentUpdatesFetchHelper {
         void response(boolean result);
     }
 
+    public interface GetLastMessageIdRequestResponse {
+        void response(Long id);
+    }
+
     // ### /Callback Interfaces ###
 
 

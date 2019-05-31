@@ -19,24 +19,26 @@ router.get('/workouts/:idUser/:idWorkout', authentication, ctrlWorkouts.workoutG
 router.post('/workouts/:idUser', authentication, ctrlWorkouts.workoutAddNew);  					    // TESTED
 
 // Controllers for working with shared workouts.
-router.get('/workout_share/:idUser', authentication, ctrlWorkouts.fetchSharedWorkouts);						// TESTED
-router.post('/workout_share/:idUser/:idReciever/:idWorkout', authentication, ctrlWorkouts.shareWorkout);    // TESTED
+router.get('/workout_share/:idUser', authentication, ctrlWorkouts.fetchSharedWorkouts);				// TESTED
+router.post('/workout_share/:idUser/:idFriend', authentication, ctrlWorkouts.shareWorkout2);    	// TESTED
 
 // Controlles for working with friends.
 router.get('/friends/:searchTerm', ctrlFriends.searchFriends); 									    // TESTED
 router.get('/friends', ctrlFriends.allPotentialFriends);  										    // TESTED
+router.get('/friends/:idUser/getFullName/:idFriend', authentication, ctrlFriends.getFriendFullName);
 router.post('/friends/:idUser/:idFriend', authentication, ctrlFriends.sendFriendRequest); 		    // TESTED
 router.get('/friends/:idUser/fetch', authentication, ctrlFriends.fetchFriends); 		    		// TESTED
-router.get('/friends/:idUser/fetch_requests', authentication, ctrlFriends.fetchFriendRequests); 		// TESTED
+router.get('/friends/:idUser/fetch_requests', authentication, ctrlFriends.fetchFriendRequests); 	// TESTED
 router.post('/friends/:idUser/accept/:idFriend', authentication, ctrlFriends.acceptFriendRequest);  // TESTED
 router.post('/friends/:idUser/reject/:idFriend', authentication, ctrlFriends.rejectFriendRequest);  // TESTED
 router.delete('/friends/:idUser/:idFriend', authentication, ctrlFriends.unfriend);
 
 // Controllers for working with messages.
 router.get('/messages/:idUser/fetch', authentication, ctrlMessages.fetchMessages); 					// TESTED
+router.get('/messages/:idUser/lastId', authentication, ctrlMessages.getLastMessageOtherId); 		// 
 router.get('/messages/:idUser/:idSender', authentication, ctrlMessages.getMessagesBySender);		// TESTED 
 router.post('/messages/:idUser/:idReceiver', authentication, ctrlMessages.sendMessage);            	// TESTED 
-router.delete('/messages/:idUser/:idOther', authentication, ctrlMessages.deleteMessageThread);
+router.delete('/messages/:idUser/:idOther', authentication, ctrlMessages.deleteMessageThread);      // TESTED
 
 
 // Controllers for authentication

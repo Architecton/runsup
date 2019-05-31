@@ -224,6 +224,41 @@ module.exports.shareWorkout = function(request, response) {
   });
 }
 
+// addTodoListToUser: auxiliary function for todoListCreate (see above)
+module.exports.shareWorkout2 = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.body && request.params.idUser == accId) {
+      User
+        .findById(request.params.idFriend)
+        .select('sharedWorkouts')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'message': 'User not found.'
+            });
+          } else {
+            console.log(user.sharedWorkouts);
+            var workoutToShare = request.body;
+            user.sharedWorkouts.push(workoutToShare);
+            user.save(function(error, user) {
+              if (error) {
+                getJsonResponse(response, 500, error);
+              } else {
+                getJsonResponse(response, 201, workoutToShare);
+              }
+            });
+          }
+        });
+    } else {
+      getJsonResponse(response, 400, {
+        'message': 'Bad request parameters'
+      });
+    }
+  });
+};
+
 //////////////////////////////////////////////////////////////////////////
 
 // Get user's id (username) from JWT

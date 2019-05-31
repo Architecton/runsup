@@ -13,7 +13,6 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,6 +22,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -129,6 +129,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.userId = intent.getLongExtra("userId", -1L);
         this.userProfileImageUrl = intent.getStringExtra("userProfileImageUrl");
 
+
         // Initialize DataForStatsRetriever instance.
         try {
             this.dsr = new DataForStatsRetriever(this.workoutId);
@@ -168,6 +169,10 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         }
     }
 
+    public interface GetShareWorkoutRequestResponse {
+       void response(boolean result);
+    }
+
     @Override
     protected void onStart() {
         super.onStart();
@@ -177,6 +182,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.shareWorkoutButton = findViewById(R.id.button_workoutdetail_send_to_friend);
         this.showParamsButton = findViewById(R.id.button_workoutdetail_show_params);
 
+
         if (this.userId == 0) {
             this.shareWorkoutButton.setVisibility(View.INVISIBLE);
         } else {
@@ -185,7 +191,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
             this.shareWorkoutButton.setOnClickListener(new View.OnClickListener() {
                 FriendsSearchHelper fsh = new FriendsSearchHelper(Constant.BASE_CLOUD_URL);
                 ListView listViewFriends;
-
                 @Override
                 public void onClick(View v) {
                     final Dialog dialog = new Dialog(WorkoutDetailActivity.this);
@@ -206,8 +211,19 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                                                     listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                         @Override
                                                         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                            // TODO
-                                                            Log.d("AMEEN", res.get(position).getName());
+                                                            fsh.shareWorkout(userId, res.get(position).getFriendUserId(), workoutId, sharedPreferences.getString("jwt", ""), new GetShareWorkoutRequestResponse() {
+                                                                @Override
+                                                                public void response(boolean result) {
+                                                                    if (result) {
+                                                                        Toast.makeText(WorkoutDetailActivity.this,
+                                                                                R.string.future_impl, Toast.LENGTH_LONG).show();
+                                                                       // TODO
+                                                                    } else {
+                                                                        Toast.makeText(WorkoutDetailActivity.this,
+                                                                                R.string.future_impl, Toast.LENGTH_LONG).show();
+                                                                    }
+                                                                }
+                                                            });
                                                         }
                                                     });
                                                 }
@@ -218,7 +234,7 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                     } else {
                         fsh.getJwt(userId, userFullName, userProfileImageUrl, new FriendsActivity.GetJwtRequestResponse() {
                             @Override
-                            public void response(String jwt) {
+                            public void response(final String jwt) {
                                 if (jwt != null && !jwt.equals("")) {
                                     fsh.fetchFriends(userId, jwt, new FriendsActivity.GetFetchFriendsResponse() {
                                         @Override
@@ -233,7 +249,16 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                                                         listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                             @Override
                                                             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                                                                Log.d("AMEEN", res.get(position).getName());
+                                                                fsh.shareWorkout(userId, res.get(position).getFriendUserId(), workoutId, jwt, new GetShareWorkoutRequestResponse() {
+                                                                    @Override
+                                                                    public void response(boolean result) {
+                                                                        if (result) {
+                                                                            // TODO
+                                                                        } else {
+                                                                            // TODO
+                                                                        }
+                                                                    }
+                                                                });
                                                             }
                                                         });
                                                     }

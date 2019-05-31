@@ -29,6 +29,10 @@
                 android:id="@+id/nav_shared_workouts"
                 android:icon="@drawable/dog_running"
                 android:title="@string/menu_shared" />
+            <item
+                android:id="@+id/nav_messaging"
+                android:icon="@drawable/close_envelope"
+                android:title="@string/menu_messaging" />
         </menu>
     </item>
 

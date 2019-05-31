@@ -347,6 +347,42 @@ module.exports.unfriend = function(request, response) {
   });
 }
 
+// getFriendFullName: get full name of friend with specified id
+module.exports.getFriendFullName = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idFriend && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('friends')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'message': 'User not found.'
+            });
+          } else if (user && user.friends && user.friends.length > 0) {
+			console.log(user);
+            const friend = user.friends.filter(x => x.friendUserId == request.params.idFriend)[0];
+			console.log(friend);
+            getJsonResponse(response, 200, {
+              'result': friend.name
+            });
+          } else {
+            getJsonResponse(response, 404, {
+              'message': 'specified friend not found'
+            });
+          }
+        });
+    } else {
+      getJsonResponse(response, 400, {
+        'message': 'Bad request parameters'
+      });
+    }
+  });
+}
+
+
 
 //////////////////////////////////////////////////////////////////////////
 

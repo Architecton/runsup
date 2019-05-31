@@ -136,4 +136,8 @@
     <string name="exittext_message_hint">Your Message</string>
     <string name="user_profile_image">user\'s profile image</string>
     <string name="messages_menuitem_delete">Delete Conversation</string>
+    <string name="menu_messaging">Messaging</string>
+    <string name="messaging_no_friends_toast">Search for friends to start messaging!</string>
+    <string name="conversation_title">Conversation with %s</string>
+    <string name="future_impl">To be implemented in the next version!</string>
 </resources>

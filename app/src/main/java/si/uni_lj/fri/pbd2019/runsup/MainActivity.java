@@ -20,6 +20,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -37,7 +38,9 @@ import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.UserProfile;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
+import si.uni_lj.fri.pbd2019.runsup.sync.CloudContentUpdatesFetchHelper;
 import si.uni_lj.fri.pbd2019.runsup.sync.CloudSyncHelper;
+import si.uni_lj.fri.pbd2019.runsup.sync.FriendsSearchHelper;
 
 
 public class MainActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
@@ -166,6 +169,7 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         // Else add data for unknown user.
         if (account != null) {
             this.userFullName = account.getDisplayName();
+            // this.userFullName ="tralala";
             if (account.getPhotoUrl() != null) {
                 this.userImageUri = account.getPhotoUrl();
             } else {
@@ -293,9 +297,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         } else {
+
             // Remove drawer menu items that should only be visible to signed in users.
             this.navView.getMenu().findItem(R.id.nav_friends).setVisible(false);
             this.navView.getMenu().findItem(R.id.nav_shared_workouts).setVisible(false);
+            this.navView.getMenu().findItem(R.id.nav_messaging).setVisible(false);
             this.currentUser = new User("anonymous");
         }
 
@@ -489,6 +495,60 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             friendsActivityIntent.putExtra("name", this.userFullName);
             friendsActivityIntent.putExtra("profileImageUrl", this.userImageUri.toString());
             MainActivity.this.startActivity(friendsActivityIntent);
+        } else if (id == R.id.nav_messaging) {
+            final FriendsSearchHelper fsh = new FriendsSearchHelper(Constant.BASE_CLOUD_URL);
+            if (!preferences.contains("jwt")) {
+                fsh.getJwt(currentUser.getId(), userFullName, userImageUri.toString(), new FriendsActivity.GetJwtRequestResponse() {
+                    @Override
+                    public void response(final String jwt) {
+                        fsh.getFriendLastMessageId(currentUser.getId(), jwt, new CloudContentUpdatesFetchHelper.GetLastMessageIdRequestResponse() {
+                            @Override
+                            public void response(Long id) {
+                                if (id != -1) {
+                                    Intent messagingActivityIntent = new Intent(MainActivity.this, MessagingActivity.class);
+                                    messagingActivityIntent.putExtra("idHere", currentUser.getId());
+                                    messagingActivityIntent.putExtra("idOther", id);
+                                    messagingActivityIntent.putExtra("profileImageUrl", userImageUri.toString());
+                                    messagingActivityIntent.putExtra("userName", userFullName);
+                                    messagingActivityIntent.putExtra("jwt", jwt);
+                                    MainActivity.this.startActivity(messagingActivityIntent);
+                                } else {
+                                    MainActivity.this.runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(MainActivity.this, R.string.messaging_no_friends_toast, Toast.LENGTH_LONG).show();
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                });
+            } else {
+                fsh.getFriendLastMessageId(currentUser.getId(), preferences.getString("jwt", ""), new CloudContentUpdatesFetchHelper.GetLastMessageIdRequestResponse() {
+                    @Override
+                    public void response(Long id) {
+                        if (id != -1) {
+                            Intent messagingActivityIntent = new Intent(MainActivity.this, MessagingActivity.class);
+                            messagingActivityIntent.putExtra("idHere", currentUser.getId());
+                            messagingActivityIntent.putExtra("idOther", id);
+                            messagingActivityIntent.putExtra("profileImageUrl", userImageUri);
+                            messagingActivityIntent.putExtra("userName", userFullName);
+                            messagingActivityIntent.putExtra("jwt", preferences.getString("jwt", ""));
+                            MainActivity.this.startActivity(messagingActivityIntent);
+                        } else {
+                            MainActivity.this.runOnUiThread(new Runnable() {
+                                @Override
+                                public void run() {
+                                    Toast.makeText(MainActivity.this, R.string.messaging_no_friends_toast, Toast.LENGTH_LONG).show();
+                                }
+                            });
+                        }
+                    }
+                });
+            }
+        } else if (id == R.id.nav_shared_workouts) {
+            Toast.makeText(MainActivity.this, R.string.future_impl, Toast.LENGTH_LONG).show();
         }
 
         // Close drawer.

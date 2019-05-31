@@ -167,6 +167,51 @@ module.exports.deleteMessageThread = function(request, response) {
   });
 }
 
+// getLastMessageOtherId: get id of last message receiver or, if no messages, first friend.
+module.exports.getLastMessageOtherId = function(request, response) {
+  getLoggedId(request, response, function(request, response, accId) {
+    if (request.params.idUser && request.params.idUser == accId) {
+      User
+        .findById(request.params.idUser)
+        .select('messages friends')
+        .exec(function(error, user) {
+          if (error) {
+            getJsonResponse(response, 500, error);
+          } else if (!user) {
+            getJsonResponse(response, 404, {
+              'message': 'User not found.'
+            });
+          } else {
+            if (user.messages && user.messages.length > 0) {
+              getJsonResponse(response, 200, 
+                {
+                'result': (user.messages[0].idSender != request.params.idUser) 
+						? user.messages[0].idSender 
+						: user.messages[0].idReceiver
+                }
+              );
+            } else if (user.friends && user.friends.length > 0) {
+              getJsonResponse(response, 200,
+                {
+                  'result': user.friends[0].friendUserId
+                }
+              );
+            } else {
+              getJsonResponse(response, 404, {
+                'message': 'No messages or friends found'
+              });
+            }
+          }
+        });
+    } else {
+      getJsonResponse(response, 400, {
+        'message': 'Bad request parameters.'
+      });
+    }
+  });
+}
+
+
 // Get user's id (username) from JWT
 var getLoggedId = function(request, response, callback) {
   // If request contains a payload and the payload contains the field "accId"

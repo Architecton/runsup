@@ -89,9 +89,7 @@ public class HistoryFragment extends Fragment {
         // Set up click listener for adapter items.
         listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                try {
-
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {try {
                     // Reconstruct positions from GPS points.
                     QueryBuilder<Workout, Long> workoutQb = dh.workoutDao().queryBuilder();
                     QueryBuilder<GpsPoint, Long> gpspointQb = dh.gpsPointDao().queryBuilder();
@@ -102,7 +100,6 @@ public class HistoryFragment extends Fragment {
                         Location locationNxt = new Location("");
                         locationNxt.setLatitude(point.getLatitude());
                         locationNxt.setLongitude(point.getLongitude());
-
                         // Handle possible pause flags.
                         if (point.getPauseFlag() == (byte)1) {
                             Bundle flags = new Bundle();

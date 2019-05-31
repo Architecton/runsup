@@ -1,5 +1,5 @@
 #
-# generated on 2019/05/23 06:11:39
+# generated on 2019/05/31 08:13:01
 #
 # --table-start--
 dataClass=si.uni_lj.fri.pbd2019.runsup.model.GpsPoint

@@ -8,6 +8,7 @@ import com.j256.ormlite.stmt.QueryBuilder;
 
 import org.json.JSONArray;
 import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -27,6 +28,7 @@ import si.uni_lj.fri.pbd2019.runsup.FriendsActivity;
 import si.uni_lj.fri.pbd2019.runsup.FriendsSearchActivity;
 import si.uni_lj.fri.pbd2019.runsup.MainActivity;
 import si.uni_lj.fri.pbd2019.runsup.MessagingActivity;
+import si.uni_lj.fri.pbd2019.runsup.WorkoutDetailActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.Friend;
 import si.uni_lj.fri.pbd2019.runsup.model.FriendRequest;
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
@@ -254,9 +256,6 @@ class ApiCallHelper {
         });
     }
 
-    void sendMessage(long idUser, long idReceiver, String jwt, String message, final FriendsActivity.GetSendMessageRequestResponse getSendMessageRequestResponse) {
-    }
-
     void unfriend(long idUser, long friendUserId, String jwt, final FriendsActivity.GetUnfriendRequestResponse getUnfriendRequestResponse) {
         final Request request = new Request.Builder()
                 .delete()
@@ -376,6 +375,100 @@ class ApiCallHelper {
                 }
             }
         });
+    }
+
+    void getFriendLastMessageId(long idUser, String jwt, final CloudContentUpdatesFetchHelper.GetLastMessageIdRequestResponse getLastMessageIdRequestResponse) {
+        final Request request = new Request.Builder()
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/messages/" + idUser + "/lastId")
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getLastMessageIdRequestResponse.response(-1L);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (response.isSuccessful()) {
+                        String json = response.body().string();
+                        JSONObject obj = new JSONObject(json);
+                        getLastMessageIdRequestResponse.response(new Long((Integer) obj.get("result")));
+                    } else {
+                        getLastMessageIdRequestResponse.response(-1L);
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    void getFullNameById(long idHere, long idOther, String jwt, final MessagingActivity.GetFullNameByIdRequestResponse getFullNameByIdRequestResponse) {
+        final Request request = new Request.Builder()
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/friends/" + idHere + "/getFullName/" + idOther)
+                .build();
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getFullNameByIdRequestResponse.response(null);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                try {
+                    if (response.isSuccessful()) {
+                        String json = response.body().string();
+                        JSONObject obj = new JSONObject(json);
+                        getFullNameByIdRequestResponse.response(obj.getString("result"));
+                    } else {
+                        getFullNameByIdRequestResponse.response(null);
+                    }
+                } catch (IOException | JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    void shareWorkout(long userId, long friendId, long workoutId, String jwt, final WorkoutDetailActivity.GetShareWorkoutRequestResponse getShareWorkoutRequestResponse) {
+        try {
+            String json = packWorkoutForSending(workoutId, userId);
+            RequestBody body = RequestBody.create(JSON, json);
+            final Request request = new Request.Builder()
+                    .post(body)
+                    .addHeader("cache-control", "no-cache")
+                    .addHeader("Content-Type", "application/json")
+                    .addHeader("Authorization" , "Bearer " + jwt)
+                    .url(baseUrl + "/workout_share/" + userId + "/" + friendId)
+                    .build();
+
+            client.newCall(request).enqueue(new Callback() {
+                @Override
+                public void onFailure(Call call, IOException e) {
+                }
+                @Override
+                public void onResponse(Call call, Response response) {
+                        if (response.isSuccessful()) {
+                            getShareWorkoutRequestResponse.response(true);
+                        } else {
+                            getShareWorkoutRequestResponse.response(false);
+                        }
+                }
+            });
+
+
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
 
 

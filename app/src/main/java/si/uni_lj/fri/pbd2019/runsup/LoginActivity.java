@@ -88,6 +88,7 @@ public class LoginActivity extends AppCompatActivity {
     private void handleSignInResult(Task<GoogleSignInAccount> completedTask) {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);  // Get account from results.
+            account = GoogleSignIn.getLastSignedInAccount(this);
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             if (account != null && account.getId() != null) {
                 this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();

@@ -1,7 +1,5 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
-import android.app.Application;
-
 public class Constant {
 
     // Commands to Service
@@ -54,7 +52,7 @@ public class Constant {
 
     // Base url for the back-end on the cloud.
     // public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
-    public static final String BASE_CLOUD_URL = "http://10.0.2.2:3000";
+    public static final String BASE_CLOUD_URL = "https://runsup2.herokuapp.com";
 
     // Color codes for stats charts.
     public static final int GRAPH_COLOR_GREEN = 0;
