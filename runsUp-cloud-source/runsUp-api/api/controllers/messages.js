@@ -28,7 +28,9 @@ module.exports.fetchMessages = function(request, response) {
             if (results.messages) {
               getJsonResponse(response, 200, results.messages);
             } else {
-              getJsonResponse(response, 404, );
+              getJsonResponse(response, 404, {
+                'message': 'no messages found.'
+              });
             }
           }
         });
