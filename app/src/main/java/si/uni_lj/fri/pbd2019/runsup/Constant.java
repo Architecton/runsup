@@ -51,8 +51,8 @@ public class Constant {
     public static final long LOCATION_UPDATES_TIMEOUT_TO_SAVE = 10000;
 
     // Base url for the back-end on the cloud.
-    // public static final String BASE_CLOUD_URL = "https://runsup.herokuapp.com";
-    public static final String BASE_CLOUD_URL = "https://runsup2.herokuapp.com";
+    // static final String BASE_CLOUD_URL = "http://10.0.2.2:3000";
+    static final String BASE_CLOUD_URL = "https://runsup2.herokuapp.com";
 
     // Color codes for stats charts.
     public static final int GRAPH_COLOR_GREEN = 0;
