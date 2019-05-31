@@ -39,5 +39,7 @@ The back-end is implemented using the Express framework and is hosted on Heroku.
 The databased was created using MLab service.
 
 The source code for the back-end along with the instructions on how to run it locally can be found in the project folder.
+To run the back-end locally, replace the BASE_CLOUD_URL constant with the commented-out one one line above.
+![picture](demo_imgs/cloud_url.png)
 
 The functionality can be tested using the .gpx file in the project folder that contains the GPS measurements of a Ljubljana half-marathon run.
