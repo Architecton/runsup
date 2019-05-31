@@ -18,8 +18,8 @@ import si.uni_lj.fri.pbd2019.runsup.model.Friend;
 
 public class FriendsAdapter extends ArrayAdapter<Friend> {
 
-    public FriendsAdapter(Context context, ArrayList<Friend> messages) {
-        super(context, 0, messages);
+    FriendsAdapter(Context context, ArrayList<Friend> friends) {
+        super(context, 0, friends);
     }
 
     @NotNull
@@ -40,7 +40,7 @@ public class FriendsAdapter extends ArrayAdapter<Friend> {
 
         // Populate the data into the template view using the data object
         friendName.setText(friendNxt.getName());
-        friendsSince.setText(friendNxt.getFriendsSince().toString());
+        friendsSince.setText(friendNxt.getFriendsSinceFormatted().toString());
         Glide
                 .with(userProfileImage.getContext())
                 .load(friendNxt.getProfileImageUrl())

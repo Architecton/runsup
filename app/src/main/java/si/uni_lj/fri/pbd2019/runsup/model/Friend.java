@@ -1,9 +1,14 @@
 package si.uni_lj.fri.pbd2019.runsup.model;
 
+import android.text.format.DateFormat;
+
 import com.j256.ormlite.field.DatabaseField;
 
 import java.io.Serializable;
 import java.util.Date;
+
+import si.uni_lj.fri.pbd2019.runsup.App;
+import si.uni_lj.fri.pbd2019.runsup.R;
 
 public class Friend implements Serializable {
 
@@ -78,5 +83,9 @@ public class Friend implements Serializable {
 
     public void setDateJoined(Date dateJoined) {
         this.dateJoined = dateJoined;
+    }
+
+    public String getFriendsSinceFormatted() {
+        return App.getAppResources().getString(R.string.friends_since) + " " + DateFormat.getDateFormat(App.getAppContext()).format(this.friendsSince);
     }
 }

@@ -26,9 +26,11 @@ import okhttp3.Response;
 import si.uni_lj.fri.pbd2019.runsup.FriendsActivity;
 import si.uni_lj.fri.pbd2019.runsup.FriendsSearchActivity;
 import si.uni_lj.fri.pbd2019.runsup.MainActivity;
+import si.uni_lj.fri.pbd2019.runsup.MessagingActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.Friend;
 import si.uni_lj.fri.pbd2019.runsup.model.FriendRequest;
 import si.uni_lj.fri.pbd2019.runsup.model.GpsPoint;
+import si.uni_lj.fri.pbd2019.runsup.model.Message;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
@@ -253,36 +255,9 @@ class ApiCallHelper {
     }
 
     void sendMessage(long idUser, long idReceiver, String jwt, String message, final FriendsActivity.GetSendMessageRequestResponse getSendMessageRequestResponse) {
-        RequestBody requestBody = new FormBody.Builder()
-                .add("content", message)
-                .build();
-        final Request request = new Request.Builder()
-                .post(requestBody)
-                .addHeader("cache-control", "no-cache")
-                .addHeader("Content-Type", "application/json")
-                .addHeader("Authorization" , "Bearer " + jwt)
-                .url(baseUrl + "/messages/" + idUser + "/" + idReceiver)
-                .build();
-
-        client.newCall(request).enqueue(new Callback() {
-            @Override
-            public void onFailure(Call call, IOException e) {
-                getSendMessageRequestResponse.response(false);
-            }
-            @Override
-            public void onResponse(Call call, Response response) {
-                if (response.isSuccessful()) {
-                    getSendMessageRequestResponse.response(true);
-                } else {
-                    getSendMessageRequestResponse.response(false);
-                }
-            }
-        });
     }
 
     void unfriend(long idUser, long friendUserId, String jwt, final FriendsActivity.GetUnfriendRequestResponse getUnfriendRequestResponse) {
-        RequestBody requestBody = new FormBody.Builder()
-                .build();
         final Request request = new Request.Builder()
                 .delete()
                 .addHeader("cache-control", "no-cache")
@@ -302,6 +277,102 @@ class ApiCallHelper {
                     getUnfriendRequestResponse.response(true);
                 } else {
                     getUnfriendRequestResponse.response(false);
+                }
+            }
+        });
+    }
+
+    void fetchMessages(long idUser, long idFriend, String jwt, final CloudContentUpdatesFetchHelper.FetchMessagesResponse fetchMessagesResponse) {
+        final Request request = new Request.Builder()
+                .get()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/messages/" + idUser + "/" + idFriend)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                e.printStackTrace();
+            }
+
+            @Override
+            public void onResponse(Call call, Response response) throws IOException {
+                if (response.isSuccessful()) {
+                    Gson gson = new Gson();
+                    String json = response.body().string();
+                    ArrayList<Message> reconstruction;
+                    if (json.charAt(0) == '[') {
+                        CloudDataMessage[] receivedData = gson.fromJson(json, CloudDataMessage[].class);
+                        reconstruction = new ArrayList<>(receivedData.length);
+                        for (CloudDataMessage receivedDatum : receivedData) {
+                            reconstruction.add(receivedDatum.toMessage());
+                        }
+                    } else {
+                        reconstruction = new ArrayList<>(1);
+                        reconstruction.add(gson.fromJson(json, CloudDataMessage.class).toMessage());
+                    }
+                    fetchMessagesResponse.response(reconstruction);
+                } else {
+                    fetchMessagesResponse.response(null);
+                }
+            }
+        });
+    }
+
+    void sendMessage(long idSender, long idReceiver, String content, String profileImageUri,
+                     String nameSender, String jwt,
+                     final CloudContentUpdatesFetchHelper.SendMessageResponse sendMessageResponse) {
+        RequestBody requestBody = new FormBody.Builder()
+                .add("content", content)
+                .add("profileImageUri", profileImageUri)
+                .add("senderName", nameSender)
+                .build();
+        final Request request = new Request.Builder()
+                .post(requestBody)
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/messages/" + idSender + "/" + idReceiver)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                sendMessageResponse.response(false);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    sendMessageResponse.response(true);
+                } else {
+                    sendMessageResponse.response(false);
+                }
+            }
+        });
+    }
+
+    void deleteConversation(long idUser, long idFriend, String jwt, final MessagingActivity.GetDeleteConversationRequestResponse getDeleteConversationRequestResponse) {
+        final Request request = new Request.Builder()
+                .delete()
+                .addHeader("cache-control", "no-cache")
+                .addHeader("Content-Type", "application/json")
+                .addHeader("Authorization" , "Bearer " + jwt)
+                .url(baseUrl + "/messages/" + idUser + "/" + idFriend)
+                .build();
+
+        client.newCall(request).enqueue(new Callback() {
+            @Override
+            public void onFailure(Call call, IOException e) {
+                getDeleteConversationRequestResponse.response(false);
+            }
+            @Override
+            public void onResponse(Call call, Response response) {
+                if (response.isSuccessful()) {
+                    getDeleteConversationRequestResponse.response(true);
+                } else {
+                    getDeleteConversationRequestResponse.response(false);
                 }
             }
         });

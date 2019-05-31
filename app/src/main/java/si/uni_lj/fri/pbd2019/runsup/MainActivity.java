@@ -14,7 +14,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,11 +51,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     public static final int FRAGMENT_ABOUT = 2;
 
     // user image uri and user's full name
-    private Uri userImageUri;
-    private String userFullName;
+    public Uri userImageUri;
+    public String userFullName;
 
     // fragment manager instance
     private FragmentManager fragmentManager;
+
+    // drawer layout of the MainActivity
+    DrawerLayout mDrawerLayout;
 
     // variable that holds the current set fragment.
     public int currentFragment;
@@ -84,6 +86,11 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     // Current user using the application.
     public User currentUser;
+
+
+    NavigationView navView;
+    private DrawerLayout.DrawerListener drawerListener;
+
 
     // ### /PROPERTIES ###
 
@@ -152,33 +159,91 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
     protected void onStart() {
         super.onStart();
 
-        // Check if user signed in.
-        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
-        if (account != null) {
+        // Check if user signed in
+        final GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
 
-            // Get user's photo url and user's full name.
-            this.userImageUri = account.getPhotoUrl();
-            if (this.userImageUri == null) {
+        // If user signed in, set account data.
+        // Else add data for unknown user.
+        if (account != null) {
+            this.userFullName = account.getDisplayName();
+            if (account.getPhotoUrl() != null) {
+                this.userImageUri = account.getPhotoUrl();
+            } else {
                 this.userImageUri = Uri.parse("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ594qCi5NafFyv4R69-Fpq_8IbbVQ1RtL208R8uM-RErUEUNp");
             }
-            this.userFullName = String.format("%s %s", account.getGivenName(), account.getFamilyName());
+        } else {
+            this.userImageUri = Uri.parse("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRZ594qCi5NafFyv4R69-Fpq_8IbbVQ1RtL208R8uM-RErUEUNp");
+            this.userFullName = getString(R.string.all_unknownuser);
+        }
+
+
+        // Set onOpen listeners for drawer.
+        mDrawerLayout = findViewById(R.id.drawer_layout);
+        mDrawerLayout.removeDrawerListener(this.drawerListener);
+        this.drawerListener = new DrawerLayout.DrawerListener() {
+
+            @Override
+            public void onDrawerOpened(View drawerView) {
+                // Find user's profile image and full name in drawer.
+                ImageView imageViewUserImage = findViewById(R.id.menu_loggedInUserImage);
+                TextView textViewUserFullName = findViewById(R.id.menu_loggedInUserFullName);
+
+                // Load profile image and set full name.
+                Glide
+                        .with(MainActivity.this)
+                        .load(userImageUri)
+                        .centerCrop()
+                        .override(150, 150)
+                        .into(imageViewUserImage);
+                textViewUserFullName.setText(userFullName);
+
+                // Set on click listeners.
+                imageViewUserImage.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Start LoginActivity.
+                        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        if (currentFragment == FRAGMENT_HISTORY) {
+                            loginIntent.putExtra("fromHistory", true);
+                        }
+                        MainActivity.this.startActivity(loginIntent);
+                    }
+                });
+                textViewUserFullName.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        // Start LoginActivity.
+                        Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
+                        if (currentFragment == FRAGMENT_HISTORY) {
+                            loginIntent.putExtra("fromHistory", true);
+                        }
+                        MainActivity.this.startActivity(loginIntent);
+                    }
+                });
+            }
+            @Override
+            public void onDrawerClosed(View drawerView) {}
+            @Override
+            public void onDrawerStateChanged(int newState) {}
+            @Override
+            public void onDrawerSlide(View drawerView, float slideOffset) {}
+        };
+
+        // Set listener.
+        this.mDrawerLayout.addDrawerListener(this.drawerListener);
+
+        // Get navigation view.
+        this.navView = findViewById(R.id.nav_view);
+
+
+        // Check if user signed in.
+        if (account != null) {
+
+            // Set shared preferences' values.
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
             this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
 
-            // Set user's avatar.
-            if (!this.accountDataSet && this.userImage != null && this.userName != null) {
-                Glide
-                        .with(MainActivity.this)
-                        .load(this.userImageUri)
-                        .centerCrop()
-                        .override(150, 150)
-                        .into(this.userImage);
-                this.userImage.setImageURI(this.userImageUri);
-                this.userName.setText(this.userFullName);
-                this.accountDataSet = true;
-            }
-
-            // Check if user in database
+            // Check if user in database.
             this.currentUser = null;
             User existingUser = null;
             try {
@@ -191,7 +256,6 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 if (res.size() > 0) {
                     existingUser = res.get(0);
                 }
-
             } catch (SQLException e) {
                 e.printStackTrace();
             }
@@ -229,19 +293,14 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
                 }
             }
         } else {
-            if (this.userImage != null && this.userName != null) {
-                this.userImage.setImageResource(R.mipmap.iconfinder_unknown2_628287);
-                this.userName.setText(getString(R.string.all_unknownuser));
-            }
-
-
-            // Set user.
+            // Remove drawer menu items that should only be visible to signed in users.
+            this.navView.getMenu().findItem(R.id.nav_friends).setVisible(false);
+            this.navView.getMenu().findItem(R.id.nav_shared_workouts).setVisible(false);
             this.currentUser = new User("anonymous");
         }
 
         // If intent has extra that specifies history fragment to be loaded, load it.
         if (getIntent().hasExtra("loadHistory")) {
-            // load AboutFragment
             this.fragmentManager.beginTransaction().replace(R.id.main_fragment_container, this.historyFragment).addToBackStack(null).commit();
             currentFragment = FRAGMENT_HISTORY;
         }
@@ -275,53 +334,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.stopwatch_shared, menu);
-
-
-        // user's profile image and full name.
-        this.userImage = findViewById(R.id.menu_loggedInUserImage);
-        this.userName = findViewById(R.id.menu_loggedInUserFullName);
-
-        // If user logged in, set profile image and full name.
-        if (this.userImageUri != null && this.userFullName != null && !accountDataSet)  {
-            Glide
-                    .with(MainActivity.this)
-                    .load(userImageUri)
-                    .centerCrop()
-                    .override(150,150)
-                    .into(userImage);
-            userImage.setImageURI(this.userImageUri);
-            userName.setText(this.userFullName);
-            this.accountDataSet = true;
-        }
-
-        // Set on click listeners.
-        userImage.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Start LoginActivity.
-                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                if (currentFragment == FRAGMENT_HISTORY) {
-                    loginIntent.putExtra("fromHistory", true);
-                }
-                MainActivity.this.startActivity(loginIntent);
-            }
-        });
-        userName.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                // Start LoginActivity.
-                Intent loginIntent = new Intent(MainActivity.this, LoginActivity.class);
-                if (currentFragment == FRAGMENT_HISTORY) {
-                    loginIntent.putExtra("fromHistory", true);
-                }
-                MainActivity.this.startActivity(loginIntent);
-            }
-        });
-
-
         return true;
     }
 
@@ -425,8 +439,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
         return super.onOptionsItemSelected(item);
     }
 
+
     // onNavigationItemSelected: handle navigation view item clicks
-    @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(@NotNull MenuItem item) {
 
@@ -469,10 +483,8 @@ public class MainActivity extends AppCompatActivity implements NavigationView.On
             }
 
         } else if (id == R.id.nav_friends) {
-
             // Start FriendsActivity.
             Intent friendsActivityIntent = new Intent(MainActivity.this, FriendsActivity.class);
-            Log.d("currentUser", "" + currentUser.getId());
             friendsActivityIntent.putExtra("currentUser", this.currentUser);
             friendsActivityIntent.putExtra("name", this.userFullName);
             friendsActivityIntent.putExtra("profileImageUrl", this.userImageUri.toString());

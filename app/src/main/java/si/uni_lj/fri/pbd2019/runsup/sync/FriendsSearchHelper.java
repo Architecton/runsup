@@ -1,7 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup.sync;
-
 import si.uni_lj.fri.pbd2019.runsup.FriendsActivity;
 import si.uni_lj.fri.pbd2019.runsup.FriendsSearchActivity;
+import si.uni_lj.fri.pbd2019.runsup.MessagingActivity;
 import si.uni_lj.fri.pbd2019.runsup.model.User;
 
 public class FriendsSearchHelper {
@@ -37,11 +37,19 @@ public class FriendsSearchHelper {
         this.apiCallHelper.fetchFriends(idUser, jwt, getFetchFriendsResponse);
     }
 
-    public void sendMessage(long idUser, long idReceiver, String jwt, String message, FriendsActivity.GetSendMessageRequestResponse getSendMessageRequestResponse) {
-        this.apiCallHelper.sendMessage(idUser, idReceiver, jwt, message, getSendMessageRequestResponse);
-    }
-
     public void unfriend(long idUser, long friendUserId, String jwt, FriendsActivity.GetUnfriendRequestResponse getUnfriendRequestResponse) {
         this.apiCallHelper.unfriend(idUser, friendUserId, jwt, getUnfriendRequestResponse);
+    }
+
+    public void fetchMessages(long idUser, long idFriend, String jwt, CloudContentUpdatesFetchHelper.FetchMessagesResponse getFetchMessagesResponse) {
+        this.apiCallHelper.fetchMessages(idUser, idFriend, jwt, getFetchMessagesResponse);
+    }
+
+    public void sendMessage(long idSender, long idReceiver, String content, String profileImageUri, String nameSender, String jwt, CloudContentUpdatesFetchHelper.SendMessageResponse sendMessageResponse) {
+        this.apiCallHelper.sendMessage(idSender, idReceiver, content, profileImageUri, nameSender, jwt, sendMessageResponse);
+    }
+
+    public void deleteConversation(long idUser, long idFriend, String jwt, MessagingActivity.GetDeleteConversationRequestResponse getDeleteConversationRequestResponse) {
+        this.apiCallHelper.deleteConversation(idUser, idFriend, jwt, getDeleteConversationRequestResponse);
     }
 }

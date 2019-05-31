@@ -544,6 +544,9 @@ public class StopwatchFragment extends Fragment {
                         workoutDetailsIntent.putExtra("calories", calories);
                         workoutDetailsIntent.putExtra("positions", positions);
                         workoutDetailsIntent.putExtra("workoutId", workoutId);
+                        workoutDetailsIntent.putExtra("userFullName", ((MainActivity)getActivity()).userFullName);
+                        workoutDetailsIntent.putExtra("userId", currentUser.getId());
+                        workoutDetailsIntent.putExtra("userProfileImageUrl", ((MainActivity)getActivity()).userImageUri.toString());
                         StopwatchFragment.this.startActivity(workoutDetailsIntent);
 
                         // If last unfinished workout exists, make sure that its state is set to STATE_STOPPED.

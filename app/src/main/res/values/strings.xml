@@ -1,6 +1,5 @@
 <resources>
-
-    <string name="app_name">FitnessTracker</string>
+    <string name="app_name">RunsUp</string>
     <string name="title_activity_maps">Map</string>
     <string name="default_duration">00:00:00</string>
     <string name="default_distance">0.00</string>
@@ -29,7 +28,7 @@
     <string name="textview_workoutdetail_labelcalories_default">CALORIES</string>
     <string name="textview_workoutdetail_valueduration_default">00:00:00"</string>
     <string name="textview_workoutdetail_valuecalories_default">0 kcal</string>
-    <string name="textview_workoutdetail_labeldistance_default">DISTANCE</string>
+    <string name="textview_workoutdetail_labeldistance_default">DISTANCE</string>/
     <string name="textview_workoutdetail_labelavgpace_default">AVG. PACE</string>
     <string name="textview_workoutdetail_valueavgpace_default">0.00 min/km"</string>
     <string name="textview_workoutdetail_valuedistance_default">0.00 km</string>
@@ -96,10 +95,10 @@
     <string name="chart_pace_title">Pace</string>
     <string name="chart_calories_title">Calories Burned (Accumulated)</string>
     <string name="params_toast_instructions">Use the slider below to view details of your workout in 10 minute sections.</string>
-    <string name="title_activity_messaging">MessagingActivity</string>
+    <string name="title_activity_messaging">Messages</string>
     <string name="menu_messages">Messages</string>
     <string name="messages_sender_profile_image">sender\'s profile image</string>
-    <string name="title_activity_friends">FriendsActivity</string>
+    <string name="title_activity_friends">Friends</string>
     <string name="menu_friends">Friends</string>
     <string name="message_no_friends">No friends to show.</string>
     <string name="alerttitle_sync_fail">Synchronization Error</string>
@@ -132,4 +131,9 @@
     <string name="alertmessage_unfriend_error">Error occurred</string>
     <string name="confirm">Confirm</string>
     <string name="confirm_unfriend">Are you sure you want to unfriend this person?</string>
+    <string name="friends_since">Friends Since:</string>
+    <string name="dialog_friend_select_title">Select Friend To Share Your Workout With</string>
+    <string name="exittext_message_hint">Your Message</string>
+    <string name="user_profile_image">user\'s profile image</string>
+    <string name="messages_menuitem_delete">Delete Conversation</string>
 </resources>

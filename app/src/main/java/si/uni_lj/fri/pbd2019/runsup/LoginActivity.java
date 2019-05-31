@@ -36,13 +36,8 @@ public class LoginActivity extends AppCompatActivity {
 
     public static final String TAG  = LoginActivity.class.getSimpleName();  // TAG
     private SharedPreferences preferences;                                  // shared preferences
-    public static final String STATE_PREF_NAME = "state";                   // name of preferences state
-    private long userId;                                                    // user's id
     private GoogleSignInClient mGoogleSignInClient;                         // Google sign in client
     static final int RC_SIGN_IN = 1;                                        // request code for intent
-
-    private int weightSetting;                                              // user's weight setting
-    private int ageSetting;                                                 // user's age setting
 
     // ### /PROPERTIES ###
 
@@ -63,9 +58,7 @@ public class LoginActivity extends AppCompatActivity {
         mGoogleSignInClient = GoogleSignIn.getClient(this, gso);
 
         // Check if user logged in.
-        if (preferences.getBoolean("userSignedIn", false)) {
-            // Do nothing.
-        } else {
+        if (!preferences.getBoolean("userSignedIn", false)) {
             // If user signed in, add click listener for sign in button.
             findViewById(R.id.sign_in_button).setOnClickListener(new View.OnClickListener() {
                 @Override
@@ -75,7 +68,6 @@ public class LoginActivity extends AppCompatActivity {
                 }
             });
         }
-
     }
 
 
@@ -97,7 +89,9 @@ public class LoginActivity extends AppCompatActivity {
         try {
             GoogleSignInAccount account = completedTask.getResult(ApiException.class);  // Get account from results.
             this.preferences.edit().putBoolean("userSignedIn", true).apply();
-            this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
+            if (account != null && account.getId() != null) {
+                this.preferences.edit().putLong("userId", account.getId().hashCode()).apply();
+            }
 
             // Signed in successfully, show authenticated UI.
             updateUiLoggedIn(account);
@@ -111,13 +105,12 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     // setNumberPickerTextColor: auxiliary method used to set the colors of the number picker.
-    public static void setNumberPickerTextColor(NumberPicker numberPicker, int color)
-    {
+    public static void setNumberPickerTextColor(NumberPicker numberPicker, int color) {
         final int count = numberPicker.getChildCount();
-        for(int i = 0; i < count; i++){
+        for (int i = 0; i < count; i++) {
             View child = numberPicker.getChildAt(i);
-            if(child instanceof EditText){
-                try{
+            if (child instanceof EditText) {
+                try {
                     Field selectorWheelPaintField = numberPicker.getClass()
                             .getDeclaredField("mSelectorWheelPaint");
                     selectorWheelPaintField.setAccessible(true);
@@ -126,13 +119,13 @@ public class LoginActivity extends AppCompatActivity {
                     numberPicker.invalidate();
                     return;
                 }
-                catch(NoSuchFieldException e){
+                catch(NoSuchFieldException e) {
                     Log.w(TAG, e);
                 }
-                catch(IllegalAccessException e){
+                catch(IllegalAccessException e) {
                     Log.w(TAG, e);
                 }
-                catch(IllegalArgumentException e){
+                catch(IllegalArgumentException e) {
                     Log.w(TAG, e);
                 }
             }
@@ -140,13 +133,11 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-
-    // onStart: method called when the activity is started.
     @Override
     protected void onStart() {
         super.onStart();
-        // this.setAgeButton = findViewById(R.id.set_age_button);
-        // this.setWeightButton = findViewById(R.id.set_weight_button);
+
+        // Get Google account. If null, user is not signed in.
         GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
         if (account != null) {
             updateUiLoggedIn(account);
@@ -155,19 +146,20 @@ public class LoginActivity extends AppCompatActivity {
             this.preferences.edit().remove("userId").apply();
         }
 
+        // Get items from view.
         NumberPicker npWeight = findViewById(R.id.numberPicker_set_weight);
         NumberPicker npAge = findViewById(R.id.numberPicker_set_age);
-
         Button startButton = findViewById(R.id.login_start_button);
-
         TextView signedInConfirmationTextView = findViewById(R.id.textview_signed_in_confirmation);
 
+        // Set NumberPicker instances text colors.
         setNumberPickerTextColor(npAge, Color.WHITE);
         setNumberPickerTextColor(npWeight, Color.WHITE);
 
+        // Add values to NumberPicker instances.
         String[] weights = new String[500];
         for(int i = 0; i < weights.length; i++) {
-            weights[i] = Integer.toString(i + 1) + " kg";
+            weights[i] = i + 1 + " kg";
         }
         String[] ages = new String[200];
 
@@ -175,18 +167,21 @@ public class LoginActivity extends AppCompatActivity {
             ages[i] = Integer.toString(i + 1);
         }
 
+        // Set NumberPicker instances values.
         npWeight.setMinValue(1);
         npWeight.setMaxValue(500);
         npWeight.setWrapSelectorWheel(false);
         npWeight.setDisplayedValues(weights);
-        npWeight.setValue(preferences.getInt("age", Constant.DEFAULT_WEIGHT));
+        npWeight.setValue(preferences.getInt("weight", Constant.DEFAULT_WEIGHT));
 
         npAge.setMinValue(1);
         npAge.setMaxValue(200);
         npAge.setWrapSelectorWheel(false);
         npAge.setDisplayedValues(ages);
-        npAge.setValue(preferences.getInt("weight", Constant.DEFAULT_AGE));
+        npAge.setValue(preferences.getInt("age", Constant.DEFAULT_AGE));
 
+
+        // Set value change listeners to NumberPicker instances.
         npWeight.setOnValueChangedListener(new NumberPicker.OnValueChangeListener() {
             @Override
             public void onValueChange(NumberPicker picker, int oldVal, int newVal) {
@@ -213,6 +208,7 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
 
+        // Set click listener for button that logs the user out.
         signedInConfirmationTextView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -248,7 +244,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
 
-    // onKeyDown: override default action when user presses the back button
+    // onKeyDown: override default action when user presses the back button.
     // Present updated history if user came from history.
     @Override
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -257,10 +253,13 @@ public class LoginActivity extends AppCompatActivity {
             mainActivityIntent.putExtra("loadHistory", true);
             LoginActivity.this.startActivity(mainActivityIntent);
             return true;
+        } else {
+            Intent mainActivityIntent = new Intent(LoginActivity.this, MainActivity.class);
+            LoginActivity.this.startActivity(mainActivityIntent);
+            return true;
         }
-        return super.onKeyDown(keyCode, event);
-
     }
+
 
     // updateUI: update user interface depending on whether user is signed in
     private void updateUiLoggedIn(GoogleSignInAccount account) {

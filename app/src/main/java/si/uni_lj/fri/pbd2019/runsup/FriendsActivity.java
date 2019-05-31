@@ -11,7 +11,6 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.EditText;
 import android.widget.ListView;
 
 import java.util.ArrayList;
@@ -40,7 +39,6 @@ public class FriendsActivity extends AppCompatActivity {
 
         this.ctx = this;
         this.fsh = new FriendsSearchHelper(Constant.BASE_CLOUD_URL);
-
         this.pref = PreferenceManager.getDefaultSharedPreferences(this);
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -276,30 +274,15 @@ public class FriendsActivity extends AppCompatActivity {
                                     builder.setPositiveButton(getString(R.string.alertoption_send), new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
-                                            AlertDialog.Builder alert = new AlertDialog.Builder(FriendsActivity.this);
-                                            final EditText edittext = new EditText(FriendsActivity.this);
-                                            alert.setMessage(getString(R.string.alertmessage_sendmessage));
-                                            alert.setTitle(getString(R.string.alerttitle_sendmessage));
-                                            alert.setView(edittext);
-                                            alert.setPositiveButton(getString(R.string.send), new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int whichButton) {
-                                                    String content = edittext.getText().toString();
-                                                    fsh.sendMessage(currentUser.getId(), res.get(position).getFriendUserId(), jwt, content, new GetSendMessageRequestResponse() {
-                                                        @Override
-                                                        public void response(boolean res) {
-                                                            // TODO
-                                                        }
-                                                    });
-                                                }
-                                            });
+                                            Intent messagingActivityIntent = new Intent(FriendsActivity.this, MessagingActivity.class);
 
-                                            alert.setNegativeButton(getString(R.string.no), new DialogInterface.OnClickListener() {
-                                                public void onClick(DialogInterface dialog, int whichButton) {
-                                                    // what ever you want to do with No option.
-                                                }
-                                            });
+                                            messagingActivityIntent.putExtra("idHere", currentUser.getId());
+                                            messagingActivityIntent.putExtra("idOther", res.get(position).getFriendUserId());
+                                            messagingActivityIntent.putExtra("profileImageUrl", currentUserProfileImageUrl);
+                                            messagingActivityIntent.putExtra("userName", currentUserName);
+                                            messagingActivityIntent.putExtra("jwt", jwt);
 
-                                            alert.show();
+                                            FriendsActivity.this.startActivity(messagingActivityIntent);
                                         }
                                     });
                                     builder.setNegativeButton(getString(R.string.alrertbutton_unfriend), new DialogInterface.OnClickListener() {
@@ -392,24 +375,15 @@ public class FriendsActivity extends AppCompatActivity {
                             builder.setPositiveButton(R.string.alertoption_send, new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
-                                    AlertDialog.Builder alert = new AlertDialog.Builder(FriendsActivity.this);
-                                    final EditText edittext = new EditText(FriendsActivity.this);
-                                    alert.setTitle(R.string.alerttitle_sendmessage);
-                                    alert.setMessage(R.string.alertmessage_sendmessage);
-                                    alert.setView(edittext);
-                                    alert.setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
-                                        public void onClick(DialogInterface dialog, int whichButton) {
-                                            String content = edittext.getText().toString();
-                                            fsh.sendMessage(currentUser.getId(), res.get(position).getId(), pref.getString("jwt", ""), content, new GetSendMessageRequestResponse() {
-                                                @Override
-                                                public void response(boolean res) {
-                                                    // TODO
-                                                }
-                                            });
-                                        }
-                                    });
-                                    alert.setNegativeButton(getString(R.string.no), null);
-                                    alert.show();
+                                    Intent messagingActivityIntent = new Intent(FriendsActivity.this, MessagingActivity.class);
+
+                                    messagingActivityIntent.putExtra("idHere", currentUser.getId());
+                                    messagingActivityIntent.putExtra("idOther", res.get(position).getFriendUserId());
+                                    messagingActivityIntent.putExtra("profileImageUrl", currentUserProfileImageUrl);
+                                    messagingActivityIntent.putExtra("userName", currentUserName);
+                                    messagingActivityIntent.putExtra("jwt", pref.getString("jwt", ""));
+
+                                    FriendsActivity.this.startActivity(messagingActivityIntent);
                                 }
                             });
                             builder.setNegativeButton(R.string.alrertbutton_unfriend, new DialogInterface.OnClickListener() {

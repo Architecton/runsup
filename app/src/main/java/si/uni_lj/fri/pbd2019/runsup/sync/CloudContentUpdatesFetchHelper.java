@@ -26,6 +26,10 @@ public class CloudContentUpdatesFetchHelper {
         void response(ArrayList<Workout> workouts);
     }
 
+    public interface SendMessageResponse {
+        void response(boolean result);
+    }
+
     // ### /Callback Interfaces ###
 
 

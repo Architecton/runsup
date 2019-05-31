@@ -1,6 +1,7 @@
 package si.uni_lj.fri.pbd2019.runsup;
 
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -12,12 +13,15 @@ import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.AppCompatActivity;
 import android.text.InputType;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 
 import com.google.android.gms.maps.CameraUpdate;
@@ -38,10 +42,12 @@ import java.util.Date;
 import java.util.Locale;
 
 import si.uni_lj.fri.pbd2019.runsup.helpers.MainHelper;
+import si.uni_lj.fri.pbd2019.runsup.model.Friend;
 import si.uni_lj.fri.pbd2019.runsup.model.Workout;
 import si.uni_lj.fri.pbd2019.runsup.model.config.DatabaseHelper;
 import si.uni_lj.fri.pbd2019.runsup.settings.SettingsActivity;
 import si.uni_lj.fri.pbd2019.runsup.stats.DataForStatsRetriever;
+import si.uni_lj.fri.pbd2019.runsup.sync.FriendsSearchHelper;
 
 
 public class WorkoutDetailActivity extends AppCompatActivity implements OnMapReadyCallback{
@@ -56,6 +62,10 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
 
     // resource used by the activity
     public static Resources resources;
+
+    private String userFullName;
+    private long userId;
+    private String userProfileImageUrl;
 
     // UI components
     private Button showParamsButton;
@@ -115,6 +125,9 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.setDistance(intent.getDoubleExtra("distance", 0.0), convertUnits);
         this.setPace(intent.getDoubleExtra("pace", 0.0), convertUnits);
         this.workoutId = intent.getLongExtra("workoutId", -1L);
+        this.userFullName = intent.getStringExtra("userFullName");
+        this.userId = intent.getLongExtra("userId", -1L);
+        this.userProfileImageUrl = intent.getStringExtra("userProfileImageUrl");
 
         // Initialize DataForStatsRetriever instance.
         try {
@@ -163,6 +176,79 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
         this.workoutTitleTextView = findViewById(R.id.textview_workoutdetail_workouttitle);
         this.shareWorkoutButton = findViewById(R.id.button_workoutdetail_send_to_friend);
         this.showParamsButton = findViewById(R.id.button_workoutdetail_show_params);
+
+        if (this.userId == 0) {
+            this.shareWorkoutButton.setVisibility(View.INVISIBLE);
+        } else {
+
+            // Set click listener for share button.
+            this.shareWorkoutButton.setOnClickListener(new View.OnClickListener() {
+                FriendsSearchHelper fsh = new FriendsSearchHelper(Constant.BASE_CLOUD_URL);
+                ListView listViewFriends;
+
+                @Override
+                public void onClick(View v) {
+                    final Dialog dialog = new Dialog(WorkoutDetailActivity.this);
+                    dialog.setContentView(R.layout.friends_share_dialog);
+                    dialog.setTitle("Select Friend to Share Your Workout With");
+                    if (sharedPreferences.contains("jwt")) {
+                        fsh.fetchFriends(userId, sharedPreferences.getString("jwt", ""),
+                                new FriendsActivity.GetFetchFriendsResponse() {
+                                    @Override
+                                    public void response(final ArrayList<Friend> res) {
+                                        if (res != null) {
+                                            final FriendsAdapter adapter = new FriendsAdapter(WorkoutDetailActivity.this, res);
+                                            WorkoutDetailActivity.this.runOnUiThread(new Runnable() {
+                                                @Override
+                                                public void run() {
+                                                    listViewFriends = dialog.findViewById(R.id.listview_friends_share);
+                                                    listViewFriends.setAdapter(adapter);
+                                                    listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                        @Override
+                                                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                            // TODO
+                                                            Log.d("AMEEN", res.get(position).getName());
+                                                        }
+                                                    });
+                                                }
+                                            });
+                                        }
+                                    }
+                                });
+                    } else {
+                        fsh.getJwt(userId, userFullName, userProfileImageUrl, new FriendsActivity.GetJwtRequestResponse() {
+                            @Override
+                            public void response(String jwt) {
+                                if (jwt != null && !jwt.equals("")) {
+                                    fsh.fetchFriends(userId, jwt, new FriendsActivity.GetFetchFriendsResponse() {
+                                        @Override
+                                        public void response(final ArrayList<Friend> res) {
+                                            if (res != null) {
+                                                final FriendsAdapter adapter = new FriendsAdapter(WorkoutDetailActivity.this, res);
+                                                WorkoutDetailActivity.this.runOnUiThread(new Runnable() {
+                                                    @Override
+                                                    public void run() {
+                                                        listViewFriends = dialog.findViewById(R.id.listview_friends_share);
+                                                        listViewFriends.setAdapter(adapter);
+                                                        listViewFriends.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                            @Override
+                                                            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                                Log.d("AMEEN", res.get(position).getName());
+                                                            }
+                                                        });
+                                                    }
+                                                });
+                                            }
+                                        }
+                                    });
+                                }
+                            }
+                        });
+                    }
+                    dialog.show();
+                }
+            });
+        }
 
         // If title of workout is set...
         if (this.titleSet) {
@@ -227,14 +313,6 @@ public class WorkoutDetailActivity extends AppCompatActivity implements OnMapRea
                     }
                 });
                 builder.show();
-            }
-        });
-
-        // Set click listener for workout share button.
-        this.shareWorkoutButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-
             }
         });
 

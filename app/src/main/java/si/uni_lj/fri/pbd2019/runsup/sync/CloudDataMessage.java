@@ -1,30 +1,22 @@
-package si.uni_lj.fri.pbd2019.runsup.model;
-
-import com.j256.ormlite.field.DatabaseField;
+package si.uni_lj.fri.pbd2019.runsup.sync;
 
 import java.util.Date;
 
-public class Message {
+import si.uni_lj.fri.pbd2019.runsup.model.Message;
 
-    @DatabaseField(generatedId = true, useGetSet = true)
+class CloudDataMessage {
+
     private long id;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private long idReceiver;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private long idSender;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private String content;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private Date sentDate;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private String profileImageUri;
-    @DatabaseField(canBeNull = false, useGetSet = true)
     private String senderName;
 
-    public Message() {}
 
-    public Message(long idReceiver, long idSender, User userSender,
-                   String content, Date sentDate, String profileImageUri, String senderName) {
+    public CloudDataMessage(long id, long idReceiver, long idSender, String content, Date sentDate, String profileImageUri, String senderName) {
+        this.id = id;
         this.idReceiver = idReceiver;
         this.idSender = idSender;
         this.content = content;
@@ -45,8 +37,8 @@ public class Message {
         return idReceiver;
     }
 
-    public void setIdReceiver(long idReciever) {
-        this.idReceiver = idReciever;
+    public void setIdReceiver(long idReceiver) {
+        this.idReceiver = idReceiver;
     }
 
     public long getIdSender() {
@@ -87,5 +79,16 @@ public class Message {
 
     public void setSenderName(String senderName) {
         this.senderName = senderName;
+    }
+
+    Message toMessage() {
+        Message res = new Message();
+        res.setContent(this.content);
+        res.setIdReceiver(this.idReceiver);
+        res.setIdSender(this.idSender);
+        res.setProfileImageUri(this.getProfileImageUri());
+        res.setSenderName(this.senderName);
+        res.setSentDate(this.sentDate);
+        return res;
     }
 }
